@@ -21,6 +21,10 @@ const DUR_MICRO = 0.15;
 const DUR_STRUCTURAL = 0.4;
 const STAGGER_DEFAULT = 0.05;
 
+// Luxe Blur Transition Settings
+const BLUR_INIT = "blur(20px)";
+const BLUR_FINAL = "blur(0px)";
+
 const LoadingState = () => (
   <main className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] flex flex-col items-center justify-center font-mono p-12 overflow-hidden">
     <div className="fixed inset-0 pointer-events-none opacity-[0.03]" 
@@ -117,24 +121,24 @@ const GEN_ASSETS: Record<string, string> = {
 function IntelligenceRow({ label, value, description, color, icon, variant = "default" }: { label: string, value: number | string, description: string, color: string, icon: any, variant?: "default" | "compact" | "card" }) {
   if (variant === "card") {
     return (
-      <div className="stagger-reveal group relative p-12 rounded-[4rem] bg-black/[0.02] border border-black/5 backdrop-blur-xl transition-all duration-700 hover:bg-black group-hover:text-white hover:-translate-y-4 overflow-hidden flex flex-col items-center text-center">
-        <div className={`absolute top-0 right-0 w-64 h-64 blur-[100px] opacity-10 group-hover:opacity-60 transition-opacity ${color.replace('text-', 'bg-')}`} />
+      <div className="stagger-reveal group/card relative p-12 rounded-[4rem] bg-black/[0.02] border border-black/5 backdrop-blur-xl transition-all duration-700 hover:bg-black hover:scale-[1.02] hover:-translate-y-4 overflow-hidden flex flex-col items-center text-center group-hover/row:opacity-40 group-hover/row:blur-sm hover:!opacity-100 hover:!blur-none">
+        <div className={`absolute top-0 right-0 w-64 h-64 blur-[100px] opacity-10 group-hover/card:opacity-60 transition-opacity ${color.replace('text-', 'bg-')}`} />
         
         <div className="relative z-10 space-y-12 w-full">
-          <div className="group-hover:scale-110 transition-all duration-1000 flex justify-center">
-            {icon ? (typeof icon === 'string' ? <img src={icon} className="w-56 h-56 group-hover:drop-shadow-[0_0_40px_rgba(109,40,217,0.3)] transition-all object-contain" alt="" /> : icon) : null}
+          <div className="group-hover/card:scale-110 transition-all duration-1000 flex justify-center">
+            {icon ? (typeof icon === 'string' ? <img src={icon} className="w-56 h-56 group-hover/card:drop-shadow-[0_0_40px_rgba(109,40,217,0.3)] transition-all object-contain" alt="" /> : icon) : null}
           </div>
           
           <div className="space-y-6">
-            <div className="text-7xl md:text-8xl font-thin tracking-tighter text-[#0A0A0A] group-hover:text-white transition-colors">
+            <div className="text-7xl md:text-8xl font-thin tracking-tighter text-[#0A0A0A] group-hover/card:text-white transition-colors">
               {value}{typeof value === 'number' ? '%' : ''}
             </div>
-            <div className="text-[12px] font-mono tracking-[0.6em] text-black/40 group-hover:text-white/60 transition-opacity uppercase font-black">
+            <div className="text-[12px] font-mono tracking-[0.6em] text-black/40 group-hover/card:text-white/60 transition-opacity uppercase font-black">
               {label}
             </div>
           </div>
  
-          <p className="text-sm text-black/50 leading-relaxed font-light px-8 group-hover:text-white/80 transition-colors">
+          <p className="text-sm text-black/50 leading-relaxed font-light px-8 group-hover/card:text-white/80 transition-colors">
             {description}
           </p>
         </div>
@@ -197,19 +201,19 @@ function DossierSection({ num, title, description, children, accentColor = "text
     
     // Header reveal (Assessment-style: Blur + Y-slide)
     gsap.fromTo(titleRef.current, 
-      { opacity: 0, filter: "blur(10px)", y: 20 },
+      { opacity: 0, filter: "blur(20px)", y: 40 },
       { 
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 1.2, ease: "power4.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 80%" }
+        opacity: 1, filter: "blur(0px)", y: 0, duration: 1.8, ease: "expo.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" }
       }
     );
 
     // Staggered reveal for children
     gsap.fromTo(sectionRef.current.querySelectorAll('.stagger-reveal'),
-      { opacity: 0, filter: "blur(8px)", y: 30 },
+      { opacity: 0, filter: "blur(15px)", y: 50 },
       {
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 1, stagger: 0.15, ease: "power4.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 70%" }
+        opacity: 1, filter: "blur(0px)", y: 0, duration: 2, stagger: 0.2, ease: "expo.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
       }
     );
 
@@ -276,7 +280,7 @@ function DossierSection({ num, title, description, children, accentColor = "text
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 group/row">
             {children}
           </div>
         </div>
@@ -304,7 +308,7 @@ function DossierSection({ num, title, description, children, accentColor = "text
             <img src={illustration} className="w-full h-full object-contain relative z-10 brightness-95 opacity-60 group-hover:opacity-100 transition-all duration-1000 scale-90 group-hover:scale-100" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pt-12 group/row">
             {children}
           </div>
         </div>
@@ -501,11 +505,37 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
       className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] font-outfit pb-40 opacity-0 selection:bg-[#6D28D9] selection:text-white"
     >
       {/* Delicate Grain Overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
+      
+      {/* Neural Depth Layer: Floating Orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div 
+          className="absolute top-[10%] -left-64 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[160px] animate-[float_20s_infinite_ease-in-out]" 
+          style={{ animationDelay: '0s' }}
+        />
+        <div 
+          className="absolute bottom-[20%] -right-64 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[180px] animate-[float_25s_infinite_ease-in-out]" 
+          style={{ animationDelay: '-5s' }}
+        />
+        <div 
+          className="absolute top-[40%] left-[30%] w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[140px] animate-[float_15s_infinite_ease-in-out]" 
+          style={{ animationDelay: '-10s' }}
+        />
+      </div>
+
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(50px, 30px) scale(1.1); }
+          66% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+      `}</style>
       
       {/* Sticky Progress Line */}
-      <div className="fixed left-0 top-0 w-[2px] h-full bg-white/5 z-50">
-        <div id="scroll-progress-bar" className="absolute top-0 left-0 w-full bg-[#6D28D9] shadow-[0_0_20px_rgba(109,40,217,0.5)]" style={{ height: "0%" }} />
+      <div className="fixed left-0 top-0 w-[2px] h-full bg-black/[0.02] z-50">
+        <div id="scroll-progress-bar" className="absolute top-0 left-0 w-full bg-[#6D28D9] shadow-[0_0_30px_rgba(109,40,217,0.8)]" style={{ height: "0%" }}>
+          <div className="absolute bottom-0 left-[-4px] w-3 h-3 bg-[#6D28D9] rounded-full blur-[4px] animate-pulse" />
+        </div>
       </div>
       <header className="px-8 md:px-24 py-4 flex justify-between items-center relative z-20 border-b border-black/5 bg-[#FDFDFD]/60 backdrop-blur-3xl sticky top-0 font-outfit">
         <div className="flex items-center">
@@ -678,30 +708,50 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
           </DossierSection>
 
           {!isUnlocked && (
-            <section className="py-60 text-center relative border-t border-black/5 space-y-16">
-                <div className="space-y-8 max-w-3xl mx-auto">
-                  <span className="text-[10px] font-mono text-[#6D28D9] tracking-[1.5em] uppercase font-black opacity-40">Section_Restricted</span>
+            <section className="py-60 text-center relative border-t border-black/5 space-y-16 overflow-hidden rounded-[4rem] bg-black/[0.01]">
+                <div className="absolute inset-0 z-0 backdrop-blur-3xl" />
+                
+                <div className="relative z-10 space-y-12 max-w-3xl mx-auto py-24">
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="w-16 h-16 rounded-full border border-black/10 flex items-center justify-center animate-pulse">
+                      <span className="text-xl rotate-12 opacity-40 italic font-serif">lock</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-[#6D28D9] tracking-[1.5em] uppercase font-black opacity-40">Protocol_Gate_Active</span>
+                  </div>
+                  
                   <h3 className="text-7xl md:text-9xl font-thin tracking-tighter text-[#0A0A0A] lowercase">
                     Deep<span className="text-[#6D28D9]">_</span>Scan
                   </h3>
-                  <p className="text-xl text-black/40 max-w-xl mx-auto font-medium leading-relaxed">
-                    The final four dimensions are currently behind encrypted access. 
-                    Reclaim your full neural map to exit the blind-spot cycle.
+                  
+                  <p className="text-xl text-black/50 max-w-xl mx-auto font-light leading-relaxed italic">
+                    "Cognitive mechanics and linguistic biomarkers are currently restricted. Full decryption required to complete neural profile."
                   </p>
+                  
+                  <div className="pt-12">
+                    <button 
+                      onClick={() => setIsUnlocked(true)}
+                      className="group relative z-10 bg-black text-white px-24 py-8 rounded-full font-bold hover:scale-105 transition-all text-[11px] tracking-[0.4em] uppercase shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-95"
+                    >
+                      <span className="relative z-10">Unlock Complete Dossier</span>
+                      <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-y-px" />
+                    </button>
+                    
+                    <div className="mt-12 flex justify-center gap-8 opacity-20 hidden md:flex">
+                       {["DIM_04", "DIM_05", "DIM_06", "DIM_07"].map(d => (
+                         <span key={d} className="text-[8px] font-mono tracking-widest">{d}_LOCKED</span>
+                       ))}
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="absolute inset-0 z-0 bg-black/[0.01] backdrop-blur-[2px]" />
-                
-                <button 
-                  onClick={() => setIsUnlocked(true)}
-                  className="relative z-10 bg-black text-white px-24 py-6 rounded-full font-bold hover:scale-105 transition-all text-[10px] tracking-[0.3em] uppercase mt-12 shadow-2xl"
-                >
-                  Unlock Complete Dossier
-                </button>
+
+                {/* Scrambled Background Texture */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden font-mono text-[8px] leading-none whitespace-pre flex items-center justify-center rotate-12 scale-150">
+                  {Array(20).fill("010110010101010110010101010110010101010110010101\n").join("")}
+                </div>
             </section>
           )}
 
-          <div className={`space-y-40 transition-all duration-1000 ${!isUnlocked ? "blur-[100px] opacity-[0.05] pointer-events-none select-none max-h-[1000px] overflow-hidden" : ""}`}>
+          <div className={`space-y-40 transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${!isUnlocked ? "blur-[60px] opacity-[0.03] pointer-events-none select-none max-h-[800px] overflow-hidden grayscale scale-95" : "blur-0 opacity-100 scale-100"}`}>
             <DossierSection 
               num={4}
               title="Cognitive Mechanics"
