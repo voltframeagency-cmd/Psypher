@@ -118,30 +118,53 @@ const GEN_ASSETS: Record<string, string> = {
  * IntelligenceRow: A minimalist, row-based display for traits.
  * This is the core of the Stockholm School layout.
  */
-function IntelligenceRow({ label, value, description, color, icon, variant = "default" }: { label: string, value: number | string, description: string, color: string, icon: any, variant?: "default" | "compact" | "card" }) {
+function IntelligenceRow({ label, value, description, color, icon, variant = "default", comparisonValue }: { label: string, value: number | string, description: string, color: string, icon: any, variant?: "default" | "compact" | "card", comparisonValue?: number | string }) {
+  const isComparison = comparisonValue !== undefined && comparisonValue !== null;
+  const compValue = comparisonValue;
+  
   if (variant === "card") {
     return (
       <div className="stagger-reveal group/card relative p-12 rounded-[4rem] bg-black/[0.02] border border-black/5 backdrop-blur-xl transition-all duration-700 hover:bg-black hover:scale-[1.02] hover:-translate-y-4 overflow-hidden flex flex-col items-center text-center group-hover/row:opacity-40 group-hover/row:blur-sm hover:!opacity-100 hover:!blur-none">
-        <div className={`absolute top-0 right-0 w-64 h-64 blur-[100px] opacity-10 group-hover/card:opacity-60 transition-opacity ${color.replace('text-', 'bg-')}`} />
+        <div className="absolute inset-0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-1000 bg-gradient-to-br from-[#6D28D9] via-transparent to-transparent" />
         
-        <div className="relative z-10 space-y-12 w-full">
-          <div className="group-hover/card:scale-110 transition-all duration-1000 flex justify-center">
-            {icon ? (typeof icon === 'string' ? <img src={icon} className="w-56 h-56 group-hover/card:drop-shadow-[0_0_40px_rgba(109,40,217,0.3)] transition-all object-contain" alt="" /> : icon) : null}
+        <div className="relative z-10 space-y-8 h-full flex flex-col justify-between items-center w-full">
+          <div className="space-y-6 w-full flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-white border border-black/5 flex items-center justify-center p-4 transition-transform duration-700 group-hover/card:rotate-[360deg] group-hover/card:scale-110 shadow-sm">
+              {icon && (typeof icon === 'string' ? <img src={icon} alt="" className="w-full h-full object-contain opacity-40 group-hover/card:opacity-100 group-hover/card:invert transition-all" /> : icon)}
+            </div>
+            
+            <div className="space-y-2">
+              <p className="text-[9px] font-mono tracking-[0.4em] uppercase font-black opacity-20 group-hover/card:text-white group-hover/card:opacity-40">{label}</p>
+              <div className="flex items-center justify-center gap-4">
+                <span className={`text-6xl font-thin tracking-tighter ${color} group-hover/card:text-white transition-colors`}>
+                  {typeof value === 'number' ? `${value}%` : value}
+                </span>
+                {isComparison && (
+                  <>
+                    <div className="w-[1px] h-8 bg-black/10 group-hover/card:bg-white/20" />
+                    <span className="text-4xl font-thin tracking-tighter text-[#6D28D9] group-hover/card:text-purple-400 opacity-60">
+                      {typeof compValue === 'number' ? `${compValue}%` : compValue}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           
-          <div className="space-y-6">
-            <div className="text-7xl md:text-8xl font-thin tracking-tighter text-[#0A0A0A] group-hover/card:text-white transition-colors">
-              {value}{typeof value === 'number' ? '%' : ''}
-            </div>
-            <div className="text-[12px] font-mono tracking-[0.6em] text-black/40 group-hover/card:text-white/60 transition-opacity uppercase font-black">
-              {label}
-            </div>
-          </div>
- 
-          <p className="text-sm text-black/50 leading-relaxed font-light px-8 group-hover/card:text-white/80 transition-colors">
-            {description}
+          <p className="text-[11px] leading-relaxed text-black/40 group-hover/card:text-white/60 font-light max-w-[200px] italic">
+            "{description}"
           </p>
         </div>
+        
+        {/* Progress Bar Background Overlay */}
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/5 group-hover/card:bg-white/10" />
+        <div 
+          className="absolute bottom-0 left-0 h-[1.5px] transition-all duration-1000 ease-out group-hover/card:h-[3px] shadow-[0_0_10px_currentColor]" 
+          style={{ 
+            width: `${typeof value === 'number' ? value : 0}%`,
+            backgroundColor: '#6D28D9',
+          }} 
+        />
       </div>
     );
   }
@@ -190,160 +213,45 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
 /**
  * DossierSection: Immersive vertical section with extreme white space.
  */
-function DossierSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "default", id }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "flipped" | "centered" | "heroic" | "protocol", id?: string }) {
+/**
+ * DossierSection: Immersive vertical section with extreme white space.
+ * Includes built-in GSAP scroll triggers for high-end reveals.
+ */
+function DossierSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "protocol", id }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "protocol" | "grid", id?: string }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const dataSeg = `DATA_SEG_0${num}`;
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    
-    // Header reveal (Assessment-style: Blur + Y-slide)
-    gsap.fromTo(titleRef.current, 
-      { opacity: 0, filter: "blur(20px)", y: 40 },
-      { 
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 1.8, ease: "expo.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" }
-      }
-    );
-
-    // Staggered reveal for children
-    gsap.fromTo(sectionRef.current.querySelectorAll('.stagger-reveal'),
-      { opacity: 0, filter: "blur(15px)", y: 50 },
-      {
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 2, stagger: 0.2, ease: "expo.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
-      }
-    );
-
-    // Image reveal
-    if (imageRef.current) {
-      gsap.fromTo(imageRef.current,
-        { opacity: 0, filter: "blur(15px)", y: 40 },
-        {
-          opacity: 1, filter: "blur(0px)", y: 0, duration: 2, ease: "expo.out",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 70%" }
-        }
-      );
-      
-      // Subtle float parallax
-      gsap.to(imageRef.current.querySelector('img'), {
-        y: -30,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-    }
-  }, [variant]);
-
-  if (variant === "heroic") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32 border-t border-black/5 relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-           <img src={illustration} className="w-full h-full object-cover opacity-5 border-black/10 blur-xl scale-110" alt="" />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#FDFDFD] via-transparent to-[#FDFDFD]" />
-        </div>
-        <div className="max-w-7xl mx-auto px-8 relative z-10 text-center space-y-24">
-          <div className="space-y-12 max-w-4xl mx-auto">
-            <span className={`text-[12px] font-mono ${accentColor} tracking-[1em] font-black uppercase opacity-60`}>Finale_Dimension_0{num}</span>
-            <h2 ref={titleRef} className="text-6xl md:text-[8rem] font-thin tracking-tighter text-[#0A0A0A] leading-none capitalize">{title}</h2>
-            <p className="text-2xl text-black/50 font-light leading-relaxed max-w-3xl mx-auto italic">
-              {description}
-            </p>
-          </div>
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (variant === "protocol") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32 flex flex-col justify-center">
-        <div className="max-w-7xl mx-auto px-8 w-full space-y-32">
-          <div className="text-center space-y-16 stagger-reveal">
-            <div className="flex flex-col items-center gap-8">
-              <span className={`text-[11px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_Ref_{num} // Segment_0{num}</span>
-              <div className="w-[1px] h-[100px] bg-gradient-to-b from-black/20 to-transparent" />
-            </div>
-            <h2 ref={titleRef} className="text-5xl md:text-8xl font-thin tracking-tight text-[#0A0A0A] leading-tight capitalize max-w-4xl mx-auto">
-              {title}
-            </h2>
-            <p className="text-2xl text-black/40 font-light leading-relaxed max-w-2xl mx-auto px-4 italic">
-              {description}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 group/row">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (variant === "centered") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32">
-        <div className="max-w-7xl mx-auto px-8 space-y-32">
-          <div className="text-center space-y-16">
-            <div className="flex flex-col items-center gap-8">
-              <span className={`text-[10px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_0{num} // PSYPHER_DATA_SEG</span>
-              <div className="w-[1px] h-[80px] bg-black/10" />
-            </div>
-            <h2 ref={titleRef} className="text-6xl md:text-8xl font-thin tracking-tighter text-[#0A0A0A] leading-tight capitalize max-w-5xl mx-auto">{title}</h2>
-            <p className="text-xl text-black/40 font-medium leading-relaxed max-w-2xl mx-auto">
-              {description}
-            </p>
-          </div>
-          
-          <div ref={imageRef} className="max-w-4xl mx-auto aspect-video relative group">
-            <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent rounded-3xl blur-[120px] opacity-20 group-hover:opacity-40 transition-opacity" />
-            <img src={illustration} className="w-full h-full object-contain relative z-10 brightness-95 opacity-60 group-hover:opacity-100 transition-all duration-1000 scale-90 group-hover:scale-100" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pt-12 group/row">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+  const formattedNum = num < 10 ? `0${num}` : num;
+  
   return (
-    <section ref={sectionRef} id={id || `dimension-${num}`} className="py-40 first:pt-0">
-      <div className="max-w-7xl mx-auto px-8 space-y-24">
-        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-24 items-center ${variant === "flipped" ? "direction-rtl" : ""}`}>
-          <div className={`${variant === "flipped" ? "lg:col-start-7 lg:col-span-6 lg:order-2" : "lg:col-span-7"} space-y-8`}>
-            <div className={`flex items-center gap-6 ${variant === "flipped" ? "flex-row-reverse" : ""}`}>
-              <span className={`text-[10px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_0{num}</span>
-              <div className="w-[40px] h-[0.5px] bg-black/10" />
-            </div>
-            <h2 ref={titleRef} className="text-7xl md:text-9xl font-thin tracking-tighter text-[#0A0A0A] leading-none uppercase">{title}</h2>
-            <p className="text-xl text-black/40 font-medium leading-relaxed max-w-2xl">
-              {description}
-            </p>
+    <section 
+      ref={sectionRef} 
+      id={id || `dimension-${num}`} 
+      className="stagger-reveal py-32 space-y-24 scroll-mt-32"
+    >
+      <div className="flex flex-col md:flex-row md:items-end justify-between border-b-[0.5px] border-black/10 pb-12 gap-8">
+        <div className="space-y-6">
+          <div className="flex items-center gap-6">
+            <span className={`text-[11px] font-mono ${accentColor} tracking-[0.6em] uppercase font-black`}>Dimension_{formattedNum}</span>
+            <div className="w-12 h-[0.5px] bg-black/10" />
+            <span className="text-[10px] font-mono text-black/20 tracking-widest uppercase font-bold">Protocol_Authorized</span>
           </div>
-          <div ref={imageRef} className={`${variant === "flipped" ? "lg:col-span-6 lg:order-1" : "lg:col-span-5"} aspect-square relative group pb-12`}>
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#6D28D9]/5 to-transparent rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-1000" />
-            <img 
-              src={illustration} 
-              alt="" 
-              className="w-full h-full object-contain relative z-10 opacity-60 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105" 
-            />
-          </div>
+          <h2 className="text-6xl md:text-8xl font-thin tracking-tighter text-[#0A0A0A] leading-none lowercase">
+            {title}<span className={accentColor}>.</span>
+          </h2>
         </div>
-
-        <div className="space-y-0">
+        <p className="text-[12px] font-mono tracking-widest uppercase text-black/30 font-bold max-w-xs md:text-right">
+          {description}
+        </p>
+      </div>
+      
+      {variant === "protocol" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 group/row">
           {children}
         </div>
-      </div>
+      ) : (
+        <div className="space-y-6">
+          {children}
+        </div>
+      )}
     </section>
   );
 }
@@ -351,8 +259,10 @@ function DossierSection({ num, title, description, children, accentColor = "text
 function ReportContent() {
   const [report, setReport] = useState<string>("");
   const [scores, setScores] = useState<any>(null);
+  const [partnerScores, setPartnerScores] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [tier, setTier] = useState<"basic" | "deep" | "compatibility">("deep");
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -361,57 +271,33 @@ function ReportContent() {
     const fetchReport = async () => {
       const isDemo = searchParams.get("demo") === "true";
       const isBypass = searchParams.get("bypass") === "true";
-      if (isDemo || isBypass) setIsUnlocked(true);
+      const tierParam = searchParams.get("tier") as any;
+      if (tierParam && ["basic", "deep", "compatibility"].includes(tierParam)) setTier(tierParam);
+      
+      if (isDemo || isBypass || tierParam === "deep" || tierParam === "compatibility") setIsUnlocked(true);
 
       try {
         if (isDemo) {
-          setScores({
-            bfi: { 
-              Openness: 88, 
-              Conscientiousness: 92, 
-              Extraversion: 45, 
-              Agreeableness: 32, 
-              Neuroticism: 58 
-            },
-            darkTriad: { 
-              Machiavellianism: 84, 
-              Psychopathy: 22, 
-              Narcissism: 68 
-            },
-            attachment: { 
-              Style: "Dismissive-Avoidant", 
-              Security: 15, 
-              Anxiety: 48, 
-              Avoidance: 89 
-            },
-            cognitive: {
-              Type: "Strategic Architect (INTJ)",
-              Functions: { 
-                "Adaptive Observation": 95, 
-                "Empathic Integration": 42, 
-                "External Engagement": 65, 
-                "Internal Reflector": 88 
-              }
-            },
-            drivers: {
-              "Power & Impact": 85,
-              "Self-Direction": 92,
-              "Achievement": 78,
-              "Security": 45
-            },
-            language: {
-              Analytical: 94,
-              Social: 12,
-              Clout: 88,
-              Authentic: 35
-            },
-            resilience: {
-              Durability: 82,
-              Agility: 65,
-              "Stress Level": 28,
-              Focus: 91
-            }
-          });
+          const mockAlpha = {
+            bfi: { Openness: 88, Conscientiousness: 92, Extraversion: 45, Agreeableness: 32, Neuroticism: 58 },
+            darkTriad: { Machiavellianism: 84, Psychopathy: 22, Narcissism: 68 },
+            attachment: { Style: "Dismissive-Avoidant", Security: 15, Anxiety: 48, Avoidance: 89 },
+            cognitive: { Type: "Strategic Architect (INTJ)", Functions: { "Adaptive Observation": 95, "Empathic Integration": 42, "External Engagement": 65, "Internal Reflector": 88 } },
+            drivers: { "Power & Impact": 85, "Self-Direction": 92, "Achievement": 78, "Security": 45 },
+            language: { Analytical: 94, Social: 12, Clout: 88, Authentic: 35 },
+            resilience: { Durability: 82, Agility: 65, "Stress Level": 28, Focus: 91 }
+          };
+          
+          setScores(mockAlpha);
+          
+          if (tierParam === "compatibility" || isDemo) {
+            setPartnerScores({
+              bfi: { Openness: 65, Conscientiousness: 78, Extraversion: 92, Agreeableness: 85, Neuroticism: 42 },
+              darkTriad: { Machiavellianism: 32, Psychopathy: 15, Narcissism: 45 },
+              attachment: { Style: "Secure", Security: 88, Anxiety: 12, Avoidance: 15 },
+              cognitive: { Type: "Social Connector (ENFP)", Functions: { "Adaptive Observation": 78, "Empathic Integration": 95, "External Engagement": 92, "Internal Reflector": 65 } },
+            });
+          }
           setReport(`# Executive Summary: The Architect Map
 
 ## ANALYSIS: TARGET STATUS
@@ -454,42 +340,79 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
     fetchReport();
   }, [searchParams]);
 
-  // Entrance Animation Reveal Logic
   useEffect(() => {
-    if (!loading && containerRef.current) {
+    if (!loading) {
       const ctx = gsap.context(() => {
-        // Enforce Elite Cubic-Bezier for Entrance
-        gsap.to(containerRef.current, {
-          opacity: 1,
-          duration: DUR_STRUCTURAL,
-          ease: "none",
+        // Main Content Reveal (with Blur)
+        gsap.to(containerRef.current, { 
+          opacity: 1, 
+          duration: 1.2, 
+          ease: "power2.out",
+          filter: "blur(0px)",
+          onStart: () => {
+            gsap.set(containerRef.current, { filter: "blur(20px)", opacity: 0 });
+          }
         });
 
-        // Global Scroll Progress Bar
+        // Sticky Progress Bar Logic
         gsap.to("#scroll-progress-bar", {
           height: "100%",
           ease: "none",
           scrollTrigger: {
-            trigger: "body",
+            trigger: containerRef.current,
             start: "top top",
             end: "bottom bottom",
-            scrub: 0.3
+            scrub: true,
           }
         });
 
-        // Staggered Entrance for Initial View Sections
-        gsap.from("section", {
-          y: 40,
-          opacity: 0,
-          duration: DUR_LUXE,
-          stagger: STAGGER_LUXE,
-          ease: CustomEase.create("custom", "0.16, 1, 0.3, 1"),
+        // Staggered Blur Reveal for all elements
+        const reveals = containerRef.current?.querySelectorAll(".stagger-reveal");
+        reveals?.forEach((el) => {
+          gsap.fromTo(el, 
+            { 
+              opacity: 0, 
+              y: 60, 
+              filter: "blur(20px)",
+              scale: 0.98
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              scale: 1,
+              duration: 1.4,
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 92%",
+                toggleActions: "play none none none"
+              }
+            }
+          );
         });
+
+        // Special Animation for Friction Zones
+        if (tier === "compatibility") {
+           const zones = containerRef.current?.querySelectorAll(".friction-zone");
+           zones?.forEach((z) => {
+             gsap.from(z, {
+               opacity: 0,
+               x: -40,
+               duration: 1.5,
+               ease: "power4.out",
+               scrollTrigger: {
+                 trigger: z,
+                 start: "top 80%"
+               }
+             });
+           });
+        }
       }, containerRef);
       
       return () => ctx.revert();
     }
-  }, [loading]);
+  }, [loading, tier]);
 
   if (loading) return <LoadingState />;
 
@@ -523,13 +446,23 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
         />
       </div>
 
+      {/* Premium Scanline Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] animate-[scanline_10s_infinite_linear] bg-gradient-to-b from-transparent via-black to-transparent h-[10px] w-full" />
+      
       <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(50px, 30px) scale(1.1); }
           66% { transform: translate(-30px, 50px) scale(0.9); }
         }
+        @keyframes scanline {
+          0% { transform: translateY(-100vh); }
+          100% { transform: translateY(100vh); }
+        }
       `}</style>
+      
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0" 
+           style={{ backgroundImage: "radial-gradient(circle at 2px 2px, black 1px, transparent 0)", backgroundSize: "40px 40px" }} />
       
       {/* Sticky Progress Line */}
       <div className="fixed left-0 top-0 w-[2px] h-full bg-black/[0.02] z-50">
@@ -565,35 +498,46 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
         <section className="space-y-32">
           <div className="space-y-12">
             <div className="flex items-center gap-6">
-              <span className="text-[10px] font-mono text-[#6D28D9] tracking-[0.6em] uppercase font-black">Subject_Analysis</span>
+              <span className="text-[10px] font-mono text-[#6D28D9] tracking-[0.6em] uppercase font-black">
+                {tier === "compatibility" ? "Binary_Sync_Protocol" : "Subject_Analysis_Dossier"}
+              </span>
               <div className="flex-1 h-[0.5px] bg-black/5" />
             </div>
-            <h1 className="text-8xl md:text-[14rem] font-thin tracking-tighter leading-none text-[#0A0A0A] lowercase">
-              Profile_Alpha<span className="text-[#6D28D9]">.</span>
-            </h1>
-          </div>
- 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-end">
-            <div className="lg:col-span-7 space-y-12">
-              <p className="text-4xl md:text-6xl font-extralight text-black/90 leading-[1.1] tracking-tight">
-                You operate as a <span className="text-[#0A0A0A] font-medium italic underline decoration-[#6D28D9]/40 underline-offset-8">Strategic Architect</span>.
-              </p>
-              <p className="text-xl text-black/40 leading-relaxed font-medium max-w-xl">
-                This dossier removes the guesswork from your interpersonal dynamics and high-pressure negotiations. 
-                We have synthesized seven layers of cognitive habits to reveal your underlying success blueprint.
-              </p>
-            </div>
-            <div className="lg:col-span-5 space-y-12 border-l border-black/5 pl-12 h-fit mb-4">
-               {[
-                { label: "Internal_ID", val: "SYN-8821" },
-                { label: "Assessed_On", val: new Date().toISOString().split('T')[0] },
-                { label: "Reliability", val: "99.4%" },
-               ].map((item) => (
-                <div key={item.label} className="flex justify-between items-center group/meta">
-                   <span className="text-[9px] font-mono text-black/20 uppercase tracking-[0.3em] font-black group-hover/meta:text-[#6D28D9] transition-colors">{item.label}</span>
-                   <span className="text-[11px] font-mono text-[#0A0A0A] font-black uppercase tracking-widest">{item.val}</span>
+            
+            <div className="flex flex-col gap-4">
+              {tier === "compatibility" ? (
+                <div className="flex flex-col md:flex-row md:items-end gap-8">
+                  <h1 className="text-8xl md:text-[12rem] font-thin tracking-tighter leading-none text-[#0A0A0A] lowercase">
+                    Alpha<span className="text-[#6D28D9]">.</span>
+                  </h1>
+                  <span className="text-4xl md:text-6xl font-thin text-black/10 md:mb-4 italic">vs</span>
+                  <h1 className="text-8xl md:text-[12rem] font-thin tracking-tighter leading-none text-[#6D28D9] lowercase">
+                    Beta<span className="text-black/10">.</span>
+                  </h1>
                 </div>
-               ))}
+              ) : (
+                <h1 className="text-8xl md:text-[14rem] font-thin tracking-tighter leading-none text-[#0A0A0A] lowercase">
+                  Profile_Alpha<span className="text-[#6D28D9]">.</span>
+                </h1>
+              )}
+            </div>
+          </div>
+  
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-end">
+            <div className="lg:col-span-12 space-y-12">
+              <p className="text-4xl md:text-6xl font-extralight text-black/90 leading-[1.1] tracking-tight">
+                {tier === "compatibility" ? (
+                  <>Synthesizing two neural architectures into one <span className="text-[#0A0A0A] font-medium italic underline decoration-[#6D28D9]/40 underline-offset-8">Cohesion Map</span>.</>
+                ) : (
+                  <>You operate as a <span className="text-[#0A0A0A] font-medium italic underline decoration-[#6D28D9]/40 underline-offset-8">Strategic Architect</span>.</>
+                )}
+              </p>
+              <p className="text-xl text-black/40 leading-relaxed font-medium max-w-3xl">
+                {tier === "compatibility" 
+                  ? "Binary synthesis calculated via cognitive friction markers, linguistic overlap, and competitive drive alignment."
+                  : "This dossier removes the guesswork from your interpersonal dynamics and high-pressure negotiations."
+                }
+              </p>
             </div>
           </div>
         </section>
@@ -630,6 +574,7 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
                 key={trait}
                 label={trait}
                 value={val}
+                comparisonValue={tier === "compatibility" ? partnerScores?.bfi?.[trait] : undefined}
                 color="text-purple-500"
                 variant="card"
                 icon={getIcon("bfi", trait)}
@@ -644,70 +589,119 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
             ))}
           </DossierSection>
 
-          <DossierSection 
-            num={2}
-            title="The Dark Triad"
-            description="The clinical sub-clinical triad: Machiavellianism, Narcissism, and Psychopathy. Your scores represent high-stakes tactical advantages and risk markers."
-            accentColor="text-red-600"
-            illustration="/assets/report/THE Dark triad SVG/Narcissism.svg"
-            variant="protocol"
-          >
-            {scores?.darkTriad && Object.entries(scores.darkTriad).map(([trait, val]: any) => (
-              <IntelligenceRow 
-                key={trait}
-                label={trait}
-                value={val}
-                color="text-red-600"
-                variant="card"
-                icon={getIcon("darkTriad", trait)}
-                description={
-                  trait === "Machiavellianism" ? "Strategic deception, social manipulation, and the calculated use of others as instruments for goal achievement." :
-                  trait === "Narcissism" ? "Ego maintenance, grandiosity, and the exploitation of perceived status symbols for dominance." :
-                  "Lowered inhibitory response and a clinical capacity for emotional detachment in high-stress, high-stakes decision cycles."
-                }
-              />
-            ))}
-          </DossierSection>
+          {tier === "basic" && (
+            <section className="py-40 text-center relative border-t border-black/5 space-y-12 rounded-[4rem] bg-black/[0.01]">
+              <div className="absolute inset-0 z-0 backdrop-blur-xl" />
+              <div className="relative z-10 space-y-8 max-w-2xl mx-auto">
+                <span className="text-[10px] font-mono text-[#6D28D9] tracking-[1em] uppercase font-black opacity-40">Tier_Gap_Detected</span>
+                <h3 className="text-5xl md:text-7xl font-thin tracking-tighter text-black">Expand_Profile<span className="text-[#6D28D9]">.</span></h3>
+                <p className="text-lg text-black/40 italic">"The remaining 6 analytical segments (Dark Triad, Attachment, Cognitive, Drivers, Linguistic, Resilience) require Deep Report clearance."</p>
+                <div className="pt-8">
+                   <button className="bg-black text-white px-16 py-6 rounded-full font-bold text-[10px] tracking-[0.3em] uppercase hover:scale-105 transition-all">Upgrade to Deep Report</button>
+                </div>
+              </div>
+            </section>
+          )}
 
-          <DossierSection 
-            num={3}
-            title="Relational Matrix"
-            description="How you build trust, manage professional boundaries, and relate to your peers."
-            accentColor="text-blue-400"
-            illustration="/assets/report/Attachment style SVG/Secure.svg"
-            variant="protocol"
-          >
-            {scores?.attachment && (
-              <>
+          {tier !== "basic" && (
+            <DossierSection 
+              num={2}
+              title="The Dark Triad"
+              description="The clinical sub-clinical triad: Machiavellianism, Narcissism, and Psychopathy. Your scores represent high-stakes tactical advantages and risk markers."
+              accentColor="text-red-600"
+              illustration="/assets/report/THE Dark triad SVG/Narcissism.svg"
+              variant="protocol"
+            >
+              {scores?.darkTriad && Object.entries(scores.darkTriad).map(([trait, val]: any) => (
                 <IntelligenceRow 
-                  label="Core_Style"
-                  value={scores.attachment.Style.replace('-', ' ')}
-                  color="text-blue-400"
+                  key={trait}
+                  label={trait}
+                  value={val}
+                  comparisonValue={tier === "compatibility" ? partnerScores?.darkTriad?.[trait] : undefined}
+                  color="text-red-600"
                   variant="card"
-                  icon={getIcon("attachment", scores.attachment.Style)}
-                  description={`Your behavior profile aligns with the ${scores.attachment.Style} protocol.`}
+                  icon={getIcon("darkTriad", trait)}
+                  description={
+                    trait === "Machiavellianism" ? "Strategic deception, social manipulation, and the calculated use of others as instruments for goal achievement." :
+                    trait === "Narcissism" ? "Ego maintenance, grandiosity, and the exploitation of perceived status symbols for dominance." :
+                    "Lowered inhibitory response and a clinical capacity for emotional detachment in high-stress, high-stakes decision cycles."
+                  }
                 />
-                <IntelligenceRow 
-                  label="Trust_Index"
-                  value={scores.attachment.Security}
-                  color="text-blue-400"
-                  variant="card"
-                  icon={getIcon("attachment", "Secure")}
-                  description="Capacity for authentic, high-security professional bonding."
-                />
-                <IntelligenceRow 
-                  label="Security_Score"
-                  value={scores.attachment.Security}
-                  color="text-blue-400"
-                  variant="card"
-                  icon={getIcon("attachment", "Secure")}
-                  description="Baseline relational durability metric."
-                />
-              </>
-            )}
-          </DossierSection>
+              ))}
+            </DossierSection>
+          )}
 
-          {!isUnlocked && (
+          {tier !== "basic" && (
+            <DossierSection 
+              num={3}
+              title="Relational Matrix"
+              description="How you build trust, manage professional boundaries, and relate to your peers."
+              accentColor="text-blue-400"
+              illustration="/assets/report/Attachment style SVG/Secure.svg"
+              variant="protocol"
+            >
+              {scores?.attachment && (
+                <>
+                  <IntelligenceRow 
+                    label="Core_Style"
+                    value={scores.attachment.Style.replace('-', ' ')}
+                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Style : undefined}
+                    color="text-blue-400"
+                    variant="card"
+                    icon={getIcon("attachment", scores.attachment.Style)}
+                    description={`Your behavior profile aligns with the ${scores.attachment.Style} protocol.`}
+                  />
+                  <IntelligenceRow 
+                    label="Trust_Index"
+                    value={scores.attachment.Security}
+                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Security : undefined}
+                    color="text-blue-400"
+                    variant="card"
+                    icon={getIcon("attachment", "Secure")}
+                    description="Capacity for authentic, high-security professional bonding."
+                  />
+                  <IntelligenceRow 
+                    label="Security_Score"
+                    value={scores.attachment.Security}
+                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Security : undefined}
+                    color="text-blue-400"
+                    variant="card"
+                    icon={getIcon("attachment", "Secure")}
+                    description="Baseline relational durability metric."
+                  />
+                </>
+              )}
+            </DossierSection>
+          )}
+
+          {tier === "compatibility" && (
+            <section className="py-40 bg-zinc-950 rounded-[4rem] px-12 md:px-24 border border-white/5 relative overflow-hidden stagger-reveal">
+               <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[120px] rounded-full" />
+               <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full" />
+               
+               <div className="relative z-10 space-y-24">
+                  <div className="space-y-8">
+                    <span className="text-[10px] font-mono text-white/40 tracking-[1em] uppercase font-black">Sync_Calibration_Report</span>
+                    <h2 className="text-6xl md:text-8xl font-thin tracking-tighter text-white">Friction_Zones<span className="text-[#6D28D9]">.</span></h2>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="p-12 rounded-3xl bg-white/[0.03] border border-white/5 space-y-6">
+                      <h4 className="text-xl font-medium text-white italic">"High Intellectual Symmetry"</h4>
+                      <p className="text-sm text-white/40 leading-relaxed font-light">Both subjects exhibit Openness scores above 80%. Strategic alignment is highly likely in innovative environments.</p>
+                      <div className="h-[2px] w-full bg-gradient-to-r from-[#6D28D9] to-transparent" />
+                    </div>
+                    <div className="p-12 rounded-3xl bg-white/[0.03] border border-white/5 space-y-6">
+                      <h4 className="text-xl font-medium text-white italic">"Relational Dissonance"</h4>
+                      <p className="text-sm text-white/40 leading-relaxed font-light">Alpha's Avoidant style vs Beta's Secure style creates a 40% communication lag during high-stress decision windows.</p>
+                      <div className="h-[2px] w-full bg-gradient-to-r from-red-500 to-transparent" />
+                    </div>
+                  </div>
+               </div>
+            </section>
+          )}
+
+          {!isUnlocked && tier !== "basic" && (
             <section className="py-60 text-center relative border-t border-black/5 space-y-16 overflow-hidden rounded-[4rem] bg-black/[0.01]">
                 <div className="absolute inset-0 z-0 backdrop-blur-3xl" />
                 
@@ -751,13 +745,13 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
             </section>
           )}
 
-          <div className={`space-y-40 transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${!isUnlocked ? "blur-[60px] opacity-[0.03] pointer-events-none select-none max-h-[800px] overflow-hidden grayscale scale-95" : "blur-0 opacity-100 scale-100"}`}>
+          <div className={`space-y-40 transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${(!isUnlocked || tier === "basic") ? "blur-[60px] opacity-[0.03] pointer-events-none select-none max-h-[800px] overflow-hidden grayscale scale-95" : "blur-0 opacity-100 scale-100"}`}>
             <DossierSection 
               num={4}
+              id="dimension-4"
               title="Cognitive Mechanics"
               description="Information processing architecture and decision-making logic gates."
               accentColor="text-amber-400"
-              id="dimension-4"
               illustration="/assets/report/Cognitive Functions SVG/Adaptive Observation.svg"
               variant="protocol"
             >
@@ -766,6 +760,7 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
                   key={trait}
                   label={trait}
                   value={val}
+                  comparisonValue={tier === "compatibility" ? (partnerScores?.cognitive?.Functions as any)?.[trait] : undefined}
                   color="text-amber-400"
                   variant="card"
                   icon={getIcon("cognitive", trait)}
@@ -783,25 +778,21 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
               num={5}
               id="dimension-5"
               title="Core Drivers"
-              description="The underlying motivational architecture that fuels your high-stakes performance."
-              accentColor="text-orange-500"
-              illustration="/assets/report/drivers.png"
+              description="Universal value orientations that govern long-term behavior and motivation."
+              accentColor="text-emerald-400"
+              illustration="/assets/report/Core Drivers SVG/HEDONISM.svg"
               variant="protocol"
             >
-              {scores?.drivers && Object.entries(scores.drivers).map(([trait, val]: any) => (
+               {scores?.schwartz && Object.entries(scores.schwartz).map(([trait, val]: any) => (
                 <IntelligenceRow 
                   key={trait}
                   label={trait}
                   value={val}
-                  color="text-orange-500"
+                  comparisonValue={tier === "compatibility" ? (partnerScores?.schwartz as any)?.[trait] : undefined}
+                  color="text-emerald-400"
                   variant="card"
-                  icon="/assets/report/drivers.png"
-                  description={
-                    trait === "Power & Impact" ? "Subconscious drive for environmental control and agency over systemic outcomes." :
-                    trait === "Self-Direction" ? "Need for autonomous decision-making loops without external authority interference." :
-                    trait === "Achievement" ? "Internal threshold for success measurement and personal legacy metrics." :
-                    "Priority placed on systemic stability and the mitigation of existential risks."
-                  }
+                  icon={getIcon("schwartz", trait)}
+                  description={`The primary motivation for ${trait} behaviors within the subject's operative framework.`}
                 />
               ))}
             </DossierSection>
@@ -820,6 +811,7 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
                   key={trait}
                   label={trait}
                   value={val}
+                  comparisonValue={tier === "compatibility" ? (partnerScores?.language as any)?.[trait] : undefined}
                   color="text-cyan-400"
                   variant="card"
                   icon="/assets/report/language.png"
@@ -847,6 +839,7 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
                   key={trait}
                   label={trait}
                   value={val}
+                  comparisonValue={tier === "compatibility" ? (partnerScores?.resilience as any)?.[trait] : undefined}
                   color="text-pink-500"
                   variant="card"
                   icon="/assets/report/resilience.png"
@@ -862,7 +855,7 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
           </div>
         </div>
 
-        <footer className="pt-40 border-t border-black/5 flex flex-col md:flex-row justify-between items-start gap-16 opacity-30 pb-20">
+        <footer className="pt-40 border-t border-black/5 flex flex-col md:flex-row justify-between items-start gap-16 opacity-30 pb-20 mt-40">
           <div className="space-y-4">
             <div className="flex gap-10 text-[9px] font-mono uppercase tracking-[0.4em] font-black text-[#0A0A0A]">
               <span className="text-[#6D28D9]">Proprietary</span>
@@ -873,8 +866,8 @@ Reclaim your focus by applying the specific "Emotional Stoicism" triggers found 
             </p>
           </div>
           
-          <div className="w-full flex justify-center py-10 opacity-60">
-             <span className="text-[9px] font-mono tracking-[0.6em] uppercase font-bold text-black/40">
+          <div className="w-full md:w-auto flex justify-center md:justify-end py-10 opacity-60">
+             <span className="text-[9px] font-mono tracking-[0.6em] uppercase font-bold text-black/40 text-center md:text-right">
                {SYSTEM_AUTH}
              </span>
           </div>
