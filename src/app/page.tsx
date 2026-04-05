@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Play, User, Shield, Brain, Zap, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 if (typeof window !== 'undefined') {
@@ -13,40 +13,104 @@ if (typeof window !== 'undefined') {
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
+  const footerLogoRef = useRef<HTMLImageElement>(null);
   const darkSectionRef = useRef<HTMLDivElement>(null);
   const lightSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Initialize logo states
+      gsap.set(logoRef.current, { filter: "invert(0)" });
+      gsap.set(footerLogoRef.current, { filter: "invert(1) hue-rotate(180deg)" });
+
       // Color shifts
       ScrollTrigger.create({
         trigger: darkSectionRef.current,
         start: "top 50%",
         end: "bottom 50%",
-        onEnter: () => gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 }),
-        onLeaveBack: () => gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.8 }),
+        onEnter: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
+          gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
+        },
+        onLeaveBack: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
+          gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
+        },
       });
       ScrollTrigger.create({
         trigger: lightSectionRef.current,
         start: "top 50%",
         end: "bottom 50%",
-        onEnter: () => gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.8 }),
-        onLeaveBack: () => gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 }),
+        onEnter: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
+          gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
+        },
+        onLeaveBack: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
+          gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
+        },
       });
 
-      // Hero
-      gsap.fromTo('.hero-title span', 
-        { y: 100, opacity: 0, rotationX: -80, transformOrigin: "0% 50% -50" }, 
-        { y: 0, opacity: 1, rotationX: 0, duration: 1.2, ease: 'power4.out', stagger: 0.1 }
-      );
-      gsap.fromTo('.hero-desc', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.5, ease: 'power3.out' });
-      gsap.fromTo('.hero-cta', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: 'power3.out' });
+      // Hero Entrance Sequence
+      const heroTl = gsap.timeline();
+      heroTl
+        .to('.hero-video', { opacity: 0.6, duration: 2, ease: 'power2.inOut' })
+        .to('.hero-title span span', { 
+          y: 0, 
+          duration: 1.4, 
+          stagger: 0.1, 
+          ease: 'expo.out' 
+        }, '-=1.5')
+        .to('.hero-desc', { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }, '-=0.8')
+        .to('.hero-cta', { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }, '-=0.8');
       
-      // Vignettes
+      // Hero Mouse Parallax
+      const handleMouseMove = (e: MouseEvent) => {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth) - 0.5;
+        const yPos = (clientY / window.innerHeight) - 0.5;
+
+        // Subtle Tilt for content
+        gsap.to('.hero-content', {
+          rotationY: xPos * 4,
+          rotationX: -yPos * 4,
+          x: xPos * 10,
+          y: yPos * 10,
+          duration: 1.2,
+          ease: 'power2.out'
+        });
+
+        // Floating Vignettes Parallax
+        gsap.to('.vignette-float', {
+          x: (i) => xPos * (40 + i * 20),
+          y: (i) => yPos * (40 + i * 20),
+          duration: 2,
+          ease: 'power2.out'
+        });
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      
+      // Vignettes Floating (Base logic)
       gsap.utils.toArray('.vignette-float').forEach((el: any) => {
         gsap.to(el, {
-          y: 'random(-30, 30)', x: 'random(-30, 30)', rotation: 'random(-20, 20)',
-          duration: 'random(4, 7)', repeat: -1, yoyo: true, ease: 'sine.inOut'
+          y: '+=20',
+          x: '+=20',
+          rotation: 'random(-10, 10)',
+          duration: 'random(4, 6)',
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut'
         });
       });
 
@@ -104,17 +168,21 @@ export default function LandingPage() {
   return (
     <div ref={containerRef} className="min-h-screen transition-colors duration-700 bg-[#FAFAF8] text-[#111111]">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex items-center justify-between mix-blend-difference text-[#F5F0EB]">
-        <div className="flex items-center gap-3 font-bold text-xl md:text-2xl">
-          <span className="text-3xl md:text-4xl font-serif">Ψ</span>
-          <span className="tracking-[0.15em] mt-1">PSYPHER<span className="text-[#7C3AED]">.</span></span>
+      <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex items-center justify-between text-[#111111]">
+        <div className="flex items-center gap-3 transition-colors duration-500">
+          <img 
+            ref={logoRef}
+            src="/logo.svg" 
+            alt="Psypher Logo" 
+            className="h-10 md:h-12 w-auto filter invert" 
+          />
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <a href="#how-it-works" className="hover:opacity-70 transition-opacity">How It Works</a>
-          <a href="#pricing" className="hover:opacity-70 transition-opacity">Pricing</a>
+          <a href="#how-it-works" className="nav-item hover:opacity-70 transition-all duration-500">How It Works</a>
+          <a href="#pricing" className="nav-item hover:opacity-70 transition-all duration-500">Pricing</a>
           <Link 
             href="/assessment" 
-            className="px-5 py-2 bg-[#7C3AED] text-white rounded-full hover:bg-[#6D28D9] transition-all"
+            className="nav-button px-5 py-2 bg-[#111111] text-white rounded-full hover:scale-105 transition-all duration-500"
           >
             Start Assessment
           </Link>
@@ -123,34 +191,37 @@ export default function LandingPage() {
 
       {/* Section 1: Hero */}
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
+        <div className="noise-overlay" />
         <video 
           autoPlay 
           loop 
           muted 
           playsInline 
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-          style={{ opacity: 0.6, mixBlendMode: 'multiply' }}
+          className="hero-video absolute inset-0 w-full h-full object-cover pointer-events-none z-0 opacity-0"
+          style={{ mixBlendMode: 'multiply' }}
           src="https://cdn.midjourney.com/video/566125f4-4a32-4676-9bb6-34ae4b723d70/0.mp4"
         />
-        {/* Animated Vignette */}
-        <svg className="vignette-float absolute top-1/4 right-1/4 w-64 h-64 text-[#7C3AED] opacity-20 pointer-events-none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        {/* Animated Vignette 1 */}
+        <svg className="vignette-float absolute top-1/4 right-1/4 w-80 h-80 text-[#7C3AED] opacity-20 pointer-events-none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.3,-46.3C90.8,-33.5,96.8,-18.1,97.4,-2.5C98,13.1,93.2,28.9,84.1,42.3C75,55.7,61.6,66.7,46.7,74.4C31.8,82.1,15.9,86.5,0.2,86.2C-15.5,85.9,-31,80.9,-44.6,72.6C-58.2,64.3,-69.9,52.7,-78.3,39.1C-86.7,25.5,-91.8,9.9,-91.3,-5.4C-90.8,-20.7,-84.7,-35.7,-75.2,-48.2C-65.7,-60.7,-52.8,-70.7,-38.8,-77.9C-24.8,-85.1,-9.7,-89.5,3.1,-94.1C15.9,-98.7,30.6,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
         </svg>
 
         <div className="px-8 md:px-24 pt-24 pb-12 max-w-7xl mx-auto w-full relative z-10">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl hero-content">
             <h1 className="hero-title text-6xl md:text-8xl font-bold tracking-tighter leading-[1.1] mb-8 flex flex-wrap gap-x-4">
               {["What", "is", "your", "personality", "costing", "you?"].map((word, i) => (
-                <span key={i} className="inline-block">{word}</span>
+                <span key={i} className="inline-block overflow-hidden">
+                  <span className="inline-block translate-y-[100%]">{word}</span>
+                </span>
               ))}
             </h1>
-          <p className="hero-desc text-xl md:text-2xl text-gray-600 max-w-2xl mb-12 leading-relaxed">
+          <p className="hero-desc text-xl md:text-2xl text-gray-600 max-w-2xl mb-12 leading-relaxed opacity-0">
             Traditional personality tests put you in a box. We give you the keys to break out of it. Decode your psychological blueprint in 10 minutes.
           </p>
-          <div className="hero-cta flex flex-col items-start gap-4">
+          <div className="hero-cta flex flex-col items-start gap-4 opacity-0">
             <Link 
               href="/assessment" 
-              className="inline-flex items-center justify-center px-8 py-4 bg-[#7C3AED] text-white font-medium rounded-full hover:bg-[#6D28D9] transition-colors group"
+              className="shimmer-btn inline-flex items-center justify-center px-8 py-4 bg-[#7C3AED] text-white font-medium rounded-full hover:bg-[#6D28D9] transition-colors group shadow-lg shadow-[#7C3AED]/20"
             >
               Get my free mini-report
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -172,33 +243,72 @@ export default function LandingPage() {
 
         <div className="hiw-header mb-20 relative z-10">
           <span className="text-sm font-bold tracking-widest uppercase text-[#7C3AED] mb-4 block">How It Works</span>
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter">Three frameworks. One truth.</h2>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter">Seven dimensions. One truth.</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
           {[
             {
               num: "01",
-              title: "The Big Five",
-              desc: "Your core personality architecture. Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism."
+              title: "Personality Architecture",
+              subtitle: "The Big Five (OCEAN)",
+              desc: "The baseline of your psychological foundation. Reveals how you naturally process information, manage stress, and interact with your environment."
             },
             {
               num: "02",
-              title: "The Dark Triad",
-              desc: "Your shadow side. Machiavellianism, Narcissism, Psychopathy — decoded as strategic assets, not diagnoses."
+              title: "Shadow Profile",
+              subtitle: "The Dark Triad",
+              desc: "The unfiltered reality of your darker traits. Machiavellianism, Narcissism, and Psychopathy analyzed as strategic levers and blind spots."
             },
             {
               num: "03",
-              title: "Attachment Style",
-              desc: "How you connect. Anxious, Avoidant, or Secure — and why your relationships follow the same pattern."
+              title: "Connection Blueprint",
+              subtitle: "Attachment Style",
+              desc: "Decodes your primary relationship script. Understand why you attract certain patterns and how to control your interpersonal dynamics."
+            },
+            {
+              num: "04",
+              title: "Cognitive Wiring",
+              subtitle: "Cognitive Type Mapping",
+              desc: "Maps your internal processing hardware. Discover how you perceive complexity, reach conclusions, and recharge your cognitive battery."
+            },
+            {
+              num: "05",
+              title: "Core Drivers",
+              subtitle: "Schwartz Values",
+              desc: "Identifies the universal human values that dictate your priorities. Discover what truly motivates your decisions when the stakes are highest."
+            },
+            {
+              num: "06",
+              title: "Language Fingerprint",
+              subtitle: "Linguistic Analysis (LIWC)",
+              desc: "Linguistic analysis of your communication style. Uncovers emotional subtext, status signaling, and cognitive transparency in your words."
+            },
+            {
+              num: "07",
+              title: "Resilience Index",
+              subtitle: "DSM-5 Wellbeing Markers",
+              desc: "A benchmark of psychological durability. Measures stress-response markers and wellbeing stability through modern clinical indicators."
             }
           ].map((card, i) => (
-            <div key={i} className="hiw-card p-8 border border-gray-200 rounded-2xl bg-white/50 backdrop-blur-sm shadow-xl">
-              <span className="text-4xl font-light text-gray-300 mb-6 block">{card.num}</span>
-              <h3 className="text-2xl font-bold mb-4">{card.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{card.desc}</p>
+            <div 
+              key={i} 
+              className={`hiw-card p-8 border border-gray-200 rounded-2xl bg-white/50 backdrop-blur-sm shadow-xl flex flex-col ${i === 0 ? 'lg:col-span-2' : ''}`}
+            >
+              <div className="flex justify-between items-start mb-6">
+                <span className="text-4xl font-light text-gray-300 block">{card.num}</span>
+                <div className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">{card.subtitle}</div>
+              </div>
+              <h3 className="text-xl font-bold mb-3">{card.title}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed flex-1">{card.desc}</p>
             </div>
           ))}
+          <div className="lg:col-span-1 p-8 border border-dashed border-gray-200 rounded-2xl flex flex-col justify-center items-center text-center group cursor-pointer hover:border-[#7C3AED]/30 transition-colors">
+            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#7C3AED]/10 transition-colors">
+              <Plus className="w-6 h-6 text-gray-300 group-hover:text-[#7C3AED] transition-colors" />
+            </div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">More Layers Coming</p>
+          </div>
         </div>
       </section>
 
@@ -242,26 +352,54 @@ export default function LandingPage() {
           </div>
           <div className="flex-1 w-full report-card">
             <div className="relative w-full aspect-[4/5] bg-[#1A1A1A] rounded-2xl border border-gray-800 p-8 shadow-2xl overflow-hidden flex flex-col">
-              <div className="h-4 w-1/3 bg-gray-800 rounded mb-8"></div>
-              <div className="space-y-4 mb-12">
-                {[85, 42, 91, 30, 65].map((val, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <div className="w-8 text-xs text-gray-500">T{i+1}</div>
-                    <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
-                      <div className="progress-bar-fill h-full bg-[#7C3AED]" data-width={`${val}%`}></div>
+              <div className="flex justify-between items-start mb-8">
+                <div className="text-[10px] font-mono tracking-[0.2em] text-[#7C3AED]">REPORT ID: #PZ-8274</div>
+                <div className="text-[10px] font-mono text-gray-600">CONFIDENTIAL</div>
+              </div>
+              
+              <div className="space-y-5 mb-10">
+                {[
+                  { name: "Openness", val: 85 },
+                  { name: "Conscientiousness", val: 42 },
+                  { name: "Extraversion", val: 91 },
+                  { name: "Agreeableness", val: 30 },
+                  { name: "Neuroticism", val: 65 }
+                ].map((trait, i) => (
+                  <div key={i} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">{trait.name}</span>
+                      <span className="text-[10px] font-medium text-gray-500">{trait.val}%</span>
                     </div>
-                    <div className="w-8 text-xs text-gray-400 text-right">{val}%</div>
+                    <div className="h-1.5 bg-gray-800/40 rounded-full overflow-hidden">
+                      <div 
+                        className="progress-bar-fill h-full bg-gradient-to-r from-[#7C3AED] to-[#A78BFA]" 
+                        data-width={`${trait.val}%`}
+                      ></div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="flex-1 blur-sm space-y-4 opacity-50">
-                <div className="h-4 w-full bg-gray-700 rounded"></div>
-                <div className="h-4 w-5/6 bg-gray-700 rounded"></div>
-                <div className="h-4 w-full bg-gray-700 rounded"></div>
-                <div className="h-4 w-4/6 bg-gray-700 rounded"></div>
+
+              <div className="flex-1 mt-6 relative overflow-hidden">
+                <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#7C3AED] mb-3">01. THE UNCOMFORTABLE TRUTH</h4>
+                <div className="space-y-4">
+                  <p className="text-[11px] leading-relaxed text-gray-300 font-medium">
+                    Your dominant trait is High Conscientiousness combined with High Machiavellianism. Your superpower is ruthless execution. Your fatal flaw is alienating your team when under pressure.
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-gray-400 opacity-60 blur-[1.5px] select-none">
+                    Attachment style analysis detects secondary avoidant triggers under high-pressure cognitive load, impacting conflict-resolution speed and long-term team cohesion...
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-gray-500 opacity-40 blur-[2.5px] select-none">
+                    Strategic Machiavellianism markers are effectively utilized for project optimization while maintaining baseline professional trust and organizational velocity...
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-gray-600 opacity-20 blur-[4px] select-none">
+                    Core personality architecture remains stable under stress, however secondary DSM-5 cluster traits may emerge in isolation...
+                  </p>
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent flex items-end justify-center pb-12">
-                <span className="px-4 py-2 bg-[#0F0F0F] border border-gray-800 rounded-full text-sm font-medium text-[#7C3AED]">
+
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/80 via-transparent to-transparent flex items-end justify-center pb-12 pointer-events-none">
+                <span className="px-6 py-2 bg-[#0F0F0F] border border-gray-800 rounded-full text-xs font-bold tracking-widest uppercase text-[#7C3AED] shadow-2xl backdrop-blur-md pointer-events-auto">
                   Confidential Analysis
                 </span>
               </div>
@@ -377,9 +515,13 @@ export default function LandingPage() {
         </div>
         
         <footer className="mt-32 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center gap-2 font-bold text-gray-300 mb-4 md:mb-0">
-            <span className="text-2xl font-serif">Ψ</span>
-            <span className="tracking-[0.15em] mt-1">PSYPHER<span className="text-[#7C3AED]">.</span></span>
+          <div className="flex items-center gap-2 mb-4 md:mb-0">
+            <img 
+              ref={footerLogoRef}
+              src="/logo.svg" 
+              alt="Psypher Logo" 
+              className="h-8 md:h-10 w-auto" 
+            />
           </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-gray-300 transition-colors">Privacy</a>

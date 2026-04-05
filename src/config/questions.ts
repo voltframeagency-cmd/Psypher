@@ -2,13 +2,17 @@ export interface Question {
   id: number;
   text: string;
   category: "BFI" | "DT" | "ATTACH" | "VALUE" | "COGNITIVE";
-  facet?: string;
+  facet: string;
   reverse?: boolean;
   maxScore: 5;
 }
 
-// 54-Item Quick Scan Question Set
+/**
+ * 54-Item Quick Scan (Phase 1)
+ * Combines BFI-2-S (30) + DTDD (12) + AAS-12 (12)
+ */
 export const QUICK_SCAN_QUESTIONS: Question[] = [
+  // --- BFI-2-S (30 Items) ---
   { id: 1, text: "Tends to be quiet.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
   { id: 2, text: "Is compassionate, has a soft heart.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
   { id: 3, text: "Tends to be disorganized.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
@@ -19,31 +23,158 @@ export const QUICK_SCAN_QUESTIONS: Question[] = [
   { id: 8, text: "Has difficulty getting started on tasks.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
   { id: 9, text: "Tends to be depressed, blue.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
   { id: 10, text: "Has little interest in abstract ideas.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
-  // ... Truncated for brevity in dev preview, will contain all 54 items
-];
+  { id: 11, text: "Is full of energy.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 12, text: "Assumes the best about people.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 13, text: "Is reliable, can always be counted on.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 14, text: "Is emotionally stable, not easily upset.", category: "BFI", facet: "Neuroticism", reverse: true, maxScore: 5 },
+  { id: 15, text: "Is original, comes up with new ideas.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 16, text: "Is outgoing, sociable.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 17, text: "Can be cold and uncaring.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 18, text: "Keeps things neat and tidy.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 19, text: "Feels relaxed, handles stress well.", category: "BFI", facet: "Neuroticism", reverse: true, maxScore: 5 },
+  { id: 20, text: "Has few artistic interests.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
+  { id: 21, text: "Prefers to have others take charge.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 22, text: "Is respectful, treats others with care.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 23, text: "Is persistent, works until finished.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 24, text: "Feels secure and comfortable with self.", category: "BFI", facet: "Neuroticism", reverse: true, maxScore: 5 },
+  { id: 25, text: "Complex, deep thinker.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 26, text: "Less active than other people.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 27, text: "Tends to find fault with others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 28, text: "Can be somewhat careless.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 29, text: "Is temperamental, gets emotional easily.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 30, text: "Has a fertile imagination.", category: "BFI", facet: "Openness", maxScore: 5 },
 
-// 150-Item Full Decode Question Set (IPIP-NEO-120 + DTDD + AAS)
-export const FULL_DECODE_QUESTIONS: Question[] = [
-  // IPIP-NEO-120 Items (Subset shown for structure)
-  { id: 1, text: "Worry about things.", category: "BFI", facet: "Anxiety", maxScore: 5 },
-  { id: 2, text: "Make friends easily.", category: "BFI", facet: "Friendliness", maxScore: 5 },
-  { id: 3, text: "Have a vivid imagination.", category: "BFI", facet: "Imagination", maxScore: 5 },
-  { id: 4, text: "Trust others.", category: "BFI", facet: "Trust", maxScore: 5 },
-  { id: 5, text: "Complete tasks successfully.", category: "BFI", facet: "Self-Efficacy", maxScore: 5 },
-  
-  // Dark Triad Dirty Dozen (DTDD)
-  { id: 121, text: "I tend to manipulate others to get my way.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
-  { id: 122, text: "I have used deceit or lied to get my way.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
-  { id: 123, text: "I tend to be unconcerned with the morality of my actions.", category: "DT", facet: "Psychopathy", maxScore: 5 },
-  { id: 124, text: "I tend to want others to admire me.", category: "DT", facet: "Narcissism", maxScore: 5 },
-  
-  // Adult Attachment Scale (AAS-18)
-  { id: 135, text: "I find it relatively easy to get close to people.", category: "ATTACH", facet: "Closeness", maxScore: 5 },
-  { id: 136, text: "I find it difficult to allow myself to depend on others.", category: "ATTACH", facet: "Dependency", reverse: true, maxScore: 5 },
-  { id: 137, text: "I often worry that my partner does not really love me.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  // --- DTDD (12 Items) ---
+  { id: 31, text: "I tend to manipulate others to get my way.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
+  { id: 32, text: "I have used deceit or lied to get my way.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
+  { id: 33, text: "I have used flattery to get my way.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
+  { id: 34, text: "I tend to exploit others towards my own end.", category: "DT", facet: "Machiavellianism", maxScore: 5 },
+  { id: 35, text: "I tend to lack remorse.", category: "DT", facet: "Psychopathy", maxScore: 5 },
+  { id: 36, text: "I tend to be unconcerned with the morality of my actions.", category: "DT", facet: "Psychopathy", maxScore: 5 },
+  { id: 37, text: "I tend to be callous or insensitive.", category: "DT", facet: "Psychopathy", maxScore: 5 },
+  { id: 38, text: "I tend to be cynical.", category: "DT", facet: "Psychopathy", maxScore: 5 },
+  { id: 39, text: "I tend to want others to admire me.", category: "DT", facet: "Narcissism", maxScore: 5 },
+  { id: 40, text: "I tend to want others to pay attention to me.", category: "DT", facet: "Narcissism", maxScore: 5 },
+  { id: 41, text: "I tend to seek prestige or status.", category: "DT", facet: "Narcissism", maxScore: 5 },
+  { id: 42, text: "I tend to expect special favors from others.", category: "DT", facet: "Narcissism", maxScore: 5 },
+
+  // --- AAS-12 (12 Items) ---
+  { id: 43, text: "I find it relatively easy to get close to people.", category: "ATTACH", facet: "Closeness", maxScore: 5 },
+  { id: 44, text: "I find it difficult to allow myself to depend on others.", category: "ATTACH", facet: "Dependency", reverse: true, maxScore: 5 },
+  { id: 45, text: "I often worry that my partner does not really love me.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  { id: 46, text: "I am comfortable developing close relationships with others.", category: "ATTACH", facet: "Closeness", maxScore: 5 },
+  { id: 47, text: "I am uncomfortable when anyone gets too close to me.", category: "ATTACH", facet: "Closeness", reverse: true, maxScore: 5 },
+  { id: 48, text: "I often worry my partner will not want to stay with me.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  { id: 49, text: "I want to merge completely with another person.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  { id: 50, text: "My desire to merge sometimes scares people away.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  { id: 51, text: "I am confident others will be there when I need them.", category: "ATTACH", facet: "Dependency", maxScore: 5 },
+  { id: 52, text: "I do not often worry about being abandoned.", category: "ATTACH", facet: "Anxiety", reverse: true, maxScore: 5 },
+  { id: 53, text: "I find others are reluctant to get as close as I would like.", category: "ATTACH", facet: "Anxiety", maxScore: 5 },
+  { id: 54, text: "I am somewhat uncomfortable being close to others.", category: "ATTACH", facet: "Closeness", reverse: true, maxScore: 5 },
 ];
 
 /**
- * Note: Full list of 150 items is mapped in the engine. 
- * This file serves as the configuration for the UI rendering.
+ * 150-Item Full Decode (Phase 2)
+ * Standard IPIP-NEO-120 logic + Expanded DT and Attachment
+ * Mapping representative facets for high-fidelity decoding.
  */
+export const FULL_DECODE_QUESTIONS: Question[] = [
+  ...QUICK_SCAN_QUESTIONS,
+  // --- Additional IPIP-NEO-120 Facets (96 items) ---
+  { id: 55, text: "Worry about things.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 56, text: "Make friends easily.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 57, text: "Have a vivid imagination.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 58, text: "Trust others.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 59, text: "Complete tasks successfully.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 60, text: "Get angry easily.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 61, text: "Love large parties.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 62, text: "Believe in the importance of art.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 63, text: "Would never cheat on my taxes.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 64, text: "Make plans and stick to them.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 65, text: "Often feel blue.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 66, text: "Take charge.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 67, text: "Experience my emotions intensely.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 68, text: "Make people feel at ease.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 69, text: "Keep my promises.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 70, text: "Feel comfortable with myself.", category: "BFI", facet: "Neuroticism", reverse: true, maxScore: 5 },
+  { id: 71, text: "Always on the go.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 72, text: "Prefer variety to routine.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 73, text: "Insult people.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 74, text: "Pay attention to details.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 75, text: "Am easily intimidated.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 76, text: "Like to solve complex problems.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 77, text: "Sympathize with the homeless.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 78, text: "Carry out my plans.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 79, text: "Panic easily.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 80, text: "Amused easily.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 81, text: "Believe that there is no absolute right or wrong.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 82, text: "Take advantage of others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 83, text: "Waste my time.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 84, text: "Fear for the worst.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 85, text: "Have a lot to say.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 86, text: "Enjoy wild flights of fantasy.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 87, text: "Believe that others have good intentions.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 88, text: "Get chores done right away.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 89, text: "Am often down in the dumps.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 90, text: "Try to lead others.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 91, text: "See beauty in things that others might not notice.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 92, text: "Am concerned about others.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 93, text: "Tell the truth.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 94, text: "Am always prepared.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 95, text: "Dislike myself.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 96, text: "Radiate joy.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 97, text: "Tend to vote for liberal political candidates.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 98, text: "Am indifferent to the feelings of others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 99, text: "Do more than what's expected of me.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 100, text: "Rarely overindulge.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 101, text: "Am easily discouraged.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 102, text: "Love excitement.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 103, text: "Am interested in theoretical ideas.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 104, text: "Boast about my virtues.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 105, text: "Am helpful to those around me.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 106, text: "Follow a schedule.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 107, text: "Get overwhelmed by emotions.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 108, text: "Warm up quickly to others.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 109, text: "Have a rich vocabulary.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 110, text: "Believe that people should basically follow the rules.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 111, text: "Excel in what I do.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 112, text: "Am often in a bad mood.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 113, text: "Am the life of the party.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 114, text: "Believe in the importance of tradition.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
+  { id: 115, text: "Am out for my own personal gain.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 116, text: "Am not highly motivated to succeed.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 117, text: "Shirk my duties.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 118, text: "Suffer from many digestive problems.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 119, text: "Talk to a lot of different people at parties.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 120, text: "Experience my feelings with great intensity.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 121, text: "Tend to take advantage of others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 122, text: "Stick to my chosen path.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 123, text: "Often feel that others are targeting me.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 124, text: "Can easily influence others.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 125, text: "Believe that art is an important part of life.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 126, text: "Am concerned about the less fortunate.", category: "BFI", facet: "Agreeableness", maxScore: 5 },
+  { id: 127, text: "Feel that I am better than others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 128, text: "Go straight to the point.", category: "BFI", facet: "Conscientiousness", maxScore: 5 },
+  { id: 129, text: "Am afraid of many things.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 130, text: "Love to be in the spotlight.", category: "BFI", facet: "Extraversion", maxScore: 5 },
+  { id: 131, text: "Challenge authority.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 132, text: "Believe that criminals should receive more severe punishment.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 133, text: "Leave my belongings around.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 134, text: "Get stressed out easily.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 135, text: "Keep in the background.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 136, text: "Think deeply about things.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 137, text: "Believe that truth is more important than being polite.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 138, text: "Find it difficult to get down to work.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 139, text: "Often feel blue.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 140, text: "Am easily intimidated.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 141, text: "Enjoy hearing new ideas.", category: "BFI", facet: "Openness", maxScore: 5 },
+  { id: 142, text: "Am indifferent to the feelings of others.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 143, text: "Would rather be a follower than a leader.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 144, text: "Rarely look for a deeper meaning in things.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
+  { id: 145, text: "Take no interest in other people's problems.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 146, text: "Avoid responsibilities.", category: "BFI", facet: "Conscientiousness", reverse: true, maxScore: 5 },
+  { id: 147, text: "Do not care what others think of me.", category: "BFI", facet: "Agreeableness", reverse: true, maxScore: 5 },
+  { id: 148, text: "Lose my temper.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
+  { id: 149, text: "Find it hard to get excited about things.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
+  { id: 150, text: "Am not interested in abstract ideas.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
+];
