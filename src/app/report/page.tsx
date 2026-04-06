@@ -225,11 +225,182 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
   );
 }
 
+function CognitiveSpectrum({ 
+  trait, 
+  value, 
+  colors,
+  isHovered = false,
+  onMouseEnter,
+  onMouseLeave
+}: { 
+  trait: string, 
+  value: number, 
+  colors: { text: string, bg: string, border: string },
+  isHovered?: boolean,
+  onMouseEnter?: () => void,
+  onMouseLeave?: () => void
+}) {
+  const opposites: Record<string, string> = {
+    "Adaptive Observation": "Systemic Structure",
+    "Empathic Integration": "Objective Analysis",
+    "External Engagement": "Internal Reflection",
+    "Internal Reflector": "External Action"
+  };
+  const opposite = opposites[trait] || "Inverse Metric";
+
+  return (
+    <div 
+      className={`w-full space-y-3 mb-4 rounded-3xl p-6 transition-all duration-300 stagger-reveal group cursor-default ${isHovered ? 'bg-[#F3F4F6] shadow-sm' : 'bg-transparent'}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className={`flex justify-center text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase ${colors.text} opacity-80 group-hover:opacity-100 transition-opacity`}>
+        {value}% {value > 50 ? trait : opposite}
+      </div>
+      <div className="relative w-full h-[6px] bg-black/5 rounded-full overflow-visible">
+         <div className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-out origin-left rounded-full ${colors.bg}`} style={{ width: `${value}%` }} />
+         <div 
+           className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-white border-[3.5px] rounded-full shadow-sm transition-all duration-1000 ease-out ${colors.border} scale-90 group-hover:scale-110 md:w-6 md:h-6`} 
+           style={{ left: `calc(${value}% - 10px)` }}
+         />
+      </div>
+      <div className={`flex justify-between text-[8px] md:text-[9px] font-mono uppercase tracking-[0.3em] font-bold transition-opacity ${isHovered ? 'opacity-60 text-black' : 'opacity-30 text-black group-hover:opacity-50'}`}>
+        <span className={value > 50 ? "opacity-100" : ""}>{trait}</span>
+        <span className={value <= 50 ? "opacity-100" : ""}>{opposite}</span>
+      </div>
+    </div>
+  );
+}
+
+function CognitiveInteractiveSection({ scores }: { scores: any }) {
+  const [hoveredTrait, setHoveredTrait] = useState<string | null>(null);
+
+  const traits = scores?.cognitive?.Functions ? Object.entries(scores.cognitive.Functions) : [];
+  
+  const colorSets = [
+    { text: "text-cyan-600", bg: "bg-cyan-500", border: "border-cyan-500", glow: "bg-cyan-500/10" },
+    { text: "text-amber-600", bg: "bg-amber-500", border: "border-amber-500", glow: "bg-amber-500/10" },
+    { text: "text-emerald-600", bg: "bg-emerald-500", border: "border-emerald-500", glow: "bg-emerald-500/10" },
+    { text: "text-purple-600", bg: "bg-purple-500", border: "border-purple-500", glow: "bg-purple-500/10" }
+  ];
+
+  const traitDescriptions: Record<string, { desc: string, icon: string }> = {
+    "Adaptive Observation": { desc: "Focuses on gathering concrete, real-world data and adjusting to emerging patterns fluidly.", icon: "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" },
+    "Systemic Structure": { desc: "Prioritizes organizing information into predictable frameworks and structured methodologies.", icon: "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" },
+    "Empathic Integration": { desc: "Synthesizes emotional feedback and collective values to form harmonious decisions.", icon: "/assets/report/Cognitive Functions SVG/Empathic Integration.svg" },
+    "Objective Analysis": { desc: "Deconstructs problems using logical frameworks, seeking efficiency and consistent truths.", icon: "/assets/report/Cognitive Functions SVG/Empathic Integration.svg" },
+    "External Engagement": { desc: "Draws energy from outward interaction, acting upon the environment and people.", icon: "/assets/report/Cognitive Functions SVG/External Engagement.svg" },
+    "Internal Reflection": { desc: "Processes deeply before acting, relying on an internal landscape of ideas and impressions.", icon: "/assets/report/Cognitive Functions SVG/External Engagement.svg" },
+    "Internal Reflector": { desc: "Processes deeply before acting, relying on an internal landscape of ideas and impressions.", icon: "/assets/report/Cognitive Functions SVG/External Engagement.svg" },
+    "External Action": { desc: "Draws energy from outward interaction, acting upon the environment and people.", icon: "/assets/report/Cognitive Functions SVG/External Engagement.svg" }
+  };
+
+  const getTraitPairs: Record<string, string> = {
+    "Adaptive Observation": "Systemic Structure",
+    "Empathic Integration": "Objective Analysis",
+    "External Engagement": "Internal Reflection",
+    "Internal Reflector": "External Action"
+  };
+
+  const activeTraitName = hoveredTrait || null; 
+  let activeValue = 0;
+  let activeOpposite = "";
+  let activeColors = colorSets[0];
+
+  if (activeTraitName) {
+     activeValue = scores?.cognitive?.Functions?.[activeTraitName] || 0;
+     activeOpposite = getTraitPairs[activeTraitName] || "Systemic Structure";
+     const index = traits.findIndex(([t]) => t === activeTraitName);
+     activeColors = colorSets[index % colorSets.length];
+  }
+
+  const identityText = scores?.cognitive?.Type?.split(' ')?.[0] || 'Strategic';
+
+  return (
+    <div 
+      className="col-span-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-12"
+    >
+      {/* Left Column: Spectrums */}
+      <div className="lg:col-span-8 bg-white border border-black/[0.03] rounded-[3rem] p-6 md:p-12 flex flex-col justify-center shadow-sm relative overflow-hidden">
+        {traits.map(([trait, val]: any, i: number) => (
+          <CognitiveSpectrum 
+            key={trait} 
+            trait={trait} 
+            value={val} 
+            colors={colorSets[i % colorSets.length]} 
+            onMouseEnter={() => setHoveredTrait(trait)}
+            onMouseLeave={() => setHoveredTrait(null)}
+            isHovered={hoveredTrait === trait}
+          />
+        ))}
+      </div>
+
+      {/* Right Column: Identity Badge */}
+      <div className={`lg:col-span-4 bg-[#F8F9FA] border border-black-[0.03] rounded-[3rem] p-10 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${activeTraitName ? 'shadow-lg scale-[1.02]' : 'shadow-sm scale-100'}`}>
+         <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] transition-colors duration-500 ${activeTraitName ? activeColors.glow : 'bg-amber-500/5'}`} />
+         
+         <div className="relative z-10 w-full flex flex-col items-center justify-center">
+           {/* Fixed Height Label */}
+           <div className="h-6 flex items-center justify-center mb-2">
+             {!activeTraitName ? (
+               <p className="text-[10px] font-mono tracking-[0.4em] uppercase text-black/40 font-bold transition-all opacity-100 truncate">Mind</p>
+             ) : (
+               <p className="text-[10px] font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase text-black/40 font-bold transition-all opacity-100 truncate">
+                 {activeTraitName} Sphere
+               </p>
+             )}
+           </div>
+
+           {/* Fixed Height Title */}
+           <div className="h-20 flex items-center justify-center mb-6">
+             {!activeTraitName ? (
+               <h4 className="text-3xl font-bold tracking-tighter text-[#0A0A0A] leading-tight transition-all">
+                 <span className="text-amber-500">92%</span><br />
+                 {identityText}
+               </h4>
+             ) : (
+               <h4 className="text-3xl font-bold tracking-tighter text-[#0A0A0A] leading-tight transition-all">
+                 <span className={activeColors.text.replace('text-', 'text-')}>{activeValue > 50 ? activeValue : Math.max(100 - activeValue, 0)}%</span><br />
+                 {activeValue > 50 ? activeTraitName.split(' ')[0] : activeOpposite.split(' ')[0]}
+               </h4>
+             )}
+           </div>
+           
+           {/* Fixed Height Image */}
+           <div className={`w-40 h-40 mb-8 mix-blend-multiply transition-all duration-500 flex items-center justify-center ${activeTraitName ? 'scale-110 opacity-100' : 'scale-100 opacity-90 grayscale hover:scale-110'}`}>
+             <img 
+               src={!activeTraitName ? "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" : (traitDescriptions[activeTraitsKey(activeTraitName, activeValue > 50)]?.icon || "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg")} 
+               alt="Illustration" 
+               className="w-full h-full object-contain" 
+             />
+           </div>
+           
+           {/* Fixed Height Description */}
+           <div className="h-24 flex items-start justify-center mt-2">
+             <p className="text-[13px] text-black/70 font-medium leading-relaxed max-w-[280px] transition-all">
+               {!activeTraitName ? (
+                 `"${scores?.cognitive?.Type || 'Strategic Architect'} profile. High-order analytical processing prioritizing systemic long-term execution."`
+               ) : (
+                 `You rely on ${activeValue > 50 ? traitDescriptions[activeTraitsKey(activeTraitName, activeValue > 50)]?.desc : traitDescriptions[activeTraitsKey(activeOpposite, true)]?.desc || `a strong preference towards ${activeOpposite}.`}`
+               )}
+             </p>
+           </div>
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function activeTraitsKey(trait: string, primary: boolean) {
+  // simple helper inside block scope to extract the true desc key
+  return trait;
+}
+
 /**
  * DossierSection: Immersive vertical section with extreme white space.
  * Includes built-in GSAP scroll triggers for high-end reveals.
  */
-function DossierSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "protocol", id }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "protocol" | "grid" | "heroic" | "centered" | "flipped", id?: string }) {
+function DossierSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "protocol", id, fastReveal = false }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "protocol" | "grid" | "heroic" | "centered" | "flipped", id?: string, fastReveal?: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const dataSeg = `DATA_SEG_0${num}`;
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -242,7 +413,7 @@ function DossierSection({ num, title, description, children, accentColor = "text
     gsap.fromTo(titleRef.current, 
       { opacity: 0, filter: "blur(20px)", y: 40 },
       { 
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 1.8, ease: "expo.out",
+        opacity: 1, filter: "blur(0px)", y: 0, duration: fastReveal ? 1.0 : 1.8, ease: "expo.out",
         scrollTrigger: { trigger: sectionRef.current, start: "top 85%" }
       }
     );
@@ -251,7 +422,7 @@ function DossierSection({ num, title, description, children, accentColor = "text
     gsap.fromTo(sectionRef.current.querySelectorAll('.stagger-reveal'),
       { opacity: 0, filter: "blur(15px)", y: 50 },
       {
-        opacity: 1, filter: "blur(0px)", y: 0, duration: 2, stagger: 0.2, ease: "expo.out",
+        opacity: 1, filter: "blur(0px)", y: 0, duration: fastReveal ? 1.0 : 2, stagger: fastReveal ? 0.08 : 0.2, ease: "expo.out",
         scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
       }
     );
@@ -261,7 +432,7 @@ function DossierSection({ num, title, description, children, accentColor = "text
       gsap.fromTo(imageRef.current,
         { opacity: 0, filter: "blur(15px)", y: 40 },
         {
-          opacity: 1, filter: "blur(0px)", y: 0, duration: 2, ease: "expo.out",
+          opacity: 1, filter: "blur(0px)", y: 0, duration: fastReveal ? 1.0 : 2, ease: "expo.out",
           scrollTrigger: { trigger: sectionRef.current, start: "top 70%" }
         }
       );
@@ -913,24 +1084,9 @@ Your Dark Triad profile contains high-stakes tactical advantages that most organ
               accentColor="text-amber-400"
               illustration="/assets/report/Cognitive Functions SVG/Adaptive Observation.svg"
               variant="protocol"
+              fastReveal={true}
             >
-               {scores?.cognitive?.Functions && Object.entries(scores.cognitive.Functions).map(([trait, val]: any) => (
-                <IntelligenceRow 
-                  key={trait}
-                  label={trait}
-                  value={val}
-                  comparisonValue={tier === "compatibility" ? (partnerScores?.cognitive?.Functions as any)?.[trait] : undefined}
-                  color="text-amber-400"
-                  variant="card"
-                  icon={getIcon("cognitive", trait)}
-                  description={
-                    trait === "Adaptive Observation" ? "Propensity for real-time recalibration under changing environmental inputs." :
-                    trait === "Empathic Integration" ? "Capacity for absorbing and processing non-verbal social indicators into decisions." :
-                    trait === "External Engagement" ? "Velocity of converting neural intent into overt physical or verbal action." :
-                    "Depth of recursive internal simulation before commitment to action."
-                  }
-                />
-              ))}
+              <CognitiveInteractiveSection scores={scores} />
             </DossierSection>
 
             <DossierSection 
