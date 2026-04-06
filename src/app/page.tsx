@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Check, Play, User, Shield, Brain, Zap, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,9 +21,9 @@ export default function LandingPage() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Initialize logo states
-      gsap.set(logoRef.current, { filter: "invert(0)" });
-      gsap.set(footerLogoRef.current, { filter: "invert(1) hue-rotate(180deg)" });
+      // Initialize states with safety checks
+      if (logoRef.current) gsap.set(logoRef.current, { filter: "invert(0)", maxWidth: "180px" });
+      if (footerLogoRef.current) gsap.set(footerLogoRef.current, { filter: "invert(1) hue-rotate(180deg)", maxWidth: "120px" });
 
       // Color shifts
       ScrollTrigger.create({
@@ -33,13 +33,13 @@ export default function LandingPage() {
         onEnter: () => {
           gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
           gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
-          gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
           gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
         },
         onLeaveBack: () => {
           gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
           gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
-          gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
           gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
         },
       });
@@ -50,13 +50,13 @@ export default function LandingPage() {
         onEnter: () => {
           gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
           gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
-          gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
           gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
         },
         onLeaveBack: () => {
           gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
           gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
-          gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
           gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
         },
       });
@@ -252,48 +252,55 @@ export default function LandingPage() {
               num: "01",
               title: "Personality Architecture",
               subtitle: "The Big Five (OCEAN)",
-              desc: "The baseline of your psychological foundation. Reveals how you naturally process information, manage stress, and interact with your environment."
+              desc: "The baseline of your psychological foundation. Reveals how you naturally process information, manage stress, and interact with your environment.",
+              class: "lg:col-span-2"
             },
             {
               num: "02",
               title: "Shadow Profile",
               subtitle: "The Dark Triad",
-              desc: "The unfiltered reality of your darker traits. Machiavellianism, Narcissism, and Psychopathy analyzed as strategic levers and blind spots."
+              desc: "The unfiltered reality of your darker traits. Machiavellianism, Narcissism, and Psychopathy analyzed as strategic levers and blind spots.",
+              class: ""
             },
             {
               num: "03",
               title: "Connection Blueprint",
               subtitle: "Attachment Style",
-              desc: "Decodes your primary relationship script. Understand why you attract certain patterns and how to control your interpersonal dynamics."
+              desc: "Decodes your primary relationship script. Understand why you attract certain patterns and how to control your interpersonal dynamics.",
+              class: ""
             },
             {
               num: "04",
               title: "Cognitive Wiring",
               subtitle: "Cognitive Type Mapping",
-              desc: "Maps your internal processing hardware. Discover how you perceive complexity, reach conclusions, and recharge your cognitive battery."
+              desc: "Maps your internal processing hardware. Discover how you perceive complexity, reach conclusions, and recharge your cognitive battery.",
+              class: ""
             },
             {
               num: "05",
               title: "Core Drivers",
               subtitle: "Schwartz Values",
-              desc: "Identifies the universal human values that dictate your priorities. Discover what truly motivates your decisions when the stakes are highest."
+              desc: "Identifies the universal human values that dictate your priorities. Discover what truly motivates your decisions when the stakes are highest.",
+              class: ""
             },
             {
               num: "06",
               title: "Language Fingerprint",
               subtitle: "Linguistic Analysis (LIWC)",
-              desc: "Linguistic analysis of your communication style. Uncovers emotional subtext, status signaling, and cognitive transparency in your words."
+              desc: "Linguistic analysis of your communication style. Uncovers emotional subtext, status signaling, and cognitive transparency in your words.",
+              class: ""
             },
             {
               num: "07",
               title: "Resilience Index",
               subtitle: "DSM-5 Wellbeing Markers",
-              desc: "A benchmark of psychological durability. Measures stress-response markers and wellbeing stability through modern clinical indicators."
+              desc: "A benchmark of psychological durability. Measures stress-response markers and wellbeing stability through modern clinical indicators.",
+              class: ""
             }
           ].map((card, i) => (
             <div 
               key={i} 
-              className={`hiw-card p-8 border border-gray-200 rounded-2xl bg-white/50 backdrop-blur-sm shadow-xl flex flex-col ${i === 0 ? 'lg:col-span-2' : ''}`}
+              className={`hiw-card p-8 border border-gray-200 rounded-2xl bg-white/50 backdrop-blur-sm shadow-xl flex flex-col ${card.class}`}
             >
               <div className="flex justify-between items-start mb-6">
                 <span className="text-4xl font-light text-gray-300 block">{card.num}</span>
