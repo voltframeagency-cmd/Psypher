@@ -743,10 +743,20 @@ If you fail to bridge this isolation, your proprietary systems will inevitably c
   };
 
   return (
-    <main 
-      ref={containerRef}
-      className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] font-outfit pb-40 opacity-0 selection:bg-[#6D28D9] selection:text-white"
-    >
+    <>
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(50px, 30px) scale(1.1); }
+          66% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+        @keyframes scanline {
+          0% { transform: translateY(-100vh); }
+          100% { transform: translateY(100vh); }
+        }
+      `}</style>
+
+      <StickyReportNav />
       {/* Delicate Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
       
@@ -769,29 +779,19 @@ If you fail to bridge this isolation, your proprietary systems will inevitably c
       {/* Premium Scanline Overlay */}
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] animate-[scanline_10s_infinite_linear] bg-gradient-to-b from-transparent via-black to-transparent h-[10px] w-full" />
       
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, 30px) scale(1.1); }
-          66% { transform: translate(-30px, 50px) scale(0.9); }
-        }
-        @keyframes scanline {
-          0% { transform: translateY(-100vh); }
-          100% { transform: translateY(100vh); }
-        }
-      `}</style>
-
-      <StickyReportNav />
-      
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0" 
-           style={{ backgroundImage: "radial-gradient(circle at 2px 2px, black 1px, transparent 0)", backgroundSize: "40px 40px" }} />
-      
       {/* Sticky Progress Line */}
       <div className="fixed left-0 top-0 w-[2px] h-full bg-black/[0.02] z-50">
         <div id="scroll-progress-bar" className="absolute top-0 left-0 w-full bg-[#6D28D9] shadow-[0_0_30px_rgba(109,40,217,0.8)]" style={{ height: "0%" }}>
           <div className="absolute bottom-0 left-[-4px] w-3 h-3 bg-[#6D28D9] rounded-full blur-[4px] animate-pulse" />
         </div>
       </div>
+      
+      <main 
+        ref={containerRef}
+        className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] font-outfit pb-40 opacity-0 selection:bg-[#6D28D9] selection:text-white"
+      >
+        <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0" 
+             style={{ backgroundImage: "radial-gradient(circle at 2px 2px, black 1px, transparent 0)", backgroundSize: "40px 40px" }} />
       <header className="px-8 md:px-24 py-4 flex justify-between items-center relative z-20 border-b border-black/5 bg-[#FDFDFD]/60 backdrop-blur-3xl sticky top-0 font-outfit">
         <div className="flex items-center">
            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
@@ -887,6 +887,7 @@ If you fail to bridge this isolation, your proprietary systems will inevitably c
           
           <DossierSection 
             num={1}
+            id="dimension-1"
             title="Personality Architecture"
             description="The core layers of your everyday behavior and how you engage with your environment."
             illustration="/assets/report/Big 5 SVG/Openness.svg"
@@ -943,6 +944,7 @@ Users with your score of 88% in Openness do not merely "like new ideas"—you hu
           {tier !== "basic" && (
             <DossierSection 
               num={2}
+              id="dimension-2"
               title="The Dark Triad"
               description="The clinical sub-clinical triad: Machiavellianism, Narcissism, and Psychopathy. Your scores represent high-stakes tactical advantages and risk markers."
               accentColor="text-red-600"
@@ -982,6 +984,7 @@ Your Dark Triad profile contains high-stakes tactical advantages that most organ
           {tier !== "basic" && (
             <DossierSection 
               num={3}
+              id="dimension-3"
               title="Relational Matrix"
               description="How you build trust, manage professional boundaries, and relate to your peers."
               accentColor="text-blue-400"
@@ -1206,18 +1209,19 @@ Your Dark Triad profile contains high-stakes tactical advantages that most organ
           </div>
         </footer>
       </div>
-
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .report-markdown h1 { font-size: 7rem; color: #0A0A0A; line-height: 0.85; margin-bottom: 5rem; letter-spacing: -0.06em; font-weight: 950; text-transform: uppercase; }
-        .report-markdown h2 { font-size: 1.25rem; color: #6D28D9; margin-top: 8rem; margin-bottom: 3rem; font-family: monospace; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 2rem; }
-        .report-markdown p { margin-bottom: 3rem; line-height: 1.6; font-weight: 400; font-size: 1.75rem; tracking: -0.02em; color: rgba(0,0,0,0.7); }
-        .report-markdown strong { color: #0A0A0A; font-weight: 900; }
-        .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); }
-      `}</style>
     </main>
-  );
+
+    <style jsx global>{`
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .report-markdown h1 { font-size: 7rem; color: #0A0A0A; line-height: 0.85; margin-bottom: 5rem; letter-spacing: -0.06em; font-weight: 950; text-transform: uppercase; }
+      .report-markdown h2 { font-size: 1.25rem; color: #6D28D9; margin-top: 8rem; margin-bottom: 3rem; font-family: monospace; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 2rem; }
+      .report-markdown p { margin-bottom: 3rem; line-height: 1.6; font-weight: 400; font-size: 1.75rem; tracking: -0.02em; color: rgba(0,0,0,0.7); }
+      .report-markdown strong { color: #0A0A0A; font-weight: 900; }
+      .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); }
+    `}</style>
+  </>
+);
 }
 
 export default function Page() {
