@@ -274,6 +274,24 @@ function CognitiveSpectrum({
 
 function CognitiveInteractiveSection({ scores }: { scores: any }) {
   const [hoveredTrait, setHoveredTrait] = useState<string | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = (trait: string) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setHoveredTrait(trait);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredTrait(null);
+    }, 150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
+  }, []);
 
   const traits = scores?.cognitive?.Functions ? Object.entries(scores.cognitive.Functions) : [];
   
@@ -328,8 +346,8 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
             trait={trait} 
             value={val} 
             colors={colorSets[i % colorSets.length]} 
-            onMouseEnter={() => setHoveredTrait(trait)}
-            onMouseLeave={() => setHoveredTrait(null)}
+            onMouseEnter={() => handleMouseEnter(trait)}
+            onMouseLeave={handleMouseLeave}
             isHovered={hoveredTrait === trait}
           />
         ))}
