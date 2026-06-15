@@ -34,7 +34,7 @@ export default function FinalCTA() {
           <span className="text-white/40 italic">your psychology?</span>
         </h2>
         <p className="text-xl md:text-2xl text-white/60 mb-16 font-medium max-w-2xl mx-auto">
-          The cost of staying stuck is far greater than $18.99.
+          The cost of staying stuck is far greater than $29.
         </p>
         
         <button className="bg-accent hover:bg-accent-hover text-white px-12 py-8 text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center group shadow-2xl shadow-accent/20 mx-auto">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,6 +11,45 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const MOCKUP_LAYERS = [
+  {
+    id: "BIG5",
+    title: "01. THE UNCOMFORTABLE TRUTH",
+    desc: "Your dominant trait is High Conscientiousness combined with High Machiavellianism. Your superpower is ruthless execution. Your fatal flaw is alienating your team when under pressure.",
+    traits: [
+      { name: "Openness", val: 85 },
+      { name: "Conscientiousness", val: 42 },
+      { name: "Extraversion", val: 91 },
+      { name: "Agreeableness", val: 30 },
+      { name: "Neuroticism", val: 65 }
+    ]
+  },
+  {
+    id: "DARK",
+    title: "02. THE DARK TRIAD",
+    desc: "Elevated Machiavellianism vectors detected. You optimize for outcomes over cohesion. Strategic empathy is deployed exclusively as an instrumental mechanism for stakeholder compliance.",
+    traits: [
+      { name: "Machiavellianism", val: 88 },
+      { name: "Narcissism", val: 64 },
+      { name: "Psychopathy", val: 21 },
+      { name: "Risk Tolerance", val: 95 },
+      { name: "Empathy Deficit", val: 45 }
+    ]
+  },
+  {
+    id: "COG",
+    title: "03. COGNITIVE DYNAMICS",
+    desc: "Extreme pattern recognition efficiency observed. You process complex, ambiguous datasets 40% faster than baseline, but experience rapid cognitive fatigue during repetitive, low-leverage tasks.",
+    traits: [
+      { name: "Pattern Recognition", val: 94 },
+      { name: "Lateral Thinking", val: 82 },
+      { name: "Processing Speed", val: 78 },
+      { name: "Cognitive Load Cap", val: 88 },
+      { name: "Systemizing", val: 91 }
+    ]
+  }
+];
+
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
@@ -18,6 +57,17 @@ export default function LandingPage() {
   const footerLogoRef = useRef<HTMLImageElement>(null);
   const darkSectionRef = useRef<HTMLDivElement>(null);
   const lightSectionRef = useRef<HTMLDivElement>(null);
+  const neuralSectionRef = useRef<HTMLDivElement>(null);
+  const neuralVideoRef = useRef<HTMLVideoElement>(null);
+
+  const [activeLayerIndex, setActiveLayerIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveLayerIndex((prev) => (prev + 1) % MOCKUP_LAYERS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -25,41 +75,8 @@ export default function LandingPage() {
       if (logoRef.current) gsap.set(logoRef.current, { filter: "invert(0)", maxWidth: "180px" });
       if (footerLogoRef.current) gsap.set(footerLogoRef.current, { filter: "invert(1) hue-rotate(180deg)", maxWidth: "120px" });
 
-      // Color shifts
-      ScrollTrigger.create({
-        trigger: darkSectionRef.current,
-        start: "top 50%",
-        end: "bottom 50%",
-        onEnter: () => {
-          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
-          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
-          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
-          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
-        },
-        onLeaveBack: () => {
-          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
-          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
-          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
-          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
-        },
-      });
-      ScrollTrigger.create({
-        trigger: lightSectionRef.current,
-        start: "top 50%",
-        end: "bottom 50%",
-        onEnter: () => {
-          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
-          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
-          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
-          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
-        },
-        onLeaveBack: () => {
-          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
-          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
-          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
-          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
-        },
-      });
+      // Moved color shift ScrollTriggers to the bottom of the GSAP ctx scope 
+      // to ensure they calculate their positions after the pin-spacers are injected.
 
       // Hero Entrance Sequence
       const heroTl = gsap.timeline();
@@ -132,6 +149,124 @@ export default function LandingPage() {
       gsap.fromTo('.report-card', { x: 100, opacity: 0, rotationZ: 10 }, { x: 0, opacity: 1, rotationZ: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.report-card', start: 'top 75%' } });
       gsap.fromTo('.progress-bar-fill', { width: '0%' }, { width: (i, el) => el.getAttribute('data-width'), duration: 1.5, ease: 'power4.out', scrollTrigger: { trigger: '.report-card', start: 'top 60%' } });
 
+      // Floating lock animation + Parallax
+      gsap.to('.floating-lock', {
+        y: -15,
+        rotationZ: 2,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+
+      const reportCard = document.querySelector('.report-card');
+      const floatingLock = document.querySelector('.floating-lock');
+      
+      if (reportCard && floatingLock) {
+        reportCard.addEventListener('mousemove', (e: any) => {
+          const rect = reportCard.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width - 0.5;
+          const y = (e.clientY - rect.top) / rect.height - 0.5;
+          
+          gsap.to(floatingLock, {
+            x: x * -40,
+            y: y * -40,
+            rotationY: x * 15,
+            rotationX: -y * 15,
+            duration: 0.5,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+        });
+        
+        reportCard.addEventListener('mouseleave', () => {
+          gsap.to(floatingLock, {
+            x: 0,
+            y: 0,
+            rotationY: 0,
+            rotationX: 0,
+            duration: 1,
+            ease: 'elastic.out(1, 0.3)'
+          });
+        });
+      }
+
+      // Neural Canvas Image Sequence Scrubbing (The Apple Method)
+      // We replaced the continuous video with a 240-frame image sequence for mathematically perfect scrubbing
+      if (neuralSectionRef.current) {
+        const canvas = document.getElementById("neural-canvas") as HTMLCanvasElement;
+        const ctx = canvas?.getContext("2d");
+
+        if (canvas && ctx) {
+          canvas.width = 1920; 
+          canvas.height = 1080;
+
+          const frameCount = 240;
+          const currentFrame = (index: number) => 
+            `/assets/neural_sequence/ezgif-frame-${(index + 1).toString().padStart(3, '0')}.jpg`;
+
+          const images: HTMLImageElement[] = [];
+          const seq = { frame: 0 };
+
+          // Preload images into memory
+          for (let i = 0; i < frameCount; i++) {
+            const img = new Image();
+            img.src = currentFrame(i);
+            images.push(img);
+          }
+
+          // Initial Render
+          images[0].onload = render;
+          
+          function render() {
+            if (images[seq.frame] && images[seq.frame].complete) {
+              ctx?.clearRect(0, 0, canvas.width, canvas.height);
+              ctx?.drawImage(images[seq.frame], 0, 0, canvas.width, canvas.height);
+            }
+          }
+
+          // Use a timeline for pinning and image sequence scrubbing
+          const neuralTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: neuralSectionRef.current,
+              start: 'top top',
+              end: '+=400%', // 4 full screen heights for buttery smooth frame distribution
+              pin: true,
+              scrub: 0.5, // low scrub value for tight, lag-free snapping
+            }
+          });
+
+          // Sequence the canvas frames
+          neuralTl.to(seq, {
+            frame: frameCount - 1,
+            snap: "frame",
+            ease: "none",
+            onUpdate: render,
+            duration: 1
+          }, 0);
+
+          // Animate the copy over the canvas sequence
+          neuralTl.fromTo('.neural-headline', 
+            { y: 50, opacity: 0, filter: 'blur(10px)' }, 
+            { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.3, ease: 'power2.out' },
+            0.2
+          );
+          neuralTl.to('.neural-headline', 
+            { opacity: 0, filter: 'blur(10px)', duration: 0.2, ease: 'power2.in' }, 
+            0.7
+          );
+          neuralTl.fromTo('.neural-subline', 
+            { y: 30, opacity: 0 }, 
+            { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' },
+            0.3
+          );
+          neuralTl.to('.neural-subline', 
+            { opacity: 0, duration: 0.2 }, 
+            0.8
+          );
+        }
+      }
+
       // Generic Reveals
       gsap.utils.toArray('.reveal-text').forEach((el: any) => {
         gsap.fromTo(el, 
@@ -158,6 +293,43 @@ export default function LandingPage() {
           const el = document.querySelector('.counter-text');
           if (el) el.innerHTML = Math.floor(counterObj.val).toLocaleString();
         }
+      });
+
+      // Color shifts MUST be declared AFTER pin-spacers (like neural-canvas) 
+      // so ScrollTrigger calculates their top/bottom positions accurately.
+      ScrollTrigger.create({
+        trigger: darkSectionRef.current,
+        start: "top 50%",
+        end: "bottom 50%",
+        onEnter: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
+        },
+        onLeaveBack: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
+        },
+      });
+      ScrollTrigger.create({
+        trigger: lightSectionRef.current,
+        start: "top 50%",
+        end: "bottom 50%",
+        onEnter: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#111111", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(0) hue-rotate(0deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#111111", color: "#FFFFFF", duration: 0.15 });
+        },
+        onLeaveBack: () => {
+          gsap.to(containerRef.current, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.3 });
+          gsap.to('.nav-item', { color: "#F5F0EB", duration: 0.15 });
+          if (logoRef.current) gsap.to(logoRef.current, { filter: "invert(1) hue-rotate(180deg)", duration: 0.15 });
+          gsap.to('.nav-button', { backgroundColor: "#7C3AED", color: "#FFFFFF", duration: 0.15 });
+        },
       });
 
     }, containerRef);
@@ -319,6 +491,32 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Section 2.5: The Neural Reveal (Scroll-Based Scrubbing) */}
+      <section 
+        ref={neuralSectionRef} 
+        className="relative h-screen flex items-center justify-center bg-[#0F0F0F] overflow-hidden"
+      >
+        <div className="absolute inset-0 z-0">
+          <canvas 
+            id="neural-canvas"
+            className="w-full h-full object-cover opacity-80"
+          />
+          <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent to-[#0F0F0F]" />
+          {/* Heavy bottom gradient to hide video watermark and blend into the next black section */}
+          <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#0F0F0F] via-[#0F0F0F]/95 to-transparent" />
+        </div>
+        
+        <div className="relative z-10 text-center max-w-4xl px-8 space-y-12">
+          <h2 className="neural-headline text-5xl md:text-8xl font-bold tracking-tighter text-[#F5F0EB]">
+            Your decisions aren't random<span className="text-[#7C3AED]">.</span>
+          </h2>
+          <p className="neural-subline text-xl md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl mx-auto">
+            They are the product of complex biological and psychological architecture. Psypher decodes the neural firmware that dictates your every move.
+          </p>
+        </div>
+      </section>
+
       {/* Section 3: The Agitation (Dark Mode Trigger) */}
       <section ref={darkSectionRef} className="py-32 px-8 md:px-24 min-h-screen flex flex-col justify-center relative overflow-hidden">
         {/* Animated Vignette */}
@@ -364,34 +562,31 @@ export default function LandingPage() {
                 <div className="text-[10px] font-mono text-gray-600">CONFIDENTIAL</div>
               </div>
               
-              <div className="space-y-5 mb-10">
-                {[
-                  { name: "Openness", val: 85 },
-                  { name: "Conscientiousness", val: 42 },
-                  { name: "Extraversion", val: 91 },
-                  { name: "Agreeableness", val: 30 },
-                  { name: "Neuroticism", val: 65 }
-                ].map((trait, i) => (
-                  <div key={i} className="flex flex-col gap-1.5">
+              <div className="space-y-5 mb-10 h-[220px]">
+                {MOCKUP_LAYERS[activeLayerIndex].traits.map((trait, i) => (
+                  <div key={i} className="flex flex-col gap-1.5 overflow-hidden">
                     <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">{trait.name}</span>
-                      <span className="text-[10px] font-medium text-gray-500">{trait.val}%</span>
+                      <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 transition-colors duration-500">{trait.name}</span>
+                      <span className="text-[10px] font-medium text-gray-500 transition-colors duration-500">{trait.val}%</span>
                     </div>
                     <div className="h-1.5 bg-gray-800/40 rounded-full overflow-hidden">
                       <div 
-                        className="progress-bar-fill h-full bg-gradient-to-r from-[#7C3AED] to-[#A78BFA]" 
+                        className="progress-bar-fill h-full bg-gradient-to-r from-[#7C3AED] to-[#A78BFA] transition-all duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]" 
                         data-width={`${trait.val}%`}
+                        style={{ width: `${trait.val}%` }} // Fallback for React-driven transition
                       ></div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex-1 mt-6 relative overflow-hidden">
-                <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#7C3AED] mb-3">01. THE UNCOMFORTABLE TRUTH</h4>
+              <div className="flex-1 mt-2 relative overflow-hidden">
+                <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#7C3AED] mb-3 uppercase animate-fade-in" key={`title-${activeLayerIndex}`}>
+                  {MOCKUP_LAYERS[activeLayerIndex].title}
+                </h4>
                 <div className="space-y-4">
-                  <p className="text-[11px] leading-relaxed text-gray-300 font-medium">
-                    Your dominant trait is High Conscientiousness combined with High Machiavellianism. Your superpower is ruthless execution. Your fatal flaw is alienating your team when under pressure.
+                  <p className="text-[11px] leading-relaxed text-gray-300 font-medium animate-fade-in" key={`desc-${activeLayerIndex}`}>
+                    {MOCKUP_LAYERS[activeLayerIndex].desc}
                   </p>
                   <p className="text-[11px] leading-relaxed text-gray-400 opacity-60 blur-[1.5px] select-none">
                     Attachment style analysis detects secondary avoidant triggers under high-pressure cognitive load, impacting conflict-resolution speed and long-term team cohesion...
@@ -405,12 +600,24 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/80 via-transparent to-transparent flex items-end justify-center pb-12 pointer-events-none">
-                <span className="px-6 py-2 bg-[#0F0F0F] border border-gray-800 rounded-full text-xs font-bold tracking-widest uppercase text-[#7C3AED] shadow-2xl backdrop-blur-md pointer-events-auto">
-                  Confidential Analysis
-                </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/95 via-[#1A1A1A]/40 to-transparent pointer-events-none flex items-end justify-end pb-10 pr-10">
+                <div className="relative group pointer-events-auto cursor-pointer">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7C3AED] to-[#4C1D95] rounded-full blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
+                  <span className="relative flex items-center gap-3 px-6 py-2 bg-[#0A0A0A]/80 border border-white/5 rounded-full text-xs font-bold tracking-[0.2em] uppercase text-[#A78BFA] shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:border-[#7C3AED]/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-pulse shadow-[0_0_8px_rgba(124,58,237,0.8)]"></span>
+                    Confidential Analysis
+                  </span>
+                </div>
               </div>
             </div>
+            
+            {/* 3D Floating Lock (Canva Export) */}
+            <img 
+              src="/assets/3D Lock.svg" 
+              alt="Confidential Lock"
+              className="absolute -left-16 -bottom-8 w-[350px] h-[350px] max-w-none object-contain drop-shadow-2xl pointer-events-none z-20 floating-lock"
+              style={{ filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.5))' }}
+            />
           </div>
         </div>
       </section>
@@ -451,21 +658,24 @@ export default function LandingPage() {
       <section id="pricing" className="py-32 px-8 md:px-24 bg-[#FAFAF8] text-[#111111]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
+            <span className="block text-[#7C3AED] text-xs font-bold tracking-[0.4em] uppercase mb-4">One-Time Payment</span>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter reveal-text">Choose the depth you are ready for.</h2>
+            <p className="text-gray-400 text-sm mt-6 max-w-md mx-auto">No subscriptions. No recurring charges. Pay once, keep your report forever.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Tier 1 */}
             <div className="parallax-card p-8 bg-white rounded-2xl border border-gray-200 flex flex-col">
-              <h3 className="text-2xl font-bold mb-2">Basic Summary</h3>
-              <div className="text-4xl font-bold mb-6">$15.00</div>
-              <p className="text-gray-600 mb-8 flex-1">A high-level overview of your Big Five traits.</p>
+              <h3 className="text-2xl font-bold mb-2">Basic Report</h3>
+              <div className="text-4xl font-bold mb-6">Free</div>
+              <p className="text-gray-600 mb-8 flex-1">See the surface. Your Big Five personality at a glance.</p>
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Big Five Percentiles</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Basic Trait Descriptions</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Core OCEAN Profile</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Facet Summaries</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Dominant Trait Analysis</li>
               </ul>
               <Link href="/assessment" className="w-full py-3 text-center border border-gray-300 rounded-full font-medium hover:bg-gray-50 transition-colors">
-                Select Basic
+                Start Free Analysis
               </Link>
             </div>
             
@@ -475,33 +685,34 @@ export default function LandingPage() {
                 Most Popular
               </div>
               <h3 className="text-2xl font-bold mb-2">The Deep Report</h3>
-              <div className="text-4xl font-bold mb-6">$18.99</div>
-              <p className="text-gray-400 mb-8 flex-1">The uncomfortable truth about how you operate.</p>
+              <div className="text-4xl font-bold mb-6">$29</div>
+              <p className="text-gray-400 mb-8 flex-1">The uncomfortable truth about how you operate. 7 frameworks. Zero sugarcoating.</p>
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Everything in Basic</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Dark Triad Analysis</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Attachment Style Breakdown</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Career Optimization</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Dark Triad Decoding</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Attachment Style Map</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Cognitive Mechanics</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> DSM-5 Risk Flags</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Schwartz Value Profile</li>
                 <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Conflict Strategy</li>
               </ul>
               <Link href="/assessment?tier=deep" className="w-full py-3 text-center bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors">
-                Get The Deep Report
+                Decode This Person — $29
               </Link>
             </div>
             
             {/* Tier 3 */}
             <div className="parallax-card p-8 bg-white rounded-2xl border border-gray-200 flex flex-col">
-              <h3 className="text-2xl font-bold mb-2">Compatibility</h3>
-              <div className="text-4xl font-bold mb-6">$28.99</div>
-              <p className="text-gray-600 mb-8 flex-1">Stop fighting. Start connecting.</p>
+              <h3 className="text-2xl font-bold mb-2">Compatibility Report</h3>
+              <div className="text-4xl font-bold mb-6">$39</div>
+              <p className="text-gray-600 mb-8 flex-1">Two minds. One verdict. See what happens when two personalities collide.</p>
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Everything in Deep</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Joint Analysis (2 profiles)</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Friction Points</li>
-                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Power Dynamics</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Two Full Deep Reports</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Friction Points Map</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Power Dynamics Analysis</li>
+                <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-[#7C3AED]" /> Resolution Blueprints</li>
               </ul>
               <Link href="/assessment?tier=compatibility" className="w-full py-3 text-center border border-gray-300 rounded-full font-medium hover:bg-gray-50 transition-colors">
-                Select Compatibility
+                Compare Two People — $39
               </Link>
             </div>
           </div>
@@ -512,7 +723,7 @@ export default function LandingPage() {
       <section className="py-32 px-8 md:px-24 bg-[#0F0F0F] text-[#F5F0EB] text-center">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 reveal-text">Ready to decode your psychology?</h2>
-          <p className="text-xl text-gray-400 mb-12 reveal-text">The cost of staying stuck is far greater than $18.99.</p>
+          <p className="text-xl text-gray-400 mb-12 reveal-text">The cost of staying stuck is far greater than $29.</p>
           <Link 
             href="/assessment" 
             className="inline-flex items-center justify-center px-10 py-5 bg-[#7C3AED] text-white font-medium rounded-full hover:bg-[#6D28D9] transition-colors text-lg reveal-text"
