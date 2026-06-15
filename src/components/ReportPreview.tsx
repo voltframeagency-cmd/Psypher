@@ -20,20 +20,22 @@ export default function ReportPreview() {
         trigger: containerRef.current,
         start: "top center",
         onEnter: () => {
-          gsap.to("body", { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 });
+          gsap.to(document.body, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 });
         }
       });
 
       // Parallax on Visual
-      gsap.from(visualRef.current, {
+      gsap.set(visualRef.current, { y: 30, opacity: 0 });
+      gsap.to(visualRef.current, {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 70%",
+          once: true,
         },
-        yPercent: 15,
-        opacity: 0,
-        duration: 1.5,
-        ease: "power4.out"
+        y: 0,
+        opacity: 1,
+        duration: 1.2,
+        ease: "power3.out"
       });
     }, containerRef);
 

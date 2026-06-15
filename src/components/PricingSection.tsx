@@ -2,45 +2,54 @@
 
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+import Link from "next/link";
 import { Check, ArrowRight, Zap, Target, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SpotlightCard from "./ui/SpotlightCard";
 
 const tiers = [
   {
-    name: "Basic Summary",
-    price: "15.00",
-    description: "A high-level overview of your Big Five traits.",
+    name: "Basic Report",
+    price: "Free",
+    description: "See the surface. Your Big Five personality at a glance.",
     features: ["Core OCEAN Profile", "Facet Summaries", "Dominant Trait Analysis"],
     icon: Target,
-    button: "Get Basic",
+    button: "Start Free Analysis",
     highlight: false
   },
   {
     name: "The Deep Report",
-    price: "18.99",
-    description: "The uncomfortable truth about how you operate.",
+    price: "29",
+    description: "The uncomfortable truth about how you operate. 7 psychological frameworks. Zero sugarcoating.",
     features: [
       "Dark Triad Decoding",
       "Attachment Style Map",
-      "Career Optimization",
+      "Cognitive Mechanics",
+      "DSM-5 Risk Flags",
+      "Schwartz Value Profile",
       "Conflict Strategy"
     ],
     icon: Zap,
-    button: "Get Deep Report",
+    button: "Decode This Person — $29",
     highlight: true
   },
   {
-    name: "The Compatibility Report",
-    price: "28.99",
-    description: "Stop fighting. Start connecting.",
+    name: "Compatibility Report",
+    price: "39",
+    description: "Two minds. One verdict. See what happens when two personalities collide.",
     features: [
-      "Joint Analysis (2 Users)",
+      "Two Full Deep Reports",
       "Friction Points Map",
-      "Power Dynamics",
+      "Power Dynamics Analysis",
       "Resolution Blueprints"
     ],
     icon: Users,
-    button: "Get Compatibility",
+    button: "Compare Two People — $39",
     highlight: false
   }
 ];
@@ -50,16 +59,20 @@ export default function PricingSection() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".pricing-card", {
+      // Set initial invisible state immediately to prevent flash
+      gsap.set(".pricing-card", { y: 40, opacity: 0 });
+
+      gsap.to(".pricing-card", {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 65%",
+          once: true,
         },
-        y: 40,
-        opacity: 0,
-        stagger: 0.15,
-        duration: 1,
-        ease: "power4.out"
+        y: 0,
+        opacity: 1,
+        stagger: 0.12,
+        duration: 0.8,
+        ease: "power3.out"
       });
     }, containerRef);
     return () => ctx.revert();
@@ -74,24 +87,27 @@ export default function PricingSection() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-24">
           <span className="block text-accent text-xs font-bold tracking-[0.4em] uppercase mb-4">
-            Pricing
+            One-Time Payment
           </span>
           <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
             Choose the depth <br />
             <span className="text-foreground/40 italic block md:inline">you are ready for.</span>
           </h2>
+          <p className="text-foreground/40 text-sm mt-6 max-w-md mx-auto">No subscriptions. No recurring charges. Pay once, keep your report forever.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {tiers.map((tier, i) => (
-            <div 
+            <SpotlightCard 
               key={i}
               className={cn(
-                "pricing-card group relative p-12 rounded-sm border transition-all duration-500 hover:shadow-2xl flex flex-col",
+                "pricing-card group relative p-12 rounded-3xl border transition-all duration-500 hover:shadow-2xl flex flex-col",
                 tier.highlight 
                   ? "bg-accent text-white border-accent scale-105 z-10 shadow-xl shadow-accent/20" 
-                  : "bg-white border-foreground/5 text-foreground shadow-sm"
+                  : "bg-white/70 border-neutral-200/50 text-foreground backdrop-blur-md shadow-sm"
               )}
+              spotlightColor={tier.highlight ? "rgba(255, 255, 255, 0.22)" : "rgba(139, 92, 246, 0.12)"}
+              spotlightRange={380}
             >
               <div className="mb-10">
                 <div className={cn(
@@ -108,7 +124,11 @@ export default function PricingSection() {
                   {tier.description}
                 </p>
                 <div className="flex items-baseline mb-12">
-                  <span className="text-4xl md:text-6xl font-black tabular-nums">${tier.price}</span>
+                  {tier.price === "Free" ? (
+                    <span className="text-4xl md:text-6xl font-black">{tier.price}</span>
+                  ) : (
+                    <span className="text-4xl md:text-6xl font-black tabular-nums">${tier.price}</span>
+                  )}
                 </div>
               </div>
 
@@ -124,7 +144,7 @@ export default function PricingSection() {
                 ))}
               </div>
 
-              <button className={cn(
+              <Link href="/assessment" className={cn(
                 "w-full py-6 text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center justify-center group",
                 tier.highlight 
                   ? "bg-white text-accent hover:bg-white/90" 
@@ -132,8 +152,8 @@ export default function PricingSection() {
               )}>
                 {tier.button}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
-              </button>
-            </div>
+              </Link>
+            </SpotlightCard>
           ))}
         </div>
       </div>
