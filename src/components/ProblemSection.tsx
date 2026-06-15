@@ -32,16 +32,19 @@ export default function ProblemSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".problem-card", {
+      gsap.set(".problem-card", { y: 50, opacity: 0 });
+
+      gsap.to(".problem-card", {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 65%",
+          once: true,
         },
-        y: 60,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 1.2,
-        ease: "expo.out"
+        y: 0,
+        opacity: 1,
+        stagger: 0.12,
+        duration: 0.8,
+        ease: "power3.out"
       });
     }, containerRef);
     return () => ctx.revert();

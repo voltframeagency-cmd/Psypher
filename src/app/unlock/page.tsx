@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Command, Loader2, ArrowRight, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * Dual-Mode entry for Clearance Codes and Stripe IDs.
  * Stockholm Minimalist (Clinical/High-Status Logic).
  */
-export default function UnlockPortal() {
+function UnlockPortalContent() {
   const [inputCode, setInputCode] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -163,5 +163,18 @@ export default function UnlockPortal() {
         Psypher Intelligence Protocol // V1.4.0
       </div>
     </main>
+  );
+}
+export default function UnlockPortal() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] flex flex-col items-center justify-center p-6 relative">
+        <div className="fixed inset-0 pointer-events-none opacity-[0.03]" 
+             style={{ backgroundImage: "linear-gradient(rgba(0,0,0,1) 0.5px, transparent 0.5px), linear-gradient(90deg, rgba(0,0,0,1) 0.5px, transparent 0.5px)", backgroundSize: "40px 40px" }} />
+        <Loader2 className="w-6 h-6 text-[#6D28D9] animate-spin" />
+      </main>
+    }>
+      <UnlockPortalContent />
+    </Suspense>
   );
 }

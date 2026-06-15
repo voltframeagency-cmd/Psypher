@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Layers, Zap, Heart, ShieldAlert, TrendingUp, UserMinus } from "lucide-react";
+import SpotlightCard from "./ui/SpotlightCard";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -41,36 +42,38 @@ export default function HowItWorks() {
         trigger: agitationRef.current,
         start: "top center",
         onEnter: () => {
-          gsap.to("body", { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 1, ease: "power2.inOut" });
+          gsap.to(document.body, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 1, ease: "power2.inOut" });
         },
         onLeaveBack: () => {
-          gsap.to("body", { backgroundColor: "#FAFAF8", color: "#111111", duration: 1, ease: "power2.inOut" });
+          gsap.to(document.body, { backgroundColor: "#FAFAF8", color: "#111111", duration: 1, ease: "power2.inOut" });
         }
       });
 
-      // Card Parallax
-      gsap.from(".framework-card", {
+      gsap.set(".framework-card", { y: 40, opacity: 0 });
+      gsap.to(".framework-card", {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 65%",
+          once: true,
         },
-        yPercent: 15,
-        opacity: 0,
+        y: 0,
+        opacity: 1,
         stagger: 0.1,
-        duration: 1.2,
-        ease: "power4.out"
+        duration: 0.8,
+        ease: "power3.out"
       });
 
-      // Agitation Stagger
-      gsap.from(".agitation-item", {
+      gsap.set(".agitation-item", { y: 30, opacity: 0 });
+      gsap.to(".agitation-item", {
         scrollTrigger: {
           trigger: agitationRef.current,
           start: "top 70%",
+          once: true,
         },
-        y: 40,
-        opacity: 0,
+        y: 0,
+        opacity: 1,
         stagger: 0.15,
-        duration: 1,
+        duration: 0.9,
         ease: "power3.out"
       });
     }, containerRef);
@@ -94,14 +97,18 @@ export default function HowItWorks() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {frameworks.map((f, i) => (
-              <div key={i} className="framework-card group p-10 bg-white border border-foreground/5 rounded-sm hover:shadow-2xl transition-all duration-500">
+              <SpotlightCard 
+                key={i} 
+                className="framework-card group p-10 bg-white/70 border border-neutral-200/50 backdrop-blur-md rounded-2xl hover:shadow-2xl transition-all duration-500"
+                spotlightColor="rgba(139, 92, 246, 0.12)"
+              >
                 <f.icon className="text-accent mb-8 group-hover:scale-110 transition-transform" size={32} />
                 <span className="block text-[10px] font-bold tracking-widest uppercase text-foreground/40 mb-2">{f.subtitle}</span>
                 <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
                 <p className="text-foreground/60 leading-relaxed text-sm">
                   {f.description}
                 </p>
-              </div>
+              </SpotlightCard>
             ))}
           </div>
         </div>
