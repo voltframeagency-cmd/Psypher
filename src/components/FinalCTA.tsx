@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 if (typeof window !== "undefined") {
@@ -19,7 +20,7 @@ export default function FinalCTA() {
         trigger: containerRef.current,
         start: "top center",
         onEnter: () => {
-          gsap.to("body", { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 });
+          gsap.to(document.body, { backgroundColor: "#0F0F0F", color: "#F5F0EB", duration: 0.8 });
         }
       });
     }, containerRef);
@@ -37,10 +38,10 @@ export default function FinalCTA() {
           The cost of staying stuck is far greater than $29.
         </p>
         
-        <button className="bg-accent hover:bg-accent-hover text-white px-12 py-8 text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center group shadow-2xl shadow-accent/20 mx-auto">
+        <Link href="/assessment" className="bg-accent hover:bg-accent-hover text-white px-12 py-8 text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center group shadow-2xl shadow-accent/20 mx-auto">
           Start my free assessment
           <ArrowRight className="ml-3 group-hover:translate-x-1 transition-transform" size={18} />
-        </button>
+        </Link>
 
         <div className="mt-40 pt-20 border-t border-white/5 opacity-30">
           <div className="flex flex-col items-center">

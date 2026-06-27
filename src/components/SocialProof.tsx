@@ -32,30 +32,33 @@ export default function SocialProof() {
         trigger: containerRef.current,
         start: "top center",
         onEnter: () => {
-          gsap.to("body", { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.8 });
+          gsap.to(document.body, { backgroundColor: "#FAFAF8", color: "#111111", duration: 0.8 });
         }
       });
 
-      // Staggered reveal
-      gsap.from(".testimonial-item", {
+      gsap.set(".testimonial-item", { y: 30, opacity: 0 });
+      gsap.to(".testimonial-item", {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 65%",
+          once: true,
         },
-        y: 40,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 1.2,
-        ease: "power4.out"
+        y: 0,
+        opacity: 1,
+        stagger: 0.15,
+        duration: 0.9,
+        ease: "power3.out"
       });
 
       // Counter animation
-      gsap.from(".counter-value", {
+      gsap.set(".counter-value", { textContent: 0 });
+      gsap.to(".counter-value", {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 70%",
+          once: true,
         },
-        textContent: 0,
+        textContent: 12847,
         duration: 2,
         ease: "power2.out",
         snap: { textContent: 1 },
