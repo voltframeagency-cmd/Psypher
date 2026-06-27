@@ -11,10 +11,87 @@ import { CustomEase } from "gsap/CustomEase";
 import ReactMarkdown from "react-markdown";
 import { StickyReportNav } from "@/components/ui/StickyReportNav";
 import NarrativeBlock from "@/components/ui/NarrativeBlock";
+import { HybridReport, PsychologyEngine } from "@/lib/psychology/scoring";
+import CongruencySection from "@/components/report/CongruencySection";
+import ShadowSection from "@/components/report/ShadowSection";
+import ShareableSnippet from "@/components/report/ShareableSnippet";
+import LinguisticReceipt from "@/components/report/LinguisticReceipt";
+import PrescriptivePlaybook from "@/components/report/PrescriptivePlaybook";
+import ArchitectureRadar from "@/components/report/ArchitectureRadar";
+import ResonanceVector from "@/components/report/ResonanceVector";
+import SpotlightCard from "@/components/ui/SpotlightCard";
+import LockedStateGate from "@/components/report/LockedStateGate";
+import BklitGauge from "@/components/report/BklitGauge";
+import BklitNotchBar from "@/components/report/BklitNotchBar";
+import { MessageCircle, Swords, Users, ShieldAlert, Share2, Target, Zap, Compass, Flame, Trophy, Crown, Shield, Scale, History, Heart, Globe, Sun, Moon } from "lucide-react";
+import { ReportEngine } from "@/lib/psychology/engine";
+import SchwartzCircumplex from "@/components/report/SchwartzCircumplex";
+
+const SCHWARTZ_MAP: Record<string, { label: string; icon: any; desc: string }> = {
+  SelfDirection: { label: "Self-Direction", icon: Compass, desc: "Prioritizes intellectual autonomy, creative agency, and independent strategy." },
+  Stimulation: { label: "Stimulation", icon: Zap, desc: "Driven by novelty, dynamic challenges, and high-velocity environments." },
+  Hedonism: { label: "Hedonism", icon: Flame, desc: "Values sensory gratification, experiential flow, and work-life harmony." },
+  Achievement: { label: "Achievement", icon: Trophy, desc: "Motivated by competence demonstration, outperformance, and recognition." },
+  Power: { label: "Power", icon: Crown, desc: "Focuses on authority, status indicators, and hierarchical leverage." },
+  Security: { label: "Security", icon: Shield, desc: "Prioritizes risk mitigation, stability, and long-term safety protocols." },
+  Conformity: { label: "Conformity", icon: Scale, desc: "Values compliance with collective norms, predictability, and alignment." },
+  Tradition: { label: "Tradition", icon: History, desc: "Respects established workflows, institutional memory, and proven rules." },
+  Benevolence: { label: "Benevolence", icon: Heart, desc: "Optimizes for close-team welfare, high-trust collaboration, and support." },
+  Universalism: { label: "Universalism", icon: Globe, desc: "Focuses on systemic impact, equity, and broad-scale welfare." }
+};
+
+const SCHWARTZ_QUADRANTS = [
+  {
+    id: "openness",
+    label: "Openness to Change",
+    description: "Motivations to pursue novelty, intellectual independence, and dynamic action.",
+    color: "#a855f7",
+    bgLight: "rgba(168, 85, 247, 0.05)",
+    borderHover: "hover:border-purple-500/30",
+    borderActive: "border-purple-500/40",
+    shadow: "rgba(168, 85, 247, 0.15)",
+    keys: ["SelfDirection", "Stimulation", "Hedonism"]
+  },
+  {
+    id: "enhancement",
+    label: "Self-Enhancement",
+    description: "Motivations for personal success, dominance, prestige, and influence.",
+    color: "#f43f5e",
+    bgLight: "rgba(244, 63, 94, 0.05)",
+    borderHover: "hover:border-rose-500/30",
+    borderActive: "border-rose-500/40",
+    shadow: "rgba(244, 63, 94, 0.15)",
+    keys: ["Achievement", "Power"]
+  },
+  {
+    id: "conservation",
+    label: "Conservation",
+    description: "Motivations for order, self-restriction, security, and preservation of past structures.",
+    color: "#06b6d4",
+    bgLight: "rgba(6, 182, 212, 0.05)",
+    borderHover: "hover:border-cyan-500/30",
+    borderActive: "border-cyan-500/40",
+    shadow: "rgba(6, 182, 212, 0.15)",
+    keys: ["Security", "Conformity", "Tradition"]
+  },
+  {
+    id: "transcendence",
+    label: "Self-Transcendence",
+    description: "Motivations to promote the welfare of others, close teams, and the global ecosystem.",
+    color: "#10b981",
+    bgLight: "rgba(16, 185, 129, 0.05)",
+    borderHover: "hover:border-emerald-500/30",
+    borderActive: "border-emerald-500/40",
+    shadow: "rgba(16, 185, 129, 0.15)",
+    keys: ["Benevolence", "Universalism"]
+  }
+];
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(CustomEase, ScrollTrigger);
 }
+
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 // Elite Motion Constants (Cubic-Bezier)
 const EASE_STANDARD = "cubic-bezier(0.2, 0.0, 0, 1.0)";
@@ -29,27 +106,49 @@ const BLUR_INIT = "blur(20px)";
 const BLUR_FINAL = "blur(0px)";
 
 const LoadingState = () => (
-  <main className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] flex flex-col items-center justify-center font-mono p-12 overflow-hidden">
-    <div className="fixed inset-0 pointer-events-none opacity-[0.03]" 
-         style={{ backgroundImage: "linear-gradient(rgba(0,0,0,1) 0.5px, transparent 0.5px), linear-gradient(90deg, rgba(0,0,0,1) 0.5px, transparent 0.5px)", backgroundSize: "40px 40px" }} />
+  <main className="min-h-screen bg-[#030303] text-zinc-100 flex flex-col items-center justify-center font-mono p-12 overflow-hidden relative">
+    {/* Dark Tech Grid Background */}
+    <div className="fixed inset-0 pointer-events-none opacity-[0.02]" 
+         style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 0.5px, transparent 0.5px), linear-gradient(90deg, rgba(255,255,255,1) 0.5px, transparent 0.5px)", backgroundSize: "30px 30px" }} />
     
-    <div className="relative">
-      <div className="w-1 h-32 bg-black/5 relative overflow-hidden mb-12 mx-auto">
-         <div className="absolute top-0 left-0 w-full bg-[#6D28D9] h-1/2 animate-[shimmer_1.5s_infinite_linear]" />
+    <div className="relative flex flex-col items-center">
+      {/* Physics-Based Concentric Tech Orbit */}
+      <div className="relative w-48 h-48 mb-16 flex items-center justify-center">
+        {/* Outer Ring with springy rotation */}
+        <div className="absolute inset-0 border border-purple-500/10 border-dashed rounded-full animate-[spin_8s_infinite_linear]" />
+        
+        {/* Middle Ring with elastic pulse */}
+        <div className="absolute w-36 h-36 border border-purple-500/20 rounded-full animate-[elasticPulse_3s_infinite_cubic-bezier(0.25,1.5,0.5,1)]" />
+        
+        {/* Inner Tech Target with spring scale */}
+        <div className="absolute w-24 h-24 border border-t-2 border-r-2 border-purple-500 rounded-full animate-[elasticSpin_4s_infinite_cubic-bezier(0.68,-0.55,0.27,1.55)]" />
+        
+        {/* Center pulsing core */}
+        <div className="w-4 h-4 bg-purple-500 rounded-full shadow-[0_0_20px_rgba(109,40,217,0.8)] animate-[corePulse_1.5s_infinite_ease-in-out]" />
       </div>
-      <div className="text-center space-y-6">
-        <p className="text-[9px] tracking-[0.8em] font-black uppercase text-[#6D28D9] animate-pulse">Syncing_Neural_Map</p>
+
+      <div className="text-center space-y-6 relative z-10">
+        <p className="text-[10px] tracking-[0.8em] font-black uppercase text-purple-400 animate-pulse">CALIBRATING_NEURAL_MAP</p>
         <div className="flex flex-col gap-2">
-          <p className="text-[8px] tracking-[0.3em] font-mono text-black/20 uppercase">PROTOCOL: PS-SYN-8821</p>
-          <p className="text-[8px] tracking-[0.3em] font-mono text-black/20 uppercase">TARGET_LOC: SCR_SCR_01</p>
+          <p className="text-[8px] tracking-[0.3em] font-mono text-zinc-600 uppercase">SYS_REF: PS-8821 // COMPILER: OK</p>
+          <p className="text-[8px] tracking-[0.3em] font-mono text-zinc-600 uppercase">PHYSICS_ENGINE: ACTIVE // STATE: INITIALIZING</p>
         </div>
       </div>
     </div>
     
     <style jsx>{`
-      @keyframes shimmer {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(200%); }
+      @keyframes elasticPulse {
+        0%, 100% { transform: scale(0.9); opacity: 0.3; }
+        50% { transform: scale(1.12); opacity: 0.8; }
+      }
+      @keyframes elasticSpin {
+        0% { transform: rotate(0deg) scale(0.9); }
+        50% { transform: rotate(180deg) scale(1.1); }
+        100% { transform: rotate(360deg) scale(0.9); }
+      }
+      @keyframes corePulse {
+        0%, 100% { transform: scale(0.8); opacity: 0.5; }
+        50% { transform: scale(1.25); opacity: 1; box-shadow: 0 0 30px rgba(109,40,217,1); }
       }
     `}</style>
   </main>
@@ -108,6 +207,24 @@ const DIMENSION_ASSETS: Record<string, { folder: string; icons: Record<string, s
       "External Engagement": "External Engagement.svg",
       "Internal Reflector": "Internal Reflector.svg",
     }
+  },
+  schwartz: {
+    folder: "", // Missing folder, using fallback
+    icons: {
+      Hedonism: "/assets/report/drivers.png",
+      Power: "/assets/report/drivers.png",
+      Achievement: "/assets/report/drivers.png",
+      Security: "/assets/report/drivers.png",
+      Universalism: "/assets/report/drivers.png",
+    }
+  },
+  resilience: {
+    folder: "resilience",
+    icons: {
+      Durability: "Durability.svg",
+      Agility: "Agility.svg",
+      Focus: "Focus.svg",
+    }
   }
 };
 
@@ -121,99 +238,131 @@ const GEN_ASSETS: Record<string, string> = {
  * IntelligenceRow: A minimalist, row-based display for traits.
  * This is the core of the Stockholm School layout.
  */
-function IntelligenceRow({ label, value, description, color, icon, variant = "default", comparisonValue }: { label: string, value: number | string, description: string, color: string, icon: any, variant?: "default" | "compact" | "card", comparisonValue?: number | string }) {
+function IntelligenceRow({ label, value, description, color, icon, variant = "default", comparisonValue, children }: { label: string, value: number | string, description: string, color: string, icon: any, variant?: "default" | "compact" | "card", comparisonValue?: number | string, children?: React.ReactNode }) {
   const isComparison = comparisonValue !== undefined && comparisonValue !== null;
   const compValue = comparisonValue;
-  
+  const shouldInvert = typeof icon === 'string' && (icon.endsWith('.svg') || icon.includes('SVG'));
+
   if (variant === "card") {
     return (
-      <div className="stagger-reveal group/card relative p-12 rounded-[4rem] bg-black/[0.02] border border-black/5 backdrop-blur-xl transition-all duration-700 hover:bg-white/60 hover:shadow-[0_0_80px_rgba(0,0,0,0.03)] hover:scale-[1.02] hover:-translate-y-4 overflow-hidden flex flex-col items-center text-center group-hover/row:opacity-40 group-hover/row:blur-sm hover:!opacity-100 hover:!blur-none">
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full blur-[120px] opacity-10 group-hover/card:opacity-[0.15] transition-opacity duration-1000 ${color.replace('text-', 'bg-')}`} />
+      <SpotlightCard 
+        glowColor="rgba(109, 40, 217, 0.08)"
+        className="stagger-reveal group/card relative p-8 rounded-[2.5rem] bg-zinc-950/20 border border-zinc-900 hover:bg-zinc-900/25 hover:shadow-[0_20px_50px_rgba(109,40,217,0.08)] hover:border-zinc-800 transition-all duration-500 overflow-hidden flex flex-col justify-between h-full text-center"
+      >
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full blur-[120px] opacity-5 group-hover/card:opacity-[0.1] transition-opacity duration-1000 ${color.replace('text-', 'bg-')}`} />
         
-        <div className="relative z-10 space-y-12 w-full">
-          <div className="group-hover/card:scale-110 transition-all duration-1000 flex justify-center">
-            {icon ? (typeof icon === 'string' ? <img src={icon} className={`w-56 h-56 transition-all duration-700 object-contain drop-shadow-sm group-hover/card:drop-shadow-[0_0_40px_rgba(109,40,217,0.5)]`} alt="" /> : icon) : null}
-          </div>
-          
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className={`font-bold tracking-tighter text-[#0A0A0A] transition-colors ${
-                typeof value === 'string'
-                  ? value.length > 15
-                    ? 'text-2xl md:text-3xl leading-tight text-balance px-2'
-                    : value.length > 8 
-                      ? 'text-4xl md:text-5xl leading-tight text-balance px-2' 
-                      : 'text-7xl md:text-8xl'
-                  : 'text-7xl md:text-8xl'
-              }`}>
-                {value}{typeof value === 'number' ? '%' : ''}
+        <div className="relative z-10 space-y-4 w-full flex-1 flex flex-col justify-between">
+          <div>
+            <div className="group-hover/card:scale-105 transition-all duration-700 flex justify-center py-4">
+              {icon ? (
+                typeof icon === 'string' ? (
+                  <img 
+                    src={icon} 
+                    className={`w-32 h-32 transition-all duration-700 object-contain drop-shadow-sm ${shouldInvert ? 'filter invert opacity-80 group-hover/card:opacity-100' : 'opacity-90'}`} 
+                    alt="" 
+                  />
+                ) : icon
+              ) : null}
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-4">
+                <div className={`font-bold tracking-tighter text-white transition-colors ${
+                  typeof value === 'string'
+                    ? value.length > 15
+                      ? 'text-xl md:text-2xl leading-tight'
+                      : value.length > 8 
+                        ? 'text-3xl md:text-4xl' 
+                        : 'text-5xl md:text-6xl'
+                    : 'text-5xl md:text-6xl'
+                }`}>
+                  {value}{typeof value === 'number' ? '%' : ''}
+                </div>
+                {isComparison && (
+                  <>
+                    <div className="w-[1.5px] h-10 bg-zinc-800 mx-3" />
+                    <div className="text-3xl md:text-4xl font-bold tracking-tighter text-purple-400 opacity-80">
+                      {compValue}{typeof compValue === 'number' ? '%' : ''}
+                    </div>
+                  </>
+                )}
               </div>
-              {isComparison && (
-                <>
-                  <div className="w-[2px] h-16 bg-black/10 mx-4" />
-                  <div className="text-4xl md:text-6xl font-bold tracking-tighter text-[#6D28D9] opacity-60">
-                    {compValue}{typeof compValue === 'number' ? '%' : ''}
-                  </div>
-                </>
-              )}
+              <div className="text-[10px] font-mono tracking-[0.5em] text-purple-400 uppercase font-black">
+                {label}
+              </div>
             </div>
-            <div className="text-[12px] font-mono tracking-[0.6em] text-[#6D28D9] transition-colors uppercase font-black">
-              {label}
-            </div>
+
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal px-4 mt-4">
+              {description}
+            </p>
           </div>
 
-          <p className="text-sm text-black/80 leading-relaxed font-normal px-8 group-hover:card:text-black transition-colors">
-            {description}
-          </p>
+          {children && <div className="pt-6 w-full">{children}</div>}
         </div>
         
         {/* Progress Bar Background Overlay */}
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/5 group-hover/card:bg-white/10" />
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-zinc-900" />
         <div 
-          className="absolute bottom-0 left-0 h-[1.5px] transition-all duration-1000 ease-out group-hover/card:h-[3px] shadow-[0_0_10px_currentColor]" 
+          className="absolute bottom-0 left-0 h-[1.5px] transition-all duration-1000 ease-out group-hover/card:h-[3px] shadow-[0_0_10px_rgba(109,40,217,0.4)]" 
           style={{ 
             width: `${typeof value === 'number' ? value : 0}%`,
             backgroundColor: '#6D28D9',
           }} 
         />
-      </div>
+      </SpotlightCard>
     );
   }
 
   if (variant === "compact") {
     return (
-      <div className="stagger-reveal group py-10 border-b border-black/5 flex flex-col md:grid md:grid-cols-12 gap-8 items-center hover:bg-black/[0.01] transition-all px-8 md:px-0">
+      <div className="stagger-reveal group py-10 border-b border-zinc-900 flex flex-col md:grid md:grid-cols-12 gap-8 items-center hover:bg-zinc-950/20 transition-all px-8 md:px-0">
         <div className="md:col-span-1 flex justify-center opacity-60">
-           {icon ? (typeof icon === 'string' ? <img src={icon} className="w-12 h-12 grayscale group-hover:grayscale-0 transition-all object-contain" alt="" /> : icon) : null}
+           {icon ? (
+             typeof icon === 'string' ? (
+               <img 
+                 src={icon} 
+                 className={`w-12 h-12 transition-all object-contain ${shouldInvert ? 'filter invert opacity-40 group-hover:opacity-100' : 'opacity-70'}`} 
+                 alt="" 
+               />
+             ) : icon
+           ) : null}
         </div>
         <div className="md:col-span-3 space-y-2 text-center md:text-left">
-          <p className="text-[10px] font-mono tracking-[0.5em] text-[#6D28D9] uppercase font-black">{label}</p>
-          <p className="text-sm text-black/70 font-medium italic leading-tight">{description}</p>
+          <p className="text-[10px] font-mono tracking-[0.5em] text-purple-400 uppercase font-black">{label}</p>
+          <p className="text-sm text-zinc-400 font-medium italic leading-tight">{description}</p>
         </div>
-        <div className="md:col-span-8 w-full h-[6px] bg-black/5 rounded-full overflow-hidden relative">
+        <div className="md:col-span-8 w-full h-[6px] bg-zinc-900 rounded-full overflow-hidden relative">
           <div 
             className="absolute top-0 left-0 h-full bg-[#6D28D9] transition-all duration-1000 origin-left"
             style={{ width: `${value}%` }} 
           />
-          <div className="absolute top-0 right-0 h-full w-[2px] bg-black/20" />
+          <div className="absolute top-0 right-0 h-full w-[2px] bg-zinc-800" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="stagger-reveal group flex items-center justify-between py-12 border-b border-black/10 hover:bg-black/[0.02] transition-all px-4 rounded-xl">
+    <div className="stagger-reveal group flex items-center justify-between py-12 border-b border-zinc-900 hover:bg-zinc-950/30 transition-all px-4 rounded-xl">
       <div className="flex items-center gap-10">
-        <div className="w-16 h-16 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-          {icon ? (typeof icon === 'string' ? <img src={icon} className="w-16 h-16 object-contain" alt="" /> : icon) : null}
+        <div className="w-24 h-24 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+          {icon ? (
+            typeof icon === 'string' ? (
+              <img 
+                src={icon} 
+                className={`w-24 h-24 object-contain ${shouldInvert ? 'filter invert opacity-70 group-hover:opacity-100' : ''}`} 
+                alt="" 
+              />
+            ) : icon
+          ) : null}
         </div>
         <div className="space-y-2">
-          <h4 className="text-[12px] font-mono tracking-[0.6em] text-[#6D28D9] uppercase font-black">{label}</h4>
-          <p className="text-sm text-black/70 font-medium max-w-md">{description}</p>
+          <h4 className="text-[12px] font-mono tracking-[0.6em] text-purple-400 uppercase font-black">{label}</h4>
+          <p className="text-sm text-zinc-400 font-medium max-w-md">{description}</p>
         </div>
       </div>
       <div className="text-right">
-        <span className={`font-bold tracking-tighter text-[#0A0A0A] group-hover:opacity-100 transition-all ${
+        <span className={`font-bold tracking-tighter text-white group-hover:opacity-100 transition-all ${
           typeof value === 'string' && value.length > 8
             ? 'text-3xl md:text-4xl text-balance break-words max-w-[200px] inline-block'
             : 'text-6xl md:text-8xl'
@@ -224,8 +373,7 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
     </div>
   );
 }
-
-function CognitiveSpectrum({ 
+function CognitiveSpectrum({ 
   trait, 
   value, 
   colors,
@@ -242,29 +390,32 @@ function CognitiveSpectrum({
 }) {
   const opposites: Record<string, string> = {
     "Adaptive Observation": "Systemic Structure",
+    "Objective Analysis": "Empathic Integration",
     "Empathic Integration": "Objective Analysis",
     "External Engagement": "Internal Reflection",
-    "Internal Reflector": "External Action"
+    "Internal Reflection": "External Engagement",
+    "Internal Reflector": "External Action",
+    "External Action": "Internal Reflector"
   };
   const opposite = opposites[trait] || "Inverse Metric";
 
   return (
     <div 
-      className={`w-full space-y-3 mb-4 rounded-3xl p-6 transition-all duration-300 stagger-reveal group cursor-default ${isHovered ? 'bg-[#F3F4F6] shadow-sm' : 'bg-transparent'}`}
+      className={`w-full space-y-3 mb-4 rounded-3xl p-6 transition-all duration-300 merge-theme group cursor-default ${isHovered ? 'bg-zinc-900/30 border border-zinc-800/40 shadow-sm' : 'bg-transparent border border-transparent'}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className={`flex justify-center text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase ${colors.text} opacity-80 group-hover:opacity-100 transition-opacity`}>
+      <div className={`flex justify-center text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase ${colors.text.replace('text-', 'text-')} opacity-80 group-hover:opacity-100 transition-opacity`}>
         {value}% {value > 50 ? trait : opposite}
       </div>
-      <div className="relative w-full h-[6px] bg-black/5 rounded-full overflow-visible">
+      <div className="relative w-full h-[6px] bg-zinc-900 rounded-full overflow-visible">
          <div className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-out origin-left rounded-full ${colors.bg}`} style={{ width: `${value}%` }} />
          <div 
-           className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-white border-[3.5px] rounded-full shadow-sm transition-all duration-1000 ease-out ${colors.border} scale-90 group-hover:scale-110 md:w-6 md:h-6`} 
-           style={{ left: `calc(${value}% - 10px)` }}
+            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-zinc-950 border-[3.5px] rounded-full shadow-sm transition-all duration-1000 ease-out ${colors.border} scale-90 group-hover:scale-110 md:w-6 md:h-6`} 
+            style={{ left: `calc(${value}% - 10px)` }}
          />
       </div>
-      <div className={`flex justify-between text-[8px] md:text-[9px] font-mono uppercase tracking-[0.3em] font-bold transition-opacity ${isHovered ? 'opacity-60 text-black' : 'opacity-30 text-black group-hover:opacity-50'}`}>
+      <div className={`flex justify-between text-[8px] md:text-[9px] font-mono uppercase tracking-[0.3em] font-bold transition-opacity ${isHovered ? 'opacity-70 text-zinc-300' : 'opacity-40 text-zinc-500 group-hover:opacity-60'}`}>
         <span className={value > 50 ? "opacity-100" : ""}>{trait}</span>
         <span className={value <= 50 ? "opacity-100" : ""}>{opposite}</span>
       </div>
@@ -296,17 +447,17 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
   const traits = scores?.cognitive?.Functions ? Object.entries(scores.cognitive.Functions) : [];
   
   const colorSets = [
-    { text: "text-cyan-600", bg: "bg-cyan-500", border: "border-cyan-500", glow: "bg-cyan-500/10" },
-    { text: "text-amber-600", bg: "bg-amber-500", border: "border-amber-500", glow: "bg-amber-500/10" },
-    { text: "text-emerald-600", bg: "bg-emerald-500", border: "border-emerald-500", glow: "bg-emerald-500/10" },
-    { text: "text-purple-600", bg: "bg-purple-500", border: "border-purple-500", glow: "bg-purple-500/10" }
+    { text: "text-cyan-400", bg: "bg-cyan-500", border: "border-cyan-500", glow: "bg-cyan-500/5" },
+    { text: "text-amber-400", bg: "bg-amber-500", border: "border-amber-500", glow: "bg-amber-500/5" },
+    { text: "text-emerald-400", bg: "bg-emerald-500", border: "border-emerald-500", glow: "bg-emerald-500/5" },
+    { text: "text-purple-400", bg: "bg-purple-500", border: "border-purple-500", glow: "bg-purple-500/5" }
   ];
 
   const traitDescriptions: Record<string, { desc: string, icon: string }> = {
     "Adaptive Observation": { desc: "Focuses on gathering concrete, real-world data and adjusting to emerging patterns fluidly.", icon: "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" },
     "Systemic Structure": { desc: "Prioritizes organizing information into predictable frameworks and structured methodologies.", icon: "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" },
-    "Empathic Integration": { desc: "Synthesizes emotional feedback and collective values to form harmonious decisions.", icon: "/assets/report/Cognitive Functions SVG/Empathic Integration.svg" },
     "Objective Analysis": { desc: "Deconstructs problems using logical frameworks, seeking efficiency and consistent truths.", icon: "/assets/report/Cognitive Functions SVG/Empathic Integration.svg" },
+    "Empathic Integration": { desc: "Synthesizes emotional feedback and collective values to form harmonious decisions.", icon: "/assets/report/Cognitive Functions SVG/Empathic Integration.svg" },
     "External Engagement": { desc: "Draws energy from outward interaction, acting upon the environment and people.", icon: "/assets/report/Cognitive Functions SVG/External Engagement.svg" },
     "Internal Reflection": { desc: "Processes deeply before acting, relying on an internal landscape of ideas and impressions.", icon: "/assets/report/Cognitive Functions SVG/Internal Reflector.svg" },
     "Internal Reflector": { desc: "Processes deeply before acting, relying on an internal landscape of ideas and impressions.", icon: "/assets/report/Cognitive Functions SVG/Internal Reflector.svg" },
@@ -315,7 +466,7 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
 
   const getTraitPairs: Record<string, string> = {
     "Adaptive Observation": "Systemic Structure",
-    "Empathic Integration": "Objective Analysis",
+    "Objective Analysis": "Empathic Integration",
     "External Engagement": "Internal Reflection",
     "Internal Reflector": "External Action"
   };
@@ -339,7 +490,7 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
       className="col-span-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-12"
     >
       {/* Left Column: Spectrums */}
-      <div className="lg:col-span-8 bg-white border border-black/[0.03] rounded-[3rem] p-6 md:p-12 flex flex-col justify-center shadow-sm relative overflow-hidden">
+      <div className="lg:col-span-8 bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-6 md:p-12 flex flex-col justify-center shadow-sm relative overflow-hidden">
         {traits.map(([trait, val]: any, i: number) => (
           <CognitiveSpectrum 
             key={trait} 
@@ -354,16 +505,16 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
       </div>
 
       {/* Right Column: Identity Badge */}
-      <div className={`lg:col-span-4 bg-[#F8F9FA] border border-black-[0.03] rounded-[3rem] p-10 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${activeTraitName ? 'shadow-lg scale-[1.02]' : 'shadow-sm scale-100'}`}>
-         <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] transition-colors duration-500 ${activeTraitName ? activeColors.glow : 'bg-amber-500/5'}`} />
+      <div className={`lg:col-span-4 bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500 ${activeTraitName ? 'shadow-lg scale-[1.02]' : 'shadow-sm scale-100'}`}>
+         <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] transition-colors duration-500 ${activeTraitName ? activeColors.glow : 'bg-purple-900/5'}`} />
          
          <div className="relative z-10 w-full flex flex-col items-center justify-center">
            {/* Fixed Height Label */}
            <div className="h-6 flex items-center justify-center mb-2">
              {!activeTraitName ? (
-               <p className="text-[10px] font-mono tracking-[0.4em] uppercase text-black/40 font-bold transition-all opacity-100 truncate">Mind</p>
+               <p className="text-[10px] font-mono tracking-[0.4em] uppercase text-zinc-500 font-bold transition-all opacity-100 truncate">Mind</p>
              ) : (
-               <p className="text-[10px] font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase text-black/40 font-bold transition-all opacity-100 truncate">
+               <p className="text-[10px] font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase text-purple-400 font-bold transition-all opacity-100 truncate">
                  {activeTraitName} Sphere
                </p>
              )}
@@ -372,30 +523,30 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
            {/* Fixed Height Title */}
            <div className="h-20 flex items-center justify-center mb-6">
              {!activeTraitName ? (
-               <h4 className="text-3xl font-bold tracking-tighter text-[#0A0A0A] leading-tight transition-all">
-                 <span className="text-amber-500">92%</span><br />
+               <h4 className="text-3xl font-bold tracking-tighter text-white leading-tight transition-all">
+                 <span className="text-purple-400">92%</span><br />
                  {identityText}
                </h4>
              ) : (
-               <h4 className="text-3xl font-bold tracking-tighter text-[#0A0A0A] leading-tight transition-all">
-                 <span className={activeColors.text.replace('text-', 'text-')}>{activeValue > 50 ? activeValue : Math.max(100 - activeValue, 0)}%</span><br />
+               <h4 className="text-3xl font-bold tracking-tighter text-white leading-tight transition-all">
+                 <span className={activeColors.text}>{activeValue > 50 ? activeValue : Math.max(100 - activeValue, 0)}%</span><br />
                  {activeValue > 50 ? activeTraitName.split(' ')[0] : activeOpposite.split(' ')[0]}
                </h4>
              )}
            </div>
            
            {/* Fixed Height Image */}
-           <div className={`w-40 h-40 mb-8 mix-blend-multiply transition-all duration-500 flex items-center justify-center ${activeTraitName ? 'scale-110 opacity-100' : 'scale-100 opacity-90 grayscale hover:scale-110'}`}>
+           <div className={`w-40 h-40 mb-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-4 transition-all duration-500 ${activeTraitName ? 'scale-110 opacity-100' : 'scale-100 opacity-90'}`}>
              <img 
                src={!activeTraitName ? "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" : (traitDescriptions[activeTraitsKey(activeTraitName, activeValue > 50)]?.icon || "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg")} 
                alt="Illustration" 
-               className="w-full h-full object-contain" 
+               className="w-full h-full object-contain filter invert opacity-80" 
              />
            </div>
            
            {/* Fixed Height Description */}
            <div className="h-24 flex items-start justify-center mt-2">
-             <p className="text-[13px] text-black/70 font-medium leading-relaxed max-w-[280px] transition-all">
+             <p className="text-[13px] text-zinc-400 font-medium leading-relaxed max-w-[280px] transition-all">
                {!activeTraitName ? (
                  `"${scores?.cognitive?.Type || 'Strategic Architect'} profile. High-order analytical processing prioritizing systemic long-term execution."`
                ) : (
@@ -410,24 +561,20 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
 }
 
 function activeTraitsKey(trait: string, primary: boolean) {
-  // simple helper inside block scope to extract the true desc key
   return trait;
 }
 
 /**
- * DossierSection: Immersive vertical section with extreme white space.
- * Includes built-in GSAP scroll triggers for high-end reveals.
+ * AnalyticalSection: Immersive vertical section with extreme white space.
  */
-function DossierSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "protocol", id, fastReveal = false }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "protocol" | "grid" | "heroic" | "centered" | "flipped", id?: string, fastReveal?: boolean }) {
+function AnalyticalSection({ num, title, description, children, accentColor = "text-[#6D28D9]", illustration, variant = "clinical", id, fastReveal = false }: { num: number, title: string, description: string, children: React.ReactNode, accentColor?: string, illustration?: string, variant?: "default" | "clinical" | "grid" | "heroic" | "centered" | "flipped", id?: string, fastReveal?: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const dataSeg = `DATA_SEG_0${num}`;
   const titleRef = useRef<HTMLHeadingElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
     
-    // Header reveal (Assessment-style: Blur + Y-slide)
     gsap.fromTo(titleRef.current, 
       { opacity: 0, filter: "blur(20px)", y: 40 },
       { 
@@ -436,7 +583,6 @@ function DossierSection({ num, title, description, children, accentColor = "text
       }
     );
 
-    // Staggered reveal for children
     gsap.fromTo(sectionRef.current.querySelectorAll('.stagger-reveal'),
       { opacity: 0, filter: "blur(15px)", y: 50 },
       {
@@ -445,7 +591,6 @@ function DossierSection({ num, title, description, children, accentColor = "text
       }
     );
 
-    // Image reveal
     if (imageRef.current) {
       gsap.fromTo(imageRef.current,
         { opacity: 0, filter: "blur(15px)", y: 40 },
@@ -455,7 +600,6 @@ function DossierSection({ num, title, description, children, accentColor = "text
         }
       );
       
-      // Subtle float parallax
       gsap.to(imageRef.current.querySelector('img'), {
         y: -30,
         scrollTrigger: {
@@ -468,187 +612,257 @@ function DossierSection({ num, title, description, children, accentColor = "text
     }
   }, [variant]);
 
-  if (variant === "heroic") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32 border-t border-black/5 relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-           <img src={illustration} className="w-full h-full object-cover opacity-5 border-black/10 blur-xl scale-110" alt="" />
-           <div className="absolute inset-0 bg-gradient-to-b from-[#FDFDFD] via-transparent to-[#FDFDFD]" />
-        </div>
-        <div className="max-w-7xl mx-auto px-8 relative z-10 text-center space-y-24">
-          <div className="space-y-12 max-w-4xl mx-auto">
-            <span className={`text-[12px] font-mono ${accentColor} tracking-[1em] font-black uppercase opacity-60`}>Finale_Dimension_0{num}</span>
-            <h2 ref={titleRef} className="text-6xl md:text-[8rem] font-bold tracking-tighter text-[#0A0A0A] leading-none uppercase">{title}</h2>
-            <p className="text-2xl text-black/70 font-medium leading-relaxed max-w-3xl mx-auto italic">
-              {description}
-            </p>
-          </div>
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (variant === "protocol") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32 flex flex-col justify-center">
-        <div className="max-w-7xl mx-auto px-8 w-full space-y-32">
-          <div className="text-center space-y-16 stagger-reveal">
-            <div className="flex flex-col items-center gap-8">
-              <span className={`text-[11px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_Ref_{num} // Segment_0{num}</span>
-              <div className="w-[1px] h-[100px] bg-gradient-to-b from-black/20 to-transparent" />
-            </div>
-            <h2 ref={titleRef} className="text-5xl md:text-8xl font-bold tracking-tight text-[#0A0A0A] leading-tight uppercase max-w-4xl mx-auto">
-              {title}
-            </h2>
-            <p className="text-2xl text-black/70 font-medium leading-relaxed max-w-2xl mx-auto px-4 italic">
-              {description}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 group/row">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (variant === "centered") {
-    return (
-      <section ref={sectionRef} id={id || `dimension-${num}`} className="py-32">
-        <div className="max-w-7xl mx-auto px-8 space-y-32">
-          <div className="text-center space-y-16">
-            <div className="flex flex-col items-center gap-8">
-              <span className={`text-[10px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_0{num} // PSYPHER_DATA_SEG</span>
-              <div className="w-[1px] h-[80px] bg-black/10" />
-            </div>
-            <h2 ref={titleRef} className="text-6xl md:text-8xl font-bold tracking-tight text-[#0A0A0A] leading-tight uppercase max-w-5xl mx-auto">{title}</h2>
-            <p className="text-xl text-black/60 font-medium leading-relaxed max-w-2xl mx-auto">
-              {description}
-            </p>
-          </div>
-          
-          <div ref={imageRef} className="max-w-4xl mx-auto aspect-video relative group">
-            <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent rounded-3xl blur-[120px] opacity-20 group-hover:opacity-40 transition-opacity" />
-            <img src={illustration} className="w-full h-full object-contain relative z-10 brightness-95 opacity-60 group-hover:opacity-100 transition-all duration-1000 scale-90 group-hover:scale-100" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pt-12 group/row">
-            {children}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section ref={sectionRef} id={id || `dimension-${num}`} className="py-40 first:pt-0">
-      <div className="max-w-7xl mx-auto px-8 space-y-24">
-        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-24 items-center ${variant === "flipped" ? "direction-rtl" : ""}`}>
-          <div className={`${variant === "flipped" ? "lg:col-start-7 lg:col-span-6 lg:order-2" : "lg:col-span-7"} space-y-8`}>
-            <div className={`flex items-center gap-6 ${variant === "flipped" ? "flex-row-reverse" : ""}`}>
-              <span className={`text-[10px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Dimension_0{num}</span>
-              <div className="w-[40px] h-[0.5px] bg-black/10" />
-            </div>
-            <h2 ref={titleRef} className="text-7xl md:text-9xl font-bold tracking-tight text-[#0A0A0A] leading-none uppercase">{title}</h2>
-            <p className="text-xl text-black/60 font-medium leading-relaxed max-w-2xl">
-              {description}
-            </p>
+    <section ref={sectionRef} id={id || `dimension-${num}`} className="py-16 flex flex-col justify-center">
+      <div className="max-w-7xl mx-auto px-8 w-full space-y-16">
+        <div className="text-center space-y-12 stagger-reveal">
+          <div className="flex flex-col items-center gap-8">
+            <span className={`text-[11px] font-mono ${accentColor} tracking-[0.5em] font-black uppercase opacity-60`}>Marker_Ref_{num} // Section_0{num}</span>
+            <div className="w-[1px] h-[60px] bg-gradient-to-b from-black/20 to-transparent" />
           </div>
-          <div ref={imageRef} className={`${variant === "flipped" ? "lg:col-span-6 lg:order-1" : "lg:col-span-5"} aspect-square relative group pb-12`}>
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#6D28D9]/5 to-transparent rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-1000" />
-            <img 
-              src={illustration} 
-              alt="" 
-              className="w-full h-full object-contain relative z-10 opacity-60 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105" 
-            />
-          </div>
+          <h2 ref={titleRef} className="text-5xl md:text-8xl font-bold tracking-tight text-[#0A0A0A] leading-tight uppercase max-w-4xl mx-auto">
+            {title}
+          </h2>
+          <p className="text-2xl text-black/70 font-medium leading-relaxed max-w-2xl mx-auto px-4 italic">
+            {description}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 group/row">
+          {children}
         </div>
       </div>
-      
-      {variant === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 group/row">
-          {children}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {children}
-        </div>
-      )}
     </section>
   );
 }
 
+const MOCK_EXECUTIVE_SUMMARY = `# Executive Summary: The Architect Map
+Your profile reflects a rare alignment between objective logic and long-term vision. Most professionals struggle with the "noise" of social momentum or emotional reactive cycles, but you operate with clinical precision. You do not merely participate in the market; you design the systems that define its boundaries.
+# STRATEGIC_BRIEF
+Your navigate high-stakes environments via a "Strategic Edge." You process social data not as emotional cues, but as variables in a logic-based equation. This allows for unmatched clarity in negotiation, but it can create an "Analytical Isolation" effect. You are building a framework in a vacuum.
+
+# CRITICAL_RISK
+If you fail to bridge this isolation, your proprietary systems will inevitably calcify. You will own the most efficient architecture in a ghost town of your own making, losing the very influence you've worked to secure..`;
+
+const MOCK_Alpha_REPORT: HybridReport = {
+  selfReport: {
+    bfi: { Openness: 88, Conscientiousness: 92, Extraversion: 45, Agreeableness: 32, Neuroticism: 58 },
+    darkTriad: { Machiavellianism: 84, Psychopathy: 22, Narcissism: 68 },
+    attachment: { Style: "Dismissive-Avoidant", Security: 15, Anxiety: 48, Avoidance: 89 },
+    cognitiveWiring: "INTJ"
+  },
+  cognitive: {
+    Type: "INTJ Mastermind",
+    Functions: {
+      "Adaptive Observation": 95,
+      "Objective Analysis": 42,
+      "External Engagement": 65,
+      "Internal Reflector": 88
+    }
+  },
+  linguistic: {
+    cognitiveComplexity: 92,
+    emotionalTone: 38,
+    socialOrientation: 15,
+    certaintlyLanguage: 82,
+    tentativeLanguage: 12,
+    powerLanguage: 75,
+    affiliationLanguage: 18,
+    analyticalThinking: 94,
+    authenticityScore: 25,
+    cloakingScore: 68,
+    wordCount: 452,
+    avgSentenceLength: 28,
+    vocabularyRichness: 72
+  },
+  congruency: [
+    { 
+      dimension: "Extraversion", 
+      selfReportScore: 45, 
+      linguisticScore: 15, 
+      discrepancy: 30, 
+      direction: "inflated", 
+      interpretation: "You see yourself as more social than your language patterns suggest.", 
+      evidenceSnippets: [
+        "I typically prefer structural planning over team syncs to ensure speed...",
+        "Most communication is handled via direct documentation to bypass meetups..."
+      ] 
+    },
+    { 
+      dimension: "Agreeableness", 
+      selfReportScore: 32, 
+      linguisticScore: 18, 
+      discrepancy: 14, 
+      direction: "aligned", 
+      interpretation: "Your reported empathy aligns with language metadata.", 
+      evidenceSnippets: [
+        "To facilitate team progress, I worked with developers to define common ground...",
+        "We should establish clarity to ensure everyone aligns on this pivot..."
+      ] 
+    }
+  ],
+  schwartz: { SelfDirection: 85, Power: 92, Achievement: 88, Hedonism: 42, Stimulation: 75, Benevolence: 22, Universalism: 35, Conformity: 15, Tradition: 12, Security: 25 },
+  resilience: { Overall: 82, Durability: 85, Flexibility: 45, Recovery: 65, Resourcefulness: 88 },
+  hasTextSample: true,
+  overallCongruencyScore: 78
+};
+
+const MOCK_Beta_REPORT = {
+  bfi: { Openness: 65, Conscientiousness: 45, Extraversion: 85, Agreeableness: 78, Neuroticism: 30 },
+  darkTriad: { Machiavellianism: 35, Psychopathy: 12, Narcissism: 40 },
+  attachment: { Style: "Secure", Security: 85, Anxiety: 15, Avoidance: 20 }
+};
+
 function ReportContent() {
-  const [report, setReport] = useState<string>("");
-  const [scores, setScores] = useState<any>(null);
+  const [scores, setScores] = useState<HybridReport | null>(null);
+  const [report, setReport] = useState<any>(null);
+  const [hybridDossier, setHybridDossier] = useState<Record<string, string> | null>(null);
   const [partnerScores, setPartnerScores] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [clearanceCode, setClearanceCode] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [tier, setTier] = useState<"basic" | "deep" | "compatibility">("deep");
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [showDevTools, setShowDevTools] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("overview");
+  const [activeTab, setActiveTab] = useState<"core" | "shadow" | "sync">("core");
+  const [hoveredTrait, setHoveredTrait] = useState<string | null>(null);
+  const [hoveredSchwartzValue, setHoveredSchwartzValue] = useState<string | null>(null);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("psypher-theme");
+    if (savedTheme === "light") {
+      setIsLightMode(true);
+    }
+  }, []);
+
+  const toggleLightMode = () => {
+    const nextMode = !isLightMode;
+    setIsLightMode(nextMode);
+    localStorage.setItem("psypher-theme", nextMode ? "light" : "dark");
+  };
+
+  const dossierGroups = [
+    {
+      id: "core",
+      label: "01 // CORE SYSTEMS",
+      items: [
+        { id: "overview", label: "Overview Summary", code: "TAB_01" },
+        { id: "personality", label: "Personality", code: "TAB_02" }
+      ]
+    },
+    {
+      id: "shadow",
+      label: "02 // SHADOW LATENCY",
+      items: [
+        { id: "shadow", label: "Shadow Index", code: "TAB_03" },
+        { id: "playbook", label: "Prescriptive Plays", code: "TAB_07" }
+      ]
+    },
+    {
+      id: "sync",
+      label: "03 // SYNC COHESION",
+      items: [
+        { id: "relational", label: "Relational Matrix", code: "TAB_04" },
+        { id: "cognitive", label: "Cognitive Wiring", code: "TAB_05" },
+        { id: "linguistics", label: "Linguistics Index", code: "TAB_06" }
+      ]
+    }
+  ];
+
+  const handleTierChange = (newTier: "basic" | "deep" | "compatibility") => {
+    setTier(newTier);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tier", newTier);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  useEffect(() => {
+    const isDevMode = process.env.NODE_ENV === "development" || searchParams.get("dev") === "true";
+    setShowDevTools(isDevMode);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchReport = async () => {
+      const assessmentId = searchParams.get("id");
       const isDemo = searchParams.get("demo") === "true";
-      const isBypass = searchParams.get("bypass") === "true";
       const tierParam = searchParams.get("tier") as any;
       if (tierParam && ["basic", "deep", "compatibility"].includes(tierParam)) setTier(tierParam);
       
-      if (isDemo || isBypass || tierParam === "deep" || tierParam === "compatibility") setIsUnlocked(true);
-
       try {
-        if (isDemo) {
-          const mockAlpha = {
-            bfi: { Openness: 88, Conscientiousness: 92, Extraversion: 45, Agreeableness: 32, Neuroticism: 58 },
-            darkTriad: { Machiavellianism: 84, Psychopathy: 22, Narcissism: 68 },
-            attachment: { Style: "Dismissive-Avoidant", Security: 15, Anxiety: 48, Avoidance: 89 },
-            cognitive: { Type: "Strategic Architect (INTJ)", Functions: { "Adaptive Observation": 95, "Empathic Integration": 42, "External Engagement": 65, "Internal Reflector": 88 } },
-            drivers: { "Power & Impact": 85, "Self-Direction": 92, "Achievement": 78, "Security": 45 },
-            language: { Analytical: 94, Social: 12, Clout: 88, Authentic: 35 },
-            resilience: { Durability: 82, Agility: 65, "Stress Level": 28, Focus: 91 }
-          };
-          
-          setScores(mockAlpha);
-          
-          if (tierParam === "compatibility" || isDemo) {
-            setPartnerScores({
-              bfi: { Openness: 65, Conscientiousness: 78, Extraversion: 92, Agreeableness: 85, Neuroticism: 42 },
-              darkTriad: { Machiavellianism: 32, Psychopathy: 15, Narcissism: 45 },
-              attachment: { Style: "Secure", Security: 88, Anxiety: 12, Avoidance: 15 },
-              cognitive: { Type: "Social Connector (ENFP)", Functions: { "Adaptive Observation": 78, "Empathic Integration": 95, "External Engagement": 92, "Internal Reflector": 65 } },
-            });
+        if (assessmentId) {
+          const { data: assessment, error } = await supabaseAdmin
+            .from("assessments")
+            .select(`
+              *,
+              reports (*)
+            `)
+            .eq("id", assessmentId)
+            .single();
+
+          if (assessment && !error) {
+            setReport(assessment.reports?.[0]?.content_text);
+            setIsUnlocked(assessment.status === "completed");
+            setClearanceCode(assessment.clearance_code);
+            setExpiresAt(assessment.expires_at);
+            
+            let finalScores = assessment.reports?.[0]?.scores || assessment.raw_answers;
+            if (finalScores) {
+              // Fallback: If it's a flat raw answers object, convert it to a full HybridReport
+              if (finalScores && !finalScores.selfReport && typeof finalScores === "object") {
+                const textSample = assessment.reports?.[0]?.text_sample || "";
+                finalScores = PsychologyEngine.generateHybridReport(finalScores, textSample);
+              }
+              setScores(finalScores);
+              const hybridData = await ReportEngine.assembleHybridReport(finalScores);
+              setHybridDossier(hybridData);
+            }
+            
+            setLoading(false);
+            return;
           }
-          setReport(`# Executive Summary: The Architect Map
-Your neural architecture reflects a rare alignment between objective logic and long-term vision protocol. Most professionals struggle with the "noise" of social momentum or emotional reactive cycles, but you operate as a clinical exception. You do not merely participate in the market; you architect the systems that define its boundaries.
+        }
 
-However, this excellence is a shield. Your strategic precision is often a defensive reaction to a visceral distrust of unmanaged environments. 
-
-# THE OPERATIONAL BLUEPRINT
-You navigate high-stakes environments via a "Strategic Alpha Edge." You process social data not as emotional cues, but as variables in a power-dynamic equation. This allows for unmatched clarity in negotiation, but it creates a "Data Isolation" effect. You are building a cathedral in a vacuum.
-
-# THE FAILURE STAKE
-If you fail to bridge this isolation, your proprietary systems will inevitably calcify. You will own the most efficient architecture in a ghost town of your own making, losing the very influence you've worked to secure.`);
+        if (isDemo) {
+          setScores(MOCK_Alpha_REPORT);
+          setPartnerScores(MOCK_Beta_REPORT);
+          setIsUnlocked(true);
+          setReport(MOCK_EXECUTIVE_SUMMARY);
+          setClearanceCode("VRTX-88");
+          const demoExpiry = new Date();
+          demoExpiry.setDate(demoExpiry.getDate() + 30);
+          setExpiresAt(demoExpiry.toISOString());
+          
+          const hybridData = await ReportEngine.assembleHybridReport(MOCK_Alpha_REPORT);
+          setHybridDossier(hybridData);
+          
           setLoading(false);
           return;
         }
-        
+
         const storedAnswers = sessionStorage.getItem("psypher_answers");
+        const storedText = sessionStorage.getItem("psypher_text_sample");
+        
         if (storedAnswers) {
           const response = await fetch("/api/generate-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ answers: JSON.parse(storedAnswers) }),
+            body: JSON.stringify({ 
+              answers: JSON.parse(storedAnswers), 
+              text_sample: storedText 
+            }),
           });
+          
           if (response.ok) {
             const data = await response.json();
             setScores(data.scores);
             setReport(data.report);
+            const hybridData = await ReportEngine.assembleHybridReport(data.scores);
+            setHybridDossier(hybridData);
           }
         }
       } catch (err) {
@@ -657,89 +871,138 @@ If you fail to bridge this isolation, your proprietary systems will inevitably c
         setLoading(false);
       }
     };
+    
     fetchReport();
   }, [searchParams]);
 
   useEffect(() => {
+    if (loading) return;
+
+    const sections = ["overview", "personality"];
+    if (isUnlocked && tier !== "basic") {
+      sections.push("shadow", "relational", "cognitive", "linguistics", "playbook");
+    } else {
+      sections.push("lock-gate");
+    }
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: "-25% 0px -55% 0px",
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          if (id === "lock-gate") {
+            setActiveSection("shadow");
+          } else {
+            setActiveSection(id);
+          }
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [loading, isUnlocked, tier, activeTab]);
+
+  useEffect(() => {
     if (!loading) {
       const ctx = gsap.context(() => {
-        // Main Content Reveal (with Blur)
-        gsap.to(containerRef.current, { 
-          opacity: 1, 
-          duration: 1.2, 
-          ease: "power2.out",
-          filter: "blur(0px)",
-          onStart: () => {
-            gsap.set(containerRef.current, { filter: "blur(20px)", opacity: 0 });
+        gsap.fromTo(containerRef.current, 
+          { opacity: 0, filter: "blur(20px)" },
+          { 
+            opacity: 1, 
+            filter: "blur(0px)",
+            duration: 1.2, 
+            ease: "power2.out"
           }
-        });
+        );
 
-        // Sticky Progress Bar Logic
-        gsap.to("#scroll-progress-bar", {
-          height: "100%",
-          ease: "none",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true,
-          }
-        });
-
-        // Staggered Blur Reveal for all elements
         const reveals = containerRef.current?.querySelectorAll(".stagger-reveal");
         reveals?.forEach((el) => {
-          gsap.fromTo(el, 
-            { 
-              opacity: 0, 
-              y: 60, 
-              filter: "blur(20px)",
-              scale: 0.98
-            },
-            {
-              opacity: 1,
-              y: 0,
-              filter: "blur(0px)",
-              scale: 1,
-              duration: 1.4,
-              ease: "expo.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 92%",
-                toggleActions: "play none none none"
+          const rect = el.getBoundingClientRect();
+          const inViewport = rect.top < (window.innerHeight || document.documentElement.clientHeight) && rect.bottom > 0;
+
+          if (inViewport) {
+            // Animate immediately if in viewport
+            gsap.fromTo(el, 
+              { opacity: 0, y: 30, filter: "blur(15px)", scale: 0.99 },
+              { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, duration: 1.0, ease: "expo.out" }
+            );
+          } else {
+            // Animate on scroll trigger
+            gsap.fromTo(el, 
+              { opacity: 0, y: 60, filter: "blur(20px)", scale: 0.98 },
+              {
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                scale: 1,
+                duration: 1.4,
+                ease: "expo.out",
+                scrollTrigger: { 
+                  trigger: el, 
+                  start: "top 95%",
+                  once: true,
+                  toggleActions: "play none none none"
+                }
               }
-            }
-          );
+            );
+          }
         });
 
-        // Special Animation for Friction Zones
-        if (tier === "compatibility") {
-           const zones = containerRef.current?.querySelectorAll(".friction-zone");
-           zones?.forEach((z) => {
-             gsap.from(z, {
-               opacity: 0,
-               x: -40,
-               duration: 1.5,
-               ease: "power4.out",
-               scrollTrigger: {
-                 trigger: z,
-                 start: "top 80%"
-               }
-             });
-           });
-        }
+        // Staggered refreshes after DOM calculations settle
+        const refreshTimes = [300, 800, 1500, 3000];
+        refreshTimes.forEach((delay) => {
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, delay);
+        });
+
       }, containerRef);
       
       return () => ctx.revert();
     }
-  }, [loading, tier]);
+  }, [loading, tier, isUnlocked, activeTab]);
 
   if (loading) return <LoadingState />;
 
   const getIcon = (dimension: string, trait: string) => {
     const dim = DIMENSION_ASSETS[dimension];
     if (!dim) return GEN_ASSETS[dimension] || "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=300";
+    if (!dim.folder) {
+      return dim.icons[trait] || GEN_ASSETS.drivers;
+    }
     return `/assets/report/${dim.folder}/${dim.icons[trait] || "default.svg"}`;
+  };
+
+  const scrollToSection = (id: string) => {
+    let targetTab: "core" | "shadow" | "sync" = "core";
+    if (id === "shadow" || id === "playbook") {
+      targetTab = "shadow";
+    } else if (["relational", "cognitive", "linguistics"].includes(id)) {
+      targetTab = "sync";
+    }
+
+    const isLocked = !isUnlocked && ["shadow", "relational", "cognitive", "linguistics", "playbook"].includes(id);
+    
+    setActiveTab(targetTab);
+
+    setTimeout(() => {
+      const targetId = isLocked ? "lock-gate" : id;
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        setActiveSection(id);
+      }
+    }, 80);
   };
 
   return (
@@ -747,481 +1010,1072 @@ If you fail to bridge this isolation, your proprietary systems will inevitably c
       <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, 30px) scale(1.1); }
-          66% { transform: translate(-30px, 50px) scale(0.9); }
+          33% { transform: translate(30px, -20px) scale(1.05); }
+          66% { transform: translate(-20px, 30px) scale(0.95); }
         }
-        @keyframes scanline {
-          0% { transform: translateY(-100vh); }
-          100% { transform: translateY(100vh); }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+          to { opacity: 1; transform: translateY(0); filter: blur(0px); }
         }
       `}</style>
 
-      <StickyReportNav />
-      {/* Delicate Grain Overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
       
-      {/* Neural Depth Layer: Floating Orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div 
-          className="absolute top-[10%] -left-64 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[160px] animate-[float_20s_infinite_ease-in-out]" 
-          style={{ animationDelay: '0s' }}
-        />
-        <div 
-          className="absolute bottom-[20%] -right-64 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[180px] animate-[float_25s_infinite_ease-in-out]" 
-          style={{ animationDelay: '-5s' }}
-        />
-        <div 
-          className="absolute top-[40%] left-[30%] w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[140px] animate-[float_15s_infinite_ease-in-out]" 
-          style={{ animationDelay: '-10s' }}
-        />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-40">
+        <div className="absolute top-[10%] -left-32 w-[400px] h-[400px] bg-purple-900/10 rounded-full blur-[100px] animate-[float_20s_infinite_ease-in-out]" />
+        <div className="absolute bottom-[20%] -right-32 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] animate-[float_25s_infinite_ease-in-out]" />
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-red-900/5 rounded-full blur-[90px] animate-[float_15s_infinite_ease-in-out]" />
       </div>
 
-      {/* Premium Scanline Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] animate-[scanline_10s_infinite_linear] bg-gradient-to-b from-transparent via-black to-transparent h-[10px] w-full" />
-      
-      {/* Sticky Progress Line */}
-      <div className="fixed left-0 top-0 w-[2px] h-full bg-black/[0.02] z-50">
-        <div id="scroll-progress-bar" className="absolute top-0 left-0 w-full bg-[#6D28D9] shadow-[0_0_30px_rgba(109,40,217,0.8)]" style={{ height: "0%" }}>
-          <div className="absolute bottom-0 left-[-4px] w-3 h-3 bg-[#6D28D9] rounded-full blur-[4px] animate-pulse" />
-        </div>
-      </div>
-      
       <main 
         ref={containerRef}
-        className="min-h-screen bg-[#FDFDFD] text-[#0A0A0A] font-outfit pb-40 opacity-0 selection:bg-[#6D28D9] selection:text-white"
+        className={`min-h-screen font-outfit flex flex-col selection:bg-purple-600 selection:text-white transition-colors duration-500 ${
+          isLightMode 
+            ? "bg-[#FAFAF8] text-[#111111] light-mode" 
+            : "bg-[#030303] text-zinc-100"
+        }`}
       >
-        <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0" 
-             style={{ backgroundImage: "radial-gradient(circle at 2px 2px, black 1px, transparent 0)", backgroundSize: "40px 40px" }} />
-      <header className="px-8 md:px-24 py-4 flex justify-between items-center relative z-20 border-b border-black/5 bg-[#FDFDFD]/60 backdrop-blur-3xl sticky top-0 font-outfit">
-        <div className="flex items-center">
-           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
-             <img 
-               src="/logo.svg" 
-               alt="Psypher Logo" 
-               className="h-8 md:h-10 w-auto transition-all duration-500 group-hover:opacity-70" 
-             />
-           </div>
-        </div>
-        
-        <div className="hidden lg:flex items-center gap-4 opacity-30 select-none text-[#0A0A0A]">
-          <span className="text-[10px] font-mono tracking-[0.4em] uppercase font-black italic">{PROTOCOL_VERSION}</span>
-        </div>
- 
-        <div className="flex gap-10 items-center">
-          <button className="text-[8px] font-mono font-black uppercase tracking-widest opacity-20 hover:opacity-80 transition-opacity text-[#0A0A0A]">
-            Download
-          </button>
-          <button className="text-[8px] font-mono font-black uppercase tracking-widest bg-black text-white px-6 py-2 rounded-full hover:bg-[#0A0A0A]/80 transition-all">
-            Export
-          </button>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-8 md:px-24 mt-40 space-y-32 relative z-10">
-        
-        {/* Initial Profile Hero */}
-        <section className="space-y-32">
-          <div className="space-y-12">
-            <div className="flex items-center gap-6">
-              <span className="text-[10px] font-mono text-[#6D28D9] tracking-[0.6em] uppercase font-black">
-                {tier === "compatibility" ? "Binary_Sync_Protocol" : "Subject_Analysis_Dossier"}
-              </span>
-              <div className="flex-1 h-[0.5px] bg-black/5" />
-            </div>            <div className="flex flex-col gap-4">
-              {tier === "compatibility" ? (
-                <div className="flex flex-col md:flex-row md:items-end gap-8">
-                  <h1 className="text-8xl md:text-[12rem] font-thin tracking-tighter leading-none text-[#0A0A0A] lowercase">
-                    Alpha<span className="text-[#6D28D9]">.</span>
-                  </h1>
-                  <span className="text-4xl md:text-6xl font-thin text-black/10 md:mb-4 italic">vs</span>
-                  <h1 className="text-8xl md:text-[12rem] font-thin tracking-tighter leading-none text-[#6D28D9] lowercase">
-                    Beta<span className="text-black/10">.</span>
-                  </h1>
-                </div>
-              ) : (
-                <h1 className="text-8xl md:text-[14rem] font-thin tracking-tighter leading-none text-[#0A0A0A] lowercase">
-                  Profile_Alpha<span className="text-[#6D28D9]">.</span>
-                </h1>
-              )}
-            </div>
-
+        <header className="sticky top-0 z-30 flex-shrink-0 px-6 py-4 flex flex-row justify-between items-center border-b border-zinc-900 bg-black/60 backdrop-blur-xl font-outfit">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
+            <img src="/logo.svg" alt="Psypher Logo" className="h-8 w-auto invert transition-opacity duration-300 group-hover:opacity-75" />
           </div>
-  
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-end">
-            <div className="lg:col-span-12 space-y-12">
-              <p className="text-4xl md:text-6xl font-extralight text-black/90 leading-[1.1] tracking-tight">
-                {tier === "compatibility" ? (
-                  <>Synthesizing two neural architectures into one <span className="text-[#0A0A0A] font-medium italic underline decoration-[#6D28D9]/40 underline-offset-8">Cohesion Map</span>.</>
-                ) : (
-                  <>You operate as a <span className="text-[#0A0A0A] font-medium italic underline decoration-[#6D28D9]/40 underline-offset-8">Strategic Architect</span>.</>
-                )}
-              </p>
-              <p className="text-xl text-black/40 leading-relaxed font-medium max-w-3xl">
-                {tier === "compatibility" 
-                  ? "Binary synthesis calculated via cognitive friction markers, linguistic overlap, and competitive drive alignment."
-                  : "This dossier removes the guesswork from your interpersonal dynamics and high-pressure negotiations."
-                }
-              </p>
-            </div>
-          </div>
-        </section>
 
-        {/* Executive Summary Narrative */}
-        <DossierSection
-          num={0}
-          title="Executive Summary"
-          description="A high-level synthesis of your primary neural architectural markers."
-          accentColor="text-black"
-          variant="protocol"
-          id="executive-summary"
-        >
-          <div className="col-span-full py-12 -mx-4 rounded-3xl px-12 md:px-24 stagger-reveal">
-             <div className="max-w-4xl mx-auto space-y-20 py-20">
-                <NarrativeBlock content={report} />
-             </div>
-          </div>
-        </DossierSection>
-
-        {/* Intelligence Journey */}
-        <div className="space-y-40">
-          
-          <DossierSection 
-            num={1}
-            id="dimension-1"
-            title="Personality Architecture"
-            description="The core layers of your everyday behavior and how you engage with your environment."
-            illustration="/assets/report/Big 5 SVG/Openness.svg"
-            variant="protocol"
-            accentColor="text-purple-500"
-          >
-            {scores?.bfi && Object.entries(scores.bfi).map(([trait, val]: any) => (
-              <IntelligenceRow 
-                key={trait}
-                label={trait}
-                value={val}
-                comparisonValue={tier === "compatibility" ? partnerScores?.bfi?.[trait] : undefined}
-                color="text-purple-500"
-                variant="card"
-                icon={getIcon("bfi", trait)}
-                description={
-                  trait === "Openness" ? "Neural potential for high-stakes innovation vs status-quo maintenance." :
-                  trait === "Conscientiousness" ? "Quality-control protocol and systemic organizational persistence." :
-                  trait === "Extraversion" ? "Social recharge velocity and independent work durability." :
-                  trait === "Agreeableness" ? "Negotiation stance—results priority vs collective harmony." :
-                  "Targeted environmental sensitivity and risk-mitigation radar."
-                }
-              />
-            ))}
-            <div className="col-span-full mt-24 stagger-reveal bg-white/40 p-12 rounded-[3rem] border border-black/5">
-              <h3 className="text-[10px] font-mono tracking-[0.4em] uppercase text-purple-600 mb-12 text-center opacity-50">Deep_Dossier_Narrative // Big_5_Analysis</h3>
-              <NarrativeBlock content={`
-## The Architecture of Openness
-Users with your score of 88% in Openness do not merely "like new ideas"—you hunt for them as survival assets. You possess a high-velocity neural plasticity that allows you to synthesize disparate concepts into cohesive weapons.
-
-**The Internal Experience:** You likely experience a constant "Background Hum" of theoretical simulation. You do not see a room; you see the potential arrangements of the room.
-
-**The Social Manifestation:** In leadership, this makes you a visionary but also a "Ghost." You move so fast through the conceptual landscape that your team often struggles to keep up with the structural shifts you've already completed in your mind.
-
-**The Failure Stake:** Without explicit grounding, your brilliance will dissipate into "Theoretical Overload." You will innovate a thousand worlds and inhabit none of them.
-              `} />
-            </div>
-          </DossierSection>
-
-          {tier === "basic" && (
-            <section className="py-40 text-center relative border-t border-black/5 space-y-12 rounded-[4rem] bg-black/[0.01]">
-              <div className="absolute inset-0 z-0 backdrop-blur-xl" />
-              <div className="relative z-10 space-y-8 max-w-2xl mx-auto">
-                <span className="text-[10px] font-mono text-[#6D28D9] tracking-[1em] uppercase font-black opacity-40">Tier_Gap_Detected</span>
-                <h3 className="text-5xl md:text-7xl font-thin tracking-tighter text-black">Expand_Profile<span className="text-[#6D28D9]">.</span></h3>
-                <p className="text-lg text-black/40 italic">"The remaining 6 analytical segments (Dark Triad, Attachment, Cognitive, Drivers, Linguistic, Resilience) require Deep Report clearance."</p>
-                <div className="pt-8">
-                   <button className="bg-black text-white px-16 py-6 rounded-full font-bold text-[10px] tracking-[0.3em] uppercase hover:scale-105 transition-all">Upgrade to Deep Report</button>
-                </div>
+          <div className="flex items-center gap-6">
+            {showDevTools && (
+              <div className="flex items-center gap-1 bg-zinc-900/60 border border-zinc-800/80 p-0.5 rounded-lg text-[8px] font-mono font-bold">
+                {["basic", "deep", "compatibility"].map((lvl) => (
+                  <button
+                    key={lvl}
+                    onClick={() => handleTierChange(lvl as any)}
+                    className={`px-2.5 py-1 rounded uppercase transition-colors ${tier === lvl ? "bg-purple-600 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
               </div>
-            </section>
-          )}
+            )}
 
-          {tier !== "basic" && (
-            <DossierSection 
-              num={2}
-              id="dimension-2"
-              title="The Dark Triad"
-              description="The clinical sub-clinical triad: Machiavellianism, Narcissism, and Psychopathy. Your scores represent high-stakes tactical advantages and risk markers."
-              accentColor="text-red-600"
-              illustration="/assets/report/THE Dark triad SVG/Narcissism.svg"
-              variant="protocol"
-            >
-              {scores?.darkTriad && Object.entries(scores.darkTriad).map(([trait, val]: any) => (
-              <IntelligenceRow 
-                key={trait}
-                label={trait}
-                value={val}
-                comparisonValue={tier === "compatibility" ? partnerScores?.darkTriad?.[trait] : undefined}
-                color="text-red-600"
-                variant="card"
-                icon={getIcon("darkTriad", trait)}
-                description={
-                  trait === "Machiavellianism" ? "Strategic deception, social manipulation, and the calculated use of others as instruments for goal achievement." :
-                  trait === "Narcissism" ? "Ego maintenance, grandiosity, and the exploitation of perceived status symbols for dominance." :
-                  "Lowered inhibitory response and a clinical capacity for emotional detachment in high-stress, high-stakes decision cycles."
-                }
-              />
-            ))}
-            <div className="col-span-full mt-24 stagger-reveal bg-white/40 p-12 rounded-[3rem] border border-black/5">
-              <h3 className="text-[10px] font-mono tracking-[0.4em] uppercase text-red-600 mb-12 text-center opacity-50">Tactical_Shadow_Protocol // Dark_Triad_Analysis</h3>
-              <NarrativeBlock content={`
-## The Strategic Shadow
-Your Dark Triad profile contains high-stakes tactical advantages that most organizations are too afraid to name. You do not suffer from the "Social Compliance" bugs that slow down traditional executives.
-
-**Machiavellianism (84%):** This is not "evil"; it is **Strategic Detachment**. You see the board with the clarity of a Grandmaster. You understand that influence is a friction-based resource that must be managed, not a social grace to be given away for free.
-
-**The Failure Stake:** If left unrefined, this detachment becomes "Isolation." You will win the war but find yourself standing on a battlefield with nobody left to command. Mastering the **guide** protocol is your only path to sustainable power.
-              `} />
+            {expiresAt && (
+              <div className="flex items-center gap-3 px-4 py-1.5 bg-zinc-950 border border-zinc-900 rounded-full">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-[8px] font-mono text-zinc-400 tracking-wider">EXPIRY:</span>
+                <Countdown targetDate={new Date(expiresAt)} />
+              </div>
+            )}
+            
+            <div className="flex items-center gap-3 px-4 py-1.5 bg-zinc-950 border border-zinc-900 rounded-full">
+              <ShieldAlert size={10} className="text-purple-400" />
+              <span className="text-[8px] font-mono text-zinc-400 tracking-wider">REF:</span>
+              <span className="text-[9px] font-mono font-bold text-purple-400 uppercase tracking-widest">{clearanceCode || "PENDING"}</span>
             </div>
-          </DossierSection>
-        )}
 
-          {tier !== "basic" && (
-            <DossierSection 
-              num={3}
-              id="dimension-3"
-              title="Relational Matrix"
-              description="How you build trust, manage professional boundaries, and relate to your peers."
-              accentColor="text-blue-400"
-              illustration="/assets/report/Attachment style SVG/Secure.svg"
-              variant="protocol"
+            <button 
+              onClick={toggleLightMode}
+              className="flex items-center gap-1.5 text-[8px] font-mono font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-350 transition-colors px-3 py-1 bg-zinc-900/40 border border-zinc-800/40 rounded-lg"
+              title="Toggle Theme"
             >
-              {scores?.attachment && (
+              {isLightMode ? (
                 <>
-                  <IntelligenceRow 
-                    label="Core_Style"
-                    value={scores.attachment.Style.replace('-', ' ')}
-                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Style : undefined}
-                    color="text-blue-400"
-                    variant="card"
-                    icon={getIcon("attachment", scores.attachment.Style)}
-                    description={`Your behavior profile aligns with the ${scores.attachment.Style} protocol.`}
-                  />
-                  <IntelligenceRow 
-                    label="Trust_Index"
-                    value={scores.attachment.Security}
-                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Security : undefined}
-                    color="text-blue-400"
-                    variant="card"
-                    icon={getIcon("attachment", "Secure")}
-                    description="Capacity for authentic, high-security professional bonding."
-                  />
-                  <IntelligenceRow 
-                    label="Security_Score"
-                    value={scores.attachment.Security}
-                    comparisonValue={tier === "compatibility" ? partnerScores?.attachment?.Security : undefined}
-                    color="text-blue-400"
-                    variant="card"
-                    icon={getIcon("attachment", "Secure")}
-                    description="Baseline relational durability metric."
-                  />
+                  <Sun size={10} className="text-amber-500" />
+                  <span>Light</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={10} className="text-purple-400" />
+                  <span>Dark</span>
                 </>
               )}
-            </DossierSection>
-          )}
+            </button>
 
-          {tier === "compatibility" && (
-            <section className="py-40 bg-zinc-950 rounded-[4rem] px-12 md:px-24 border border-white/5 relative overflow-hidden stagger-reveal">
-               <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[120px] rounded-full" />
-               <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full" />
-               
-               <div className="relative z-10 space-y-24">
-                  <div className="space-y-8">
-                    <span className="text-[10px] font-mono text-white/40 tracking-[1em] uppercase font-black">Sync_Calibration_Report</span>
-                    <h2 className="text-6xl md:text-8xl font-thin tracking-tighter text-white">Friction_Zones<span className="text-[#6D28D9]">.</span></h2>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="p-12 rounded-3xl bg-white/[0.03] border border-white/5 space-y-6">
-                      <h4 className="text-xl font-medium text-white italic">"High Intellectual Symmetry"</h4>
-                      <p className="text-sm text-white/40 leading-relaxed font-light">Both subjects exhibit Openness scores above 80%. Strategic alignment is highly likely in innovative environments.</p>
-                      <div className="h-[2px] w-full bg-gradient-to-r from-[#6D28D9] to-transparent" />
-                    </div>
-                    <div className="p-12 rounded-3xl bg-white/[0.03] border border-white/5 space-y-6">
-                      <h4 className="text-xl font-medium text-white italic">"Relational Dissonance"</h4>
-                      <p className="text-sm text-white/40 leading-relaxed font-light">Alpha's Avoidant style vs Beta's Secure style creates a 40% communication lag during high-stress decision windows.</p>
-                      <div className="h-[2px] w-full bg-gradient-to-r from-red-500 to-transparent" />
-                    </div>
-                  </div>
-               </div>
-            </section>
-          )}
+            <button 
+              onClick={() => window.print()}
+              className="text-[8px] font-mono font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors px-3 py-1 bg-zinc-900/40 border border-zinc-800/40 rounded-lg"
+            >
+              PDF
+            </button>
+          </div>
+        </header>
 
-          {!isUnlocked && tier !== "basic" && (
-            <section className="py-60 text-center relative border-t border-black/5 space-y-16 overflow-hidden rounded-[4rem] bg-black/[0.01]">
-                <div className="absolute inset-0 z-0 backdrop-blur-3xl" />
-                
-                <div className="relative z-10 space-y-12 max-w-3xl mx-auto py-24">
-                  <div className="flex flex-col items-center gap-6">
-                    <div className="w-16 h-16 rounded-full border border-black/10 flex items-center justify-center animate-pulse">
-                      <span className="text-xl rotate-12 opacity-40 italic font-serif">lock</span>
+        <div className="flex-1 flex flex-col lg:flex-row relative max-w-[1500px] mx-auto w-full px-6 md:px-10 py-10 gap-10 items-start">
+          
+          <aside className="w-full lg:w-72 hidden lg:flex flex-col justify-between p-6 bg-zinc-950/25 border border-zinc-900 rounded-[2rem] lg:sticky lg:top-24 select-none self-start h-[calc(100vh-8rem)] z-20 backdrop-blur-md">
+            <div className="space-y-8">
+              <div className="space-y-1">
+                <span className="text-[8px] font-mono uppercase text-zinc-600 tracking-[0.2em]">INTELLIGENCE_PROFILE</span>
+                <h2 className="text-2xl font-light tracking-tighter text-white uppercase">Dossier Index</h2>
+              </div>
+
+              <nav className="flex flex-col gap-5">
+                {dossierGroups.map((group) => {
+                  const isGroupActive = activeTab === group.id;
+                  const isGroupLocked = !isUnlocked && group.id !== "core";
+                  
+                  return (
+                    <div key={group.id} className="space-y-1.5">
+                      {/* Group Header */}
+                      <button
+                        onClick={() => {
+                          if (isGroupLocked) {
+                            scrollToSection("lock-gate");
+                          } else {
+                            setActiveTab(group.id as any);
+                            scrollToSection(group.items[0].id);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] font-black pb-1.5 border-b border-zinc-900/80 text-left transition-colors duration-300 ${
+                          isGroupActive ? "text-purple-400 border-purple-950/40" : "text-zinc-600 hover:text-zinc-400"
+                        }`}
+                      >
+                        <span>{group.label}</span>
+                        {isGroupLocked && (
+                          <span className="text-[7px] text-red-500 font-mono tracking-normal">LOCK</span>
+                        )}
+                      </button>
+
+                      {/* Group Items (Indented) */}
+                      {isGroupActive && (
+                        <div className="flex flex-col gap-1 pl-2 animate-[fadeIn_0.3s_ease-out]">
+                          {group.items.map((item) => {
+                            const active = activeSection === item.id;
+                            const isBasicHidden = tier === "basic" && ["shadow", "relational", "cognitive", "linguistics", "playbook"].includes(item.id);
+                            if (isBasicHidden) return null;
+
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => scrollToSection(item.id)}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-mono text-[8px] uppercase tracking-widest transition-all duration-300 font-bold text-left border ${
+                                  active 
+                                    ? "bg-purple-950/20 text-purple-400 border-purple-800/10" 
+                                    : "text-zinc-500 hover:text-zinc-300 border-transparent"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-[6px] ${active ? "text-purple-400" : "text-zinc-700"}`}>
+                                    {item.code}
+                                  </span>
+                                  <span>{item.label}</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <span className="text-[10px] font-mono text-[#6D28D9] tracking-[1.5em] uppercase font-black opacity-40">Protocol_Gate_Active</span>
-                  </div>
-                  
-                  <h3 className="text-7xl md:text-9xl font-bold tracking-tighter text-[#0A0A0A] uppercase">
-                    Deep<span className="text-[#6D28D9]">_</span>Scan
-                  </h3>
-                  
-                  <p className="text-xl text-black/70 max-w-xl mx-auto font-medium leading-relaxed italic">
-                    "Cognitive mechanics and linguistic biomarkers are currently restricted. Full decryption required to complete neural profile."
-                  </p>
-                  
-                  <div className="pt-12">
-                    <button 
-                      onClick={() => setIsUnlocked(true)}
-                      className="group relative z-10 bg-black text-white px-24 py-8 rounded-full font-bold hover:scale-105 transition-all text-[11px] tracking-[0.4em] uppercase shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-95"
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-zinc-900 opacity-40 hover:opacity-100 transition-opacity duration-300">
+              <div className="text-[8px] font-mono uppercase text-zinc-500 tracking-wider">System Credentials</div>
+              <p className="text-[8px] font-mono text-zinc-600 leading-tight">V1.2 // SECURE_DATA_ENCRYPTION_ACTIVE // Ψ</p>
+            </div>
+          </aside>
+          <div className="flex-1 w-full space-y-12 relative bg-transparent z-0">
+            {/* Command-Center Tabs Navigator */}
+            <div className="relative z-20 w-full bg-zinc-950/40 border border-zinc-900 rounded-[2rem] p-2 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 max-w-6xl mx-auto stagger-reveal">
+              <div className="flex flex-wrap w-full md:w-auto items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest font-black">
+                {[
+                  { id: "core", label: "01 // MY CORE", desc: "Core Personality" },
+                  { id: "shadow", label: "02 // MY SHADOW", desc: "Shadow & Values" },
+                  { id: "sync", label: "03 // OUR SYNC", desc: "Resonance & Cognitive" }
+                ].map((tab) => {
+                  const active = activeTab === tab.id;
+                  const isLocked = !isUnlocked && (tab.id === "shadow" || tab.id === "sync");
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        if (isLocked) {
+                          scrollToSection("lock-gate");
+                        } else {
+                          setActiveTab(tab.id as any);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }
+                      }}
+                      className={`relative px-6 py-3 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 overflow-hidden min-w-[130px] md:min-w-[160px] text-center ${
+                        active 
+                          ? "bg-purple-950/40 border border-purple-800/30 text-purple-400 shadow-[0_0_15px_rgba(109,40,217,0.05)]" 
+                          : "text-zinc-500 hover:text-zinc-300 border border-transparent hover:bg-zinc-900/30"
+                      }`}
                     >
-                      <span className="relative z-10">Unlock Complete Dossier</span>
-                      <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-y-px" />
+                      <span className="text-[10px] tracking-[0.2em] font-black">{tab.label}</span>
+                      <span className="text-[7px] text-zinc-500 font-mono tracking-widest mt-0.5">{tab.desc}</span>
+                      {active && (
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 to-indigo-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                      )}
+                      {isLocked && (
+                        <span className="absolute top-1.5 right-1.5 text-[6px] text-red-500 font-mono bg-red-950/40 px-1 py-0.2 rounded border border-red-900/30 tracking-normal">LOCK</span>
+                      )}
                     </button>
-                    
-                    <div className="mt-12 flex justify-center gap-8 opacity-20 hidden md:flex">
-                       {["DIM_04", "DIM_05", "DIM_06", "DIM_07"].map(d => (
-                         <span key={d} className="text-[8px] font-mono tracking-widest">{d}_LOCKED</span>
-                       ))}
+                  );
+                })}
+              </div>
+              
+              <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-2xl">
+                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                <span className="text-[8px] font-mono text-zinc-500 tracking-[0.3em] uppercase">{`VIEWPORT: ${activeTab === "core" ? "CORE_SYSTEMS" : activeTab === "shadow" ? "SHADOW_LATENCY" : "SYNC_COHESION"}`}</span>
+              </div>
+            </div>
+
+            <div className="relative z-10 max-w-6xl mx-auto">
+              
+              {/* TAB 1: CORE */}
+              {activeTab === "core" && (
+                <div className="space-y-32 animate-[fadeIn_0.5s_ease-out]">
+                  <section id="overview" className="scroll-mt-28 space-y-12 stagger-reveal">
+                    <div className="border-b border-zinc-900 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                      <div className="space-y-4">
+                        <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">CORE_ANALYTICAL_NARRATIVE</span>
+                        <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">
+                          {tier === "compatibility" ? "Alpha vs Beta Cohesion" : "Subject Profile Summary"}
+                        </h1>
+                      </div>
+                      <p className="text-xs text-zinc-500 font-mono uppercase tracking-widest">
+                        {tier === "compatibility" ? "COHESION_PROFILE_VERIFIED" : "CORE_DOSSIER_OPEN"}
+                      </p>
                     </div>
-                  </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                      <div className="lg:col-span-8 bg-zinc-950/40 border border-zinc-900 rounded-[2rem] p-8 md:p-12 shadow-sm flex flex-col justify-center">
+                        <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={report} />
+                      </div>
+
+                      <div className="lg:col-span-4 bg-zinc-950/20 border border-zinc-900 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
+                        <div className="relative flex-shrink-0 w-[180px] h-[180px]">
+                          <BklitGauge 
+                            value={scores?.overallCongruencyScore || 78} 
+                            centerValue={scores?.overallCongruencyScore || 78} 
+                            defaultLabel="Coherence" 
+                            totalNotches={45} 
+                            spacing={20}
+                            notchCornerRadius={1}
+                            useGradient 
+                            activeGradient={["#a855f7", "#6D28D9"]}
+                            inactiveFill={isLightMode ? "rgba(9, 9, 11, 0.05)" : "rgba(255, 255, 255, 0.03)"}
+                            width={180} 
+                            height={180} 
+                          />
+                        </div>
+                        <div className="mt-8 space-y-2">
+                          <h4 className="text-sm font-bold text-white uppercase tracking-wider">Calibration Integrity</h4>
+                          <p className="text-xs text-zinc-400 leading-relaxed max-w-[200px]">Profile metadata indicates high self-awareness and data stability.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {tier === "basic" && (
+                      <div className="p-10 rounded-[2.5rem] bg-zinc-950 border border-zinc-900 text-center space-y-6 relative overflow-hidden">
+                        <span className="text-[9px] font-mono text-purple-500 tracking-[0.4em] uppercase font-bold">Tier clearance gate</span>
+                        <h3 className="text-4xl font-light tracking-tighter text-white">Decryption Required</h3>
+                        <p className="text-sm text-zinc-400 max-w-md mx-auto">Access the remaining 6 analytical segments (Shadow Profile, Relational Resonance, Cognitive Wiring) to complete the profile.</p>
+                        <button onClick={() => { setIsUnlocked(true); setTier("deep"); }} className="bg-purple-600 text-white px-12 py-4 rounded-full font-mono text-xs uppercase tracking-widest hover:bg-purple-700 transition-colors shadow-lg shadow-purple-900/30">Purchase Deep scan — $29</button>
+                      </div>
+                    )}
+                  </section>
+
+                  <section id="personality" className="scroll-mt-28 space-y-12 stagger-reveal">
+                    <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                      <div className="space-y-4">
+                        <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_02 // SYSTEMATIC_BEHAVIOR</span>
+                        <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Personality Architecture</h1>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                      <div className="lg:col-span-8 flex flex-col justify-between bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-sm relative overflow-hidden">
+                        <SpotlightCard glowColor="rgba(109, 40, 217, 0.05)" className="w-full h-full flex flex-col justify-center">
+                          <div className="space-y-6">
+                            <h3 className="text-[9px] font-mono tracking-[0.3em] uppercase text-purple-500 opacity-60">Intelligence_Analysis</h3>
+                            <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier?.personality_architecture || "Analyzing neural architecture..."} />
+                          </div>
+                        </SpotlightCard>
+                      </div>
+
+                      <div className="lg:col-span-4 bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                        <SpotlightCard glowColor="rgba(109, 40, 217, 0.06)" className="w-full h-full flex flex-col justify-between">
+                          <div className="space-y-6">
+                            <div className="space-y-2">
+                              <span className="text-[8px] font-mono tracking-[0.3em] uppercase text-zinc-500 font-bold">Subject_profile_signature</span>
+                              <h3 className="text-4xl font-light tracking-tighter text-white leading-tight">
+                                Strategic<br />
+                                <span className="text-[#6D28D9] font-medium">Architect</span>
+                              </h3>
+                            </div>
+                            
+                            <div className="h-[0.5px] w-full bg-zinc-800" />
+
+                            {/* High-Tech HUD Container */}
+                            <div className="bg-zinc-900/30 border border-purple-500/20 rounded-[1.5rem] p-5 relative overflow-hidden flex justify-center items-center">
+                              {scores?.selfReport?.bfi && (
+                                <ArchitectureRadar 
+                                  data={scores.selfReport.bfi} 
+                                  hoveredTrait={hoveredTrait}
+                                  onHoverTrait={setHoveredTrait}
+                                  showLabels={true}
+                                  standalone={false}
+                                />
+                              )}
+                            </div>
+
+                            {/* Compact BFI Traits List */}
+                            <div className="space-y-4 pt-2">
+                              {scores?.selfReport?.bfi && Object.entries(scores.selfReport.bfi).map(([trait, val]: any) => {
+                                const isHighlighted = hoveredTrait === trait;
+                                const traitKey = trait as string;
+                                const displayLabel = traitKey === "Neuroticism" ? "Emotionality" : traitKey;
+                                
+                                return (
+                                  <div
+                                    key={trait}
+                                    onMouseEnter={() => setHoveredTrait(trait)}
+                                    onMouseLeave={() => setHoveredTrait(null)}
+                                    className={`flex flex-col gap-1.5 cursor-pointer group/row transition-all duration-300 ${
+                                      isHighlighted ? "opacity-100 scale-[1.01]" : "opacity-70 hover:opacity-100"
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-baseline text-[9px] font-mono tracking-wider font-bold">
+                                      <span className={isHighlighted ? "text-purple-400" : "text-zinc-400 group-hover/row:text-zinc-300"}>
+                                        {displayLabel.toUpperCase()}
+                                      </span>
+                                      <span className={isHighlighted ? "text-purple-400 font-extrabold" : "text-white"}>
+                                        {val}%
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="relative w-full h-[3px] bg-zinc-900 rounded-full overflow-hidden">
+                                      <div 
+                                        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${
+                                          isHighlighted 
+                                            ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" 
+                                            : "bg-purple-950/60 group-hover/row:bg-purple-900/60"
+                                        }`}
+                                        style={{ width: `${val}%` }} 
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </SpotlightCard>
+                      </div>
+
+                      <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6">
+                        {scores?.selfReport?.bfi && Object.entries(scores.selfReport.bfi).map(([trait, val]: any) => {
+                          const isHighlighted = hoveredTrait === trait;
+                          return (
+                            <div
+                              key={trait}
+                              onMouseEnter={() => setHoveredTrait(trait)}
+                              onMouseLeave={() => setHoveredTrait(null)}
+                              className="h-full"
+                            >
+                              <SpotlightCard 
+                                glowColor={isHighlighted ? "rgba(168, 85, 247, 0.15)" : "rgba(109, 40, 217, 0.08)"}
+                                className={`rounded-[2rem] p-6 flex flex-col justify-between h-full group transition-all duration-500 ${
+                                  isHighlighted 
+                                    ? "bg-zinc-900/40 border-purple-500/50 scale-[1.03] shadow-[0_0_25px_rgba(168,85,247,0.15)]" 
+                                    : "bg-zinc-950/20 border-zinc-900 hover:bg-zinc-900/10 hover:border-zinc-800"
+                                }`}
+                              >
+                                <div className="space-y-4">
+                                  <div className="flex justify-between items-start">
+                                    <span className="text-[9px] font-mono tracking-[0.15em] text-purple-400 uppercase font-black">{trait}</span>
+                                    <img src={getIcon("bfi", trait)} className="w-8 h-8 object-contain opacity-60 invert group-hover:scale-105 transition-transform" alt="" />
+                                  </div>
+                                  <p className="text-[11px] text-zinc-400 leading-relaxed font-outfit">
+                                    {
+                                      trait === "Openness" ? "Neural potential for high-stakes innovation vs status-quo maintenance." :
+                                      trait === "Conscientiousness" ? "Quality-control protocol and systemic organizational persistence." :
+                                      trait === "Extraversion" ? "Social recharge velocity and independent work durability." :
+                                      trait === "Agreeableness" ? "Negotiation stance—results priority vs harmony." :
+                                      "Targeted environmental sensitivity and risk-mitigation radar."
+                                    }
+                                  </p>
+                                </div>
+                                
+                                <div className="mt-8">
+                                  <BklitNotchBar 
+                                    value={val} 
+                                    segments={10} 
+                                    activeColor={isHighlighted ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]" : "bg-purple-600 shadow-[0_0_10px_rgba(109,40,217,0.3)]"}
+                                    className="mb-3 h-2"
+                                  />
+                                  <div className="flex items-baseline justify-between">
+                                    <span className="text-3xl font-bold tracking-tighter text-white">{val}%</span>
+                                    {tier === "compatibility" && partnerScores?.bfi?.[trait] !== undefined && (
+                                      <span className="text-[9px] font-mono text-purple-400 font-bold">Partner: {partnerScores.bfi[trait]}%</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </SpotlightCard>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="col-span-full mt-8">
+                      <PrescriptivePlaybook 
+                        dimension="Personality Architecture"
+                        score={88}
+                        plays={[
+                          { label: "High Openness Negotiation", script: "I see the tactical shifts happening here, and I've architected a pivot that leverages the current volatility as a primary asset.", context: "Use when the team is stuck in status-quo reactive cycles.", icon: Swords },
+                          { label: "Social Bridge Protocol", script: "I acknowledge the current workflow is functional, but my analysis indicates a 20% efficiency gap if we do not integrate the upcoming neural shift.", context: "Use to lower social friction when proposing radical innovation.", icon: MessageCircle }
+                        ]}
+                      />
+                    </div>
+                  </section>
                 </div>
+              )}
 
-                {/* Scrambled Background Texture */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden font-mono text-[8px] leading-none whitespace-pre flex items-center justify-center rotate-12 scale-150">
-                  {Array(20).fill("010110010101010110010101010110010101010110010101\n").join("")}
+              {/* TAB 2: SHADOW & VALUES */}
+              {activeTab === "shadow" && (
+                <div className="space-y-32 animate-[fadeIn_0.5s_ease-out]">
+                  {(!isUnlocked || tier === "basic") ? (
+                    <>
+                      <div id="lock-gate" className="scroll-mt-28 w-full">
+                        <LockedStateGate onUnlock={() => { setIsUnlocked(true); setTier("deep"); }} />
+                      </div>
+
+                      <div className="blur-[40px] opacity-10 pointer-events-none select-none max-h-[450px] overflow-hidden space-y-24 border border-zinc-900/30 p-8 rounded-[2.5rem] bg-zinc-950/10">
+                        <section id="shadow" className="scroll-mt-28 space-y-12">
+                          <div className="border-b border-zinc-900 pb-8">
+                            <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_03 // SHADOW_PROFILE</span>
+                            <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">The Shadow Index</h1>
+                          </div>
+                          {scores?.selfReport?.darkTriad && (
+                            <ShadowSection 
+                              scores={scores.selfReport.darkTriad as any} 
+                              partnerScores={tier === "compatibility" ? partnerScores?.darkTriad : undefined}
+                              narrative={hybridDossier?.shadow_profile}
+                              theme={isLightMode ? "light" : "dark"}
+                            />
+                          )}
+                        </section>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <section id="shadow" className="scroll-mt-28 space-y-12 stagger-reveal">
+                        <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                          <div className="space-y-4">
+                            <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_03 // SHADOW_PROFILE</span>
+                            <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">The Shadow Index</h1>
+                          </div>
+                        </div>
+                        {scores?.selfReport?.darkTriad && (
+                          <ShadowSection 
+                            scores={scores.selfReport.darkTriad as any} 
+                            partnerScores={tier === "compatibility" ? partnerScores?.darkTriad : undefined}
+                            narrative={hybridDossier?.shadow_profile}
+                            theme={isLightMode ? "light" : "dark"}
+                          />
+                        )}
+                      </section>
+
+                      <section id="playbook" className="scroll-mt-28 space-y-12 stagger-reveal">
+                        {scores && (
+                          <div className="space-y-12">
+                            <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                              <div className="space-y-4">
+                                <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_08 // PRESCRIPTIVE_DIRECTIVES</span>
+                                <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Prescriptive Plays & Drivers</h1>
+                              </div>
+                            </div>
+
+                            <div className="space-y-8">
+                              <div className="flex items-center gap-4">
+                                <div className="w-6 h-[1px] bg-purple-500" />
+                                <span className="text-[8px] font-mono tracking-widest text-zinc-500 uppercase">Value Orientation Index</span>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                                {/* Visual Donut Chart HUD (Left) */}
+                                <div className="lg:col-span-5 flex justify-center lg:self-start lg:sticky lg:top-28">
+                                  {scores?.schwartz && (
+                                    <SchwartzCircumplex 
+                                      data={scores.schwartz}
+                                      hoveredValue={hoveredSchwartzValue}
+                                      onHoverValue={setHoveredSchwartzValue}
+                                    />
+                                  )}
+                                </div>
+
+                                {/* Quadrants Bento Grid (Right) */}
+                                <div className="lg:col-span-7">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {SCHWARTZ_QUADRANTS.map((quad) => {
+                                      const hasActiveKey = quad.keys.includes(hoveredSchwartzValue || "");
+                                      return (
+                                        <SpotlightCard 
+                                          key={quad.id}
+                                          glowColor={quad.color + "15"}
+                                          className={`rounded-[2rem] p-6 bg-zinc-950/20 border transition-all duration-300 flex flex-col justify-between ${
+                                            hasActiveKey 
+                                              ? "bg-zinc-900/10 shadow-[0_0_20px_rgba(0,0,0,0.5)]" 
+                                              : "border-zinc-900 hover:border-zinc-800"
+                                          }`}
+                                          style={{
+                                            borderColor: hasActiveKey ? quad.color : "rgb(24, 24, 27)"
+                                          }}
+                                        >
+                                          <div className="space-y-4">
+                                            <div className="space-y-1">
+                                              <span 
+                                                className="text-[9px] font-mono tracking-[0.15em] uppercase font-black"
+                                                style={{ color: quad.color }}
+                                              >
+                                                {quad.label}
+                                              </span>
+                                              <p className="text-[10px] text-zinc-500 leading-normal font-outfit">
+                                                {quad.description}
+                                              </p>
+                                            </div>
+
+                                            <div className="space-y-3 pt-2">
+                                              {quad.keys.map((key) => {
+                                                const val = scores?.schwartz?.[key] || 50;
+                                                const meta = SCHWARTZ_MAP[key] || { label: key, icon: Zap, desc: "Primary driver." };
+                                                const Icon = meta.icon;
+                                                const isActive = hoveredSchwartzValue === key;
+
+                                                return (
+                                                  <div
+                                                    key={key}
+                                                    onMouseEnter={() => setHoveredSchwartzValue(key)}
+                                                    onMouseLeave={() => setHoveredSchwartzValue(null)}
+                                                    className="flex flex-col gap-1 cursor-pointer transition-all duration-300"
+                                                  >
+                                                    <div className="flex justify-between items-baseline font-mono text-[9px] font-bold">
+                                                      <span className="flex items-center gap-1.5">
+                                                        <Icon 
+                                                          size={11} 
+                                                          className="transition-colors duration-300"
+                                                          style={{ color: isActive ? quad.color : "#52525b" }} 
+                                                        />
+                                                        <span 
+                                                          className="transition-colors duration-300"
+                                                          style={{ color: isActive ? "#ffffff" : "#a1a1aa" }}
+                                                        >
+                                                          {meta.label.toUpperCase()}
+                                                        </span>
+                                                      </span>
+                                                      <span 
+                                                        className="transition-colors duration-300"
+                                                        style={{ color: isActive ? quad.color : "#71717a" }}
+                                                      >
+                                                        {val}%
+                                                      </span>
+                                                    </div>
+
+                                                    <div className="relative w-full h-[2.5px] bg-zinc-900 rounded-full overflow-hidden mt-0.5">
+                                                      <div 
+                                                        className="absolute top-0 left-0 h-full rounded-full transition-all duration-500"
+                                                        style={{ 
+                                                          width: `${val}%`,
+                                                          backgroundColor: quad.color,
+                                                          boxShadow: isActive ? `0 0 8px ${quad.color}` : "none"
+                                                        }}
+                                                      />
+                                                    </div>
+
+                                                    <p 
+                                                      className={`text-[9px] text-zinc-400 font-outfit mt-1 leading-relaxed transition-all duration-300 ${
+                                                        isActive 
+                                                          ? "opacity-100 max-h-12 translate-y-0" 
+                                                          : "opacity-0 max-h-0 overflow-hidden -translate-y-1 pointer-events-none"
+                                                      }`}
+                                                    >
+                                                      {meta.desc}
+                                                    </p>
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        </SpotlightCard>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="pt-12 border-t border-zinc-900">
+                              <PrescriptivePlaybook 
+                                dimension="Actionable Synthesis"
+                                score={84}
+                                plays={[
+                                  { label: "High-Context Negotiation", script: "My analysis indicates that we have an 18% efficiency gap in the current methodology. I'm proposing a structural pivot to secure long-term outcomes.", context: "Use when addressing systemic bottlenecks in professional workflows.", icon: Target },
+                                  { label: "Relational Dynamics Shift", script: "I recognize the current interaction depth is functional, but my modeling shows that increasing transparency will optimize our joint integration scores.", context: "Use to shift interpersonal friction into collaborative alignment.", icon: Zap }
+                                ]}
+                              />
+                            </div>
+
+                            <div className="pt-12 border-t border-zinc-900">
+                              <div className="flex flex-col items-center gap-10 max-w-4xl mx-auto px-8 py-16 bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] relative overflow-hidden">
+                                <div className="flex flex-col items-center text-center gap-4 relative z-10">
+                                  <div className="p-3 bg-[#6D28D9]/10 rounded-2xl">
+                                    <Share2 size={24} className="text-purple-400" />
+                                  </div>
+                                  <h2 className="text-4xl font-bold uppercase tracking-tight text-white">Export Signature</h2>
+                                  <p className="text-zinc-500 font-mono text-[9px] uppercase tracking-[0.2em] max-w-md">
+                                    Generate a validated cognitive signature for external review. 
+                                  </p>
+                                </div>
+
+                                {scores && (
+                                  <ShareableSnippet 
+                                    clearanceCode={clearanceCode || "SYN-88"}
+                                    summary={report?.split('\n')[0] || "Psychological profile synthesized. Analysis suggests high cognitive resilience."}
+                                    traits={[
+                                      { label: "Machiavellianism", value: scores.selfReport.darkTriad.Machiavellianism || 50 },
+                                      { label: "Strategic_Action", value: scores.linguistic?.analyticalThinking || 50 },
+                                      { label: "Status_Awareness", value: scores.linguistic?.powerLanguage || 50 }
+                                    ]}
+                                  />
+                                )}
+                                
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-900/5 blur-[100px] rounded-full" />
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-900/5 blur-[100px] rounded-full" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </section>
+                    </>
+                  )}
                 </div>
-            </section>
-          )}
+              )}
 
-          <div className={`space-y-40 transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${(!isUnlocked || tier === "basic") ? "blur-[60px] opacity-[0.03] pointer-events-none select-none max-h-[800px] overflow-hidden grayscale scale-95" : "blur-0 opacity-100 scale-100"}`}>
-            <DossierSection 
-              num={4}
-              id="dimension-4"
-              title="Cognitive Mechanics"
-              description="Information processing architecture and decision-making logic gates."
-              accentColor="text-amber-400"
-              illustration="/assets/report/Cognitive Functions SVG/Adaptive Observation.svg"
-              variant="protocol"
-              fastReveal={true}
-            >
-              <CognitiveInteractiveSection scores={scores} />
-            </DossierSection>
+              {/* TAB 3: RELATIONSHIPS & COGNITIVE */}
+              {activeTab === "sync" && (
+                <div className="space-y-32 animate-[fadeIn_0.5s_ease-out]">
+                  {(!isUnlocked || tier === "basic") ? (
+                    <>
+                      <div id="lock-gate" className="scroll-mt-28 w-full">
+                        <LockedStateGate onUnlock={() => { setIsUnlocked(true); setTier("deep"); }} />
+                      </div>
 
-            <DossierSection 
-              num={5}
-              id="dimension-5"
-              title="Core Drivers"
-              description="Universal value orientations that govern long-term behavior and motivation."
-              accentColor="text-emerald-400"
-              illustration="/assets/report/Core Drivers SVG/HEDONISM.svg"
-              variant="protocol"
-            >
-               {scores?.schwartz && Object.entries(scores.schwartz).map(([trait, val]: any) => (
-                <IntelligenceRow 
-                  key={trait}
-                  label={trait}
-                  value={val}
-                  comparisonValue={tier === "compatibility" ? (partnerScores?.schwartz as any)?.[trait] : undefined}
-                  color="text-emerald-400"
-                  variant="card"
-                  icon={getIcon("schwartz", trait)}
-                  description={`The primary motivation for ${trait} behaviors within the subject's operative framework.`}
-                />
-              ))}
-            </DossierSection>
+                      <div className="blur-[40px] opacity-10 pointer-events-none select-none max-h-[450px] overflow-hidden space-y-24 border border-zinc-900/30 p-8 rounded-[2.5rem] bg-zinc-950/10">
+                        <section id="relational" className="scroll-mt-28 space-y-12">
+                          <div className="border-b border-zinc-900 pb-8">
+                            <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_04 // RELATIONAL_RESONANCE</span>
+                            <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Relational Resonance</h1>
+                          </div>
+                          {scores?.selfReport?.attachment && (
+                            <ResonanceVector 
+                              style={scores.selfReport.attachment.Style} 
+                              security={scores.selfReport.attachment.Security} 
+                            />
+                          )}
+                        </section>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <section id="relational" className="scroll-mt-28 space-y-12 stagger-reveal">
+                        {scores?.selfReport?.attachment && (
+                          <div className="space-y-12">
+                            <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                              <div className="space-y-4">
+                                <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_04 // RELATIONAL_RESONANCE</span>
+                                <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Relational Resonance</h1>
+                              </div>
+                            </div>
+                            <ResonanceVector 
+                              style={scores.selfReport.attachment.Style} 
+                              security={scores.selfReport.attachment.Security} 
+                              theme={isLightMode ? "light" : "dark"}
+                            />
 
-            <DossierSection 
-              num={6}
-              id="dimension-6"
-              title="Linguistic Fingerprint"
-              description="Neural markers found in your communication patterns that reveal hidden cognitive biases."
-              accentColor="text-cyan-400"
-              illustration="/assets/report/language.png"
-              variant="protocol"
-            >
-              {scores?.language && Object.entries(scores.language).map(([trait, val]: any) => (
-                <IntelligenceRow 
-                  key={trait}
-                  label={trait}
-                  value={val}
-                  comparisonValue={tier === "compatibility" ? (partnerScores?.language as any)?.[trait] : undefined}
-                  color="text-cyan-400"
-                  variant="card"
-                  icon="/assets/report/language.png"
-                  description={
-                    trait === "Analytical" ? "Density of logical connective markers and preference for objective evidence." :
-                    trait === "Social" ? "Frequence of relational cues and community-oriented linguistic structures." :
-                    trait === "Clout" ? "Communicative indicators of status-awareness and hierarchical positioning." :
-                    "Markers of transparency, vulnerability, and baseline communicative honesty."
-                  }
-                />
-              ))}
-            </DossierSection>
+                            {tier === "compatibility" && (
+                              <div className="p-10 bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-900/5 blur-[100px] rounded-full" />
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-900/5 blur-[100px] rounded-full" />
+                                
+                                <div className="relative z-10 space-y-8">
+                                  <div className="flex flex-col gap-2">
+                                    <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">Sync_Calibration_Report</span>
+                                    <h3 className="text-4xl font-light tracking-tighter text-white">Friction_Zones</h3>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <SpotlightCard 
+                                      glowColor="rgba(168, 85, 247, 0.08)"
+                                      className="p-8 rounded-[2rem] bg-zinc-950 border border-zinc-900/80 space-y-4 hover:border-zinc-800 transition-all duration-300"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                                          <Target size={16} />
+                                        </div>
+                                        <h4 className="text-lg font-medium text-white italic">&quot;High Intellectual Symmetry&quot;</h4>
+                                      </div>
+                                      <p className="text-xs text-zinc-400 leading-relaxed font-light">Both subjects exhibit Openness scores above 80%. Strategic alignment is highly likely in innovative environments.</p>
+                                      <div className="h-[1px] w-full bg-gradient-to-r from-purple-500/30 to-transparent" />
+                                    </SpotlightCard>
+                                    
+                                    <SpotlightCard 
+                                      glowColor="rgba(239, 68, 68, 0.08)"
+                                      className="p-8 rounded-[2rem] bg-zinc-950 border border-zinc-900/80 space-y-4 hover:border-zinc-800 transition-all duration-300"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-red-500/10 rounded-lg text-red-400">
+                                          <ShieldAlert size={16} />
+                                        </div>
+                                        <h4 className="text-lg font-medium text-white italic">&quot;Relational Dissonance&quot;</h4>
+                                      </div>
+                                      <p className="text-xs text-zinc-400 leading-relaxed font-light">Alpha&apos;s Avoidant style vs Beta&apos;s Secure style creates a 40% communication lag during high-stress decision windows.</p>
+                                      <div className="h-[1px] w-full bg-gradient-to-r from-red-500/30 to-transparent" />
+                                    </SpotlightCard>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
 
-            <DossierSection 
-              num={7}
-              id="dimension-7"
-              title="Resilience Index"
-              description="Your psychological bypass capacity for maintaining focus under extreme pressure."
-              accentColor="text-pink-500"
-              illustration="/assets/report/resilience.png"
-              variant="heroic"
-            >
-              {scores?.resilience && Object.entries(scores.resilience).map(([trait, val]: any) => (
-                <IntelligenceRow 
-                  key={trait}
-                  label={trait}
-                  value={val}
-                  comparisonValue={tier === "compatibility" ? (partnerScores?.resilience as any)?.[trait] : undefined}
-                  color="text-pink-500"
-                  variant="card"
-                  icon="/assets/report/resilience.png"
-                  description={
-                    trait === "Durability" ? "Baseline capacity to withstand extended periods of high-stress environmental noise." :
-                    trait === "Agility" ? "Speed of psychological recovery after high-impact cognitive friction." :
-                    trait === "Focus" ? "Signal-to-noise optimization during peak mental task performance." :
-                    "Real-time measurement of current environmental pressure levels."
-                  }
-                />
-              ))}
-            </DossierSection>
+                            <div className="col-span-full">
+                              <PrescriptivePlaybook 
+                                dimension="Relational Matrix"
+                                score={scores.selfReport.attachment.Security || 50}
+                                plays={[
+                                  { label: "Conflict Neutralization", script: "I understand the friction here, but my priority is the objective security of the project. Let's recalibrate the communication map to bypass these social blockers.", context: "Use during professional disagreements to maintain high-security boundaries.", icon: ShieldAlert },
+                                  { label: "Influence Bonding", script: "Your analysis aligns with my vision protocol. I'm opening a high-confidence channel for this specific negotiation.", context: "Use to build authentic alliance while maintaining control.", icon: Users }
+                                ]}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </section>
+
+                      <section id="cognitive" className="scroll-mt-28 space-y-12 stagger-reveal">
+                        {scores && (
+                          <div className="space-y-12">
+                            <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                              <div className="space-y-4">
+                                <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_05 // COGNITIVE_WIRING</span>
+                                <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Cognitive Wiring</h1>
+                              </div>
+                            </div>
+
+                            <div className="space-y-8">
+                              <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-10 text-center">
+                                <h4 className="text-4xl font-bold tracking-tighter mb-2 text-white">{scores?.selfReport?.cognitiveWiring} Architecture</h4>
+                                <p className="text-zinc-500 text-[10px] font-mono tracking-widest uppercase">Cognitive Protocol ID</p>
+                              </div>
+                              
+                              <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 overflow-hidden shadow-sm">
+                                <CognitiveInteractiveSection scores={scores} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </section>
+
+                      <section id="linguistics" className="scroll-mt-28 space-y-12 stagger-reveal">
+                        {scores?.linguistic && (
+                          <div className="space-y-12">
+                            <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                              <div className="space-y-4">
+                                <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_06 // LINGUISTIC_BIOMARKERS</span>
+                                <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Linguistic Markers</h1>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                              {Object.entries(scores.linguistic)
+                                .filter(([key, val]) => typeof val === 'number' && key !== 'wordCount' && key !== 'avgSentenceLength')
+                                .map(([key, val]) => (
+                                  <IntelligenceRow 
+                                    key={key}
+                                    label={key.replace(/([A-Z])/g, ' $1').trim()}
+                                    value={val as number}
+                                    color="text-purple-500"
+                                    variant="card"
+                                    icon={getIcon("language", "default")}
+                                    description="Identified linguistic variance within clinical sample."
+                                  />
+                                ))
+                              }
+                            </div>
+
+                            <div className="pt-12 border-t border-zinc-900 space-y-8">
+                              <div className="flex items-center gap-6">
+                                <span className="text-[8px] font-mono text-purple-500 tracking-[0.4em] uppercase font-bold">DIMENSION_07 // CONGRUENCY_MAPPING</span>
+                                <h3 className="text-3xl font-light tracking-tight text-white">Congruency Mapping Analysis</h3>
+                              </div>
+                              <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-12 text-center shadow-sm">
+                                <div className="max-w-3xl mx-auto space-y-6">
+                                  <div className="text-[8px] tracking-[0.4em] font-mono text-purple-400 uppercase">Matrix_Synthesis</div>
+                                  <p className="text-xl font-serif italic text-zinc-300 leading-relaxed">
+                                    &quot;{hybridDossier?.congruency_logic || "Statistical synthesis in progress..."}&quot;
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </section>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>          
+
+            <footer className="pt-16 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-start gap-12 opacity-25 mt-20 pb-8 text-zinc-400">
+              <div className="space-y-4">
+                <div className="flex gap-10 text-[8px] font-mono uppercase tracking-[0.4em]">
+                  <span className="text-purple-400">Proprietary</span>
+                  <span>Ref: PS-SYN-8821</span>
+                </div>
+                <p className="text-[8px] font-mono leading-relaxed uppercase tracking-[0.2em] max-w-xs">
+                  For clinical evaluation only. Internal synthesis of subject-level data.
+                </p>
+              </div>
+              <div className="w-full md:w-auto flex justify-center md:justify-end opacity-60">
+                 <span className="text-[8px] font-mono tracking-[0.6em] uppercase font-bold text-center md:text-right">
+                   SYSTEM_IDENT_HIGH_PRECISION // DATA_ENCRYPTION_ACTIVE // Ψ
+                 </span>
+              </div>
+            </footer>
           </div>
         </div>
+      </main>
 
-        <footer className="pt-40 border-t border-black/5 flex flex-col md:flex-row justify-between items-start gap-16 opacity-30 pb-20 mt-40">
-          <div className="space-y-4">
-            <div className="flex gap-10 text-[9px] font-mono uppercase tracking-[0.4em] font-black text-[#0A0A0A]">
-              <span className="text-[#6D28D9]">Proprietary</span>
-              <span>Ref: PS-SYN-8821</span>
-            </div>
-            <p className="text-[9px] font-mono leading-relaxed uppercase tracking-[0.2em] font-black max-w-xs text-black/60">
-              For authorized target use only. Duplicate at Subject-Level risk.
-            </p>
-          </div>
-          
-          <div className="w-full md:w-auto flex justify-center md:justify-end py-10 opacity-60">
-             <span className="text-[9px] font-mono tracking-[0.6em] uppercase font-bold text-black/40 text-center md:text-right">
-               {SYSTEM_AUTH}
-             </span>
-          </div>
-        </footer>
-      </div>
-    </main>
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .report-markdown h1 { font-size: 4rem; color: #ffffff; line-height: 0.95; margin-bottom: 3rem; letter-spacing: -0.04em; font-weight: 800; text-transform: uppercase; }
+        .report-markdown h2 { font-size: 1.1rem; color: #c084fc; margin-top: 5rem; margin-bottom: 2rem; font-family: monospace; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
+        .report-markdown p { margin-bottom: 2.5rem; line-height: 1.6; font-weight: 400; font-size: 1.35rem; tracking: -0.01em; color: rgba(255,255,255,0.75); }
+        .report-markdown strong { color: #ffffff; font-weight: 800; }
+        
+        /* Premium light mode styling overrides */
+        .light-mode {
+          background-color: #FAFAF8 !important;
+          color: #1c1917 !important;
+        }
+        
+        .light-mode header {
+          background-color: rgba(250, 250, 248, 0.8) !important;
+          border-color: #e4e4e7 !important;
+        }
+        
+        .light-mode header img.invert {
+          filter: brightness(0.08) !important;
+        }
+        
+        .light-mode aside {
+          background-color: rgba(255, 255, 255, 0.6) !important;
+          border-color: #e4e4e7 !important;
+          box-shadow: 0 10px 30px rgba(9, 9, 11, 0.02) !important;
+        }
+        
+        .light-mode aside h2,
+        .light-mode h1,
+        .light-mode h2,
+        .light-mode h3,
+        .light-mode h4,
+        .light-mode h5,
+        .light-mode h6 {
+          color: #09090b !important;
+        }
+        
+        .light-mode aside button {
+          color: #71717a !important;
+        }
+        
+        .light-mode aside button:hover {
+          color: #09090b !important;
+        }
+        
+        .light-mode aside button[class*="text-purple-400"] {
+          color: #7c3aed !important;
+          border-color: rgba(124, 58, 237, 0.2) !important;
+        }
+        
+        .light-mode aside button[class*="bg-purple-950/20"] {
+          background-color: rgba(124, 58, 237, 0.08) !important;
+          color: #7c3aed !important;
+          border-color: rgba(124, 58, 237, 0.1) !important;
+        }
+        
+        .light-mode aside div[class*="border-t"],
+        .light-mode aside p {
+          border-color: #e4e4e7 !important;
+          color: #a1a1aa !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] {
+          background-color: rgba(255, 255, 255, 0.65) !important;
+          border-color: #e4e4e7 !important;
+          box-shadow: 0 10px 30px rgba(9, 9, 11, 0.02) !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] button {
+          color: #71717a !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] button:hover {
+          color: #09090b !important;
+          background-color: rgba(9, 9, 11, 0.03) !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] button[class*="bg-purple-950/40"] {
+          background-color: rgba(124, 58, 237, 0.08) !important;
+          border-color: rgba(124, 58, 237, 0.15) !important;
+          color: #7c3aed !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] button[class*="bg-purple-950/40"] span {
+          color: #7c3aed !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/40"] button span[class*="text-zinc-500"] {
+          color: #a1a1aa !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/60"] {
+          background-color: rgba(255, 255, 255, 0.8) !important;
+          border-color: #e4e4e7 !important;
+          color: #71717a !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950"] {
+          background-color: #f4f4f5 !important;
+          border-color: #e4e4e7 !important;
+          color: #27272a !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950"] span[class*="text-zinc-400"] {
+          color: #71717a !important;
+        }
+        
+        .light-mode div[class*="border-zinc-900"],
+        .light-mode section[class*="border-zinc-900"],
+        .light-mode div[class*="border-t-zinc-900"],
+        .light-mode div[class*="border-b-zinc-900"] {
+          border-color: #e4e4e7 !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/20"],
+        .light-mode div[class*="bg-zinc-950/40"],
+        .light-mode div[class*="bg-zinc-950/25"],
+        .light-mode section[class*="bg-zinc-950/20"],
+        .light-mode section[class*="bg-zinc-950/40"],
+        .light-mode .spotlight-card,
+        .light-mode .congruency-row {
+          background-color: rgba(255, 255, 255, 0.85) !important;
+          border-color: #e4e4e7 !important;
+          box-shadow: 0 10px 30px rgba(9, 9, 11, 0.02) !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-950/20"]:hover,
+        .light-mode div[class*="bg-zinc-950/40"]:hover,
+        .light-mode .congruency-row:hover {
+          background-color: #ffffff !important;
+          border-color: #d4d4d8 !important;
+        }
+        
+        .light-mode .text-zinc-100 {
+          color: #18181b !important;
+        }
+        .light-mode .text-zinc-300 {
+          color: #27272a !important;
+        }
+        .light-mode .text-zinc-400 {
+          color: #71717a !important;
+        }
+        .light-mode .text-zinc-500 {
+          color: #71717a !important;
+        }
+        .light-mode .text-zinc-600 {
+          color: #a1a1aa !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-900/40"] {
+          background-color: #ffffff !important;
+          border-color: rgba(168, 85, 247, 0.3) !important;
+          box-shadow: 0 10px 30px rgba(168, 85, 247, 0.06) !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-900/40"] span {
+          color: #7c3aed !important;
+        }
+        
+        .light-mode div[class*="bg-zinc-900/30"] {
+          background-color: #fcfbfa !important;
+          border-color: rgba(168, 85, 247, 0.15) !important;
+        }
+        
+        .light-mode img.invert {
+          filter: none !important;
+        }
+        
+        .light-mode div[class*="bg-[#030303]/90"] {
+          background-color: rgba(255, 255, 255, 0.95) !important;
+          border-color: #e4e4e7 !important;
+        }
+        
+        .light-mode div[class*="bg-[#030303]/90"] span[class*="text-white"] {
+          color: #09090b !important;
+        }
+        
+        .light-mode span[style*="color: rgb(255, 255, 255)"] {
+          color: #09090b !important;
+        }
+        
+        .light-mode span[class*="text-white"] {
+          color: #09090b !important;
+        }
+        
+        .light-mode::selection {
+          background-color: rgba(168, 85, 247, 0.15) !important;
+          color: #7c3aed !important;
+        }
+        
+        @media print {
+          header, aside, button, footer { display: none !important; }
+          main { background: white !important; color: black !important; }
+          .report-markdown h1 { font-size: 2.5rem !important; color: black !important; }
+          .light-mode {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+          }
+        }
+      `}</style>
+    </>
+  );
+}
 
-    <style jsx global>{`
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      .report-markdown h1 { font-size: 7rem; color: #0A0A0A; line-height: 0.85; margin-bottom: 5rem; letter-spacing: -0.06em; font-weight: 950; text-transform: uppercase; }
-      .report-markdown h2 { font-size: 1.25rem; color: #6D28D9; margin-top: 8rem; margin-bottom: 3rem; font-family: monospace; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 2rem; }
-      .report-markdown p { margin-bottom: 3rem; line-height: 1.6; font-weight: 400; font-size: 1.75rem; tracking: -0.02em; color: rgba(0,0,0,0.7); }
-      .report-markdown strong { color: #0A0A0A; font-weight: 900; }
-      .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); }
-    `}</style>
-  </>
-);
+// --- Countdown Helper ---
+function Countdown({ targetDate }: { targetDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft("EXPIRED");
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      
+      setTimeLeft(`${days}D ${hours}H ${minutes}M`);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return <span className="text-[10px] font-mono font-black text-red-500">{timeLeft}</span>;
 }
 
 export default function Page() {

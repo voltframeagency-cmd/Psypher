@@ -20,6 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${jetbrains.variable} ${ebGaramond.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js-ready');`,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <SmoothScrollProvider>
           {children}

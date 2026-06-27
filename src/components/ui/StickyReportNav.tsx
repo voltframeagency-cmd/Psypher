@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -8,20 +7,37 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollToPlugin);
 }
 
-const SECTIONS = [
-  { id: "executive-summary", label: "Executive Summary" },
-  { id: "dimension-1", label: "Personality" },
-  { id: "dimension-2", label: "Dark Triad" },
-  { id: "dimension-3", label: "Relational" },
-  { id: "dimension-4", label: "Cognitive" },
-  { id: "dimension-5", label: "Drivers" },
-  { id: "dimension-6", label: "Linguistics" },
-  { id: "dimension-7", label: "Resiliency" },
-];
+interface StickyReportNavProps {
+  currentTier?: "basic" | "deep" | "compatibility";
+  isUnlocked?: boolean;
+}
 
-export function StickyReportNav() {
+export function StickyReportNav({ currentTier = "deep", isUnlocked = true }: StickyReportNavProps) {
   const [activeId, setActiveId] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+
+  // Compute sections based on active tier and lock status
+  const visibleSections = [
+    { id: "executive-summary", label: "Executive Summary" },
+    { id: "architecture", label: "Personality" }
+  ];
+
+  if (currentTier !== "basic") {
+    visibleSections.push(
+      { id: "shadow", label: "Dark Triad" },
+      { id: "connection", label: "Relational" }
+    );
+
+    if (isUnlocked) {
+      visibleSections.push(
+        { id: "cognitive", label: "Cognitive Wiring" },
+        { id: "values", label: "Drivers" },
+        { id: "linguistic", label: "Linguistics" },
+        { id: "matrix", label: "Congruency" },
+        { id: "actions", label: "Playbook" }
+      );
+    }
+  }
 
   useEffect(() => {
     // Show nav only after scrolling past top section
@@ -38,17 +54,16 @@ export function StickyReportNav() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the visible section
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id);
           }
         });
       },
-      { rootMargin: "-30% 0px -50% 0px" } // trigger earlier when scrolling
+      { rootMargin: "-30% 0px -50% 0px" }
     );
 
-    SECTIONS.forEach((section) => {
+    visibleSections.forEach((section) => {
       const el = document.getElementById(section.id);
       if (el) observer.observe(el);
     });
@@ -57,7 +72,7 @@ export function StickyReportNav() {
       window.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
-  }, []);
+  }, [currentTier, isUnlocked, visibleSections.length]);
 
   const scrollTo = (id: string) => {
     gsap.to(window, {
@@ -75,7 +90,7 @@ export function StickyReportNav() {
     >
       <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-black/5" />
       
-      {SECTIONS.map((section, idx) => {
+      {visibleSections.map((section, idx) => {
         const isActive = activeId === section.id;
         return (
           <button

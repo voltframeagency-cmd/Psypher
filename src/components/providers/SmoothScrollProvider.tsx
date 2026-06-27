@@ -25,6 +25,8 @@ export default function SmoothScrollProvider({ children }: { children: ReactNode
       touchMultiplier: 2,
     });
 
+    lenis.on("scroll", ScrollTrigger.update);
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
