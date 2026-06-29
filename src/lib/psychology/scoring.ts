@@ -1,4 +1,5 @@
 import { LINGUISTIC_PROXY_SCENARIOS } from "@/config/scenarios";
+import { SPANISH_LIWC_DICT } from "@/config/locales/es/liwc";
 
 /**
  * Psypher Analytical Engine: Core Scoring Logic
@@ -72,6 +73,14 @@ export interface HybridReport {
   // Meta
   hasTextSample: boolean;
   overallCongruencyScore: number | null; // 0-100 (100 = perfect alignment)
+  // v2 Upgrades
+  modifyingIndices?: {
+    disclosure: number;
+    desirability: number;
+    debasement: number;
+    isInvalid: boolean;
+  };
+  sd3?: Record<string, number>;
 }
 
 export const PSYPHER_DIMENSIONS = [
@@ -127,6 +136,15 @@ export class PsychologyEngine {
     CLOSENESS: { plus: [43, 46], minus: [47, 54] },
     DEPENDENCY: { plus: [51], minus: [44] },
     ANXIETY: { plus: [45, 48, 49, 50, 53], minus: [52] },
+  };
+
+  /**
+   * Short Dark Triad (SD3) Scoring Key
+   */
+  private static readonly SD3_MAP = {
+    MACHIAVELLIANISM: { plus: [151, 152, 153, 154, 155, 156, 157, 158, 159], minus: [] },
+    NARCISSISM: { plus: [160, 162, 163, 164, 166, 168], minus: [161, 165, 167] },
+    PSYCHOPATHY: { plus: [169, 171, 172, 173, 174, 176, 177], minus: [170, 175] }
   };
 
   // =============================================
@@ -185,6 +203,70 @@ export class PsychologyEngine {
     return "Fearful-Avoidant";
   }
 
+  static calculateSD3(data: Record<number, number>) {
+    const scores: Record<string, number> = {};
+    for (const [trait, mapping] of Object.entries(this.SD3_MAP)) {
+      let sum = 0;
+      mapping.plus.forEach(idx => sum += (data[idx] || 3));
+      mapping.minus.forEach(idx => sum += (6 - (data[idx] || 3)));
+      scores[trait] = sum / 9;
+    }
+    return scores;
+  }
+
+  static applyQuasiIpsativeCorrection(sd3Scores: Record<string, number>): Record<string, number> {
+    const mach = sd3Scores.MACHIAVELLIANISM || 3.1;
+    const narc = sd3Scores.NARCISSISM || 2.8;
+    const psych = sd3Scores.PSYCHOPATHY || 2.4;
+
+    const individualMean = (mach + narc + psych) / 3;
+
+    // Population norms from research blueprint
+    const normMach = 3.1;
+    const normNarc = 2.8;
+    const normPsych = 2.4;
+
+    return {
+      MACHIAVELLIANISM: Math.max(1, Math.min(5, mach - individualMean + normMach)),
+      NARCISSISM: Math.max(1, Math.min(5, narc - individualMean + normNarc)),
+      PSYCHOPATHY: Math.max(1, Math.min(5, psych - individualMean + normPsych))
+    };
+  }
+
+  static calculateModifyingIndices(data: Record<number, number>): {
+    disclosure: number;
+    desirability: number;
+    debasement: number;
+    isInvalid: boolean;
+  } {
+    const keys = Object.keys(data).map(Number);
+    const totalItems = keys.length || 1;
+    
+    // 1. Disclosure: percentage of non-neutral responses
+    let nonNeutral = 0;
+    keys.forEach(k => {
+      if (data[k] !== 3) nonNeutral++;
+    });
+    const disclosure = Math.round((nonNeutral / totalItems) * 100);
+
+    // 2. Desirability: socially desirable items (e.g. 12, 13, 22, 23)
+    const desirableIndices = [12, 13, 22, 23];
+    let desirableSum = 0;
+    desirableIndices.forEach(idx => desirableSum += (data[idx] || 3));
+    const desirability = Math.round((desirableSum / desirableIndices.length) * 20);
+
+    // 3. Debasement: self-deprecation items (e.g. 9, 27, 28)
+    const debasementIndices = [9, 27, 28];
+    let debasementSum = 0;
+    debasementIndices.forEach(idx => debasementSum += (data[idx] || 3));
+    const debasement = Math.round((debasementSum / debasementIndices.length) * 20);
+
+    // Artificially high Desirability paired with zero/low Debasement
+    const isInvalid = (desirability > 90 && debasement < 20) || (disclosure < 20);
+
+    return { disclosure, desirability, debasement, isInvalid };
+  }
+
   /**
    * Cognitive Wiring: Jungian Archetype Mapping from Big Five
    */
@@ -225,7 +307,8 @@ export class PsychologyEngine {
    * Analyze raw text for linguistic markers.
    * Returns LIWC-inspired scores on a 0-100 scale.
    */
-  static analyzeLinguistic(text: string): LinguisticMarkers {
+  static analyzeLinguistic(text: string, locale?: string): LinguisticMarkers {
+    const activeDict = locale === "es" ? SPANISH_LIWC_DICT : LIWC_DICT;
     const words = text.toLowerCase().split(/\s+/).filter(Boolean);
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
@@ -253,11 +336,11 @@ export class PsychologyEngine {
       return Math.min(Math.round((per1k / baseline) * 100), 100);
     };
 
-    const certCount = count(LIWC_DICT.certainty);
-    const tentCount = count(LIWC_DICT.tentative);
-    const powerCount = count(LIWC_DICT.power);
-    const affiliCount = count(LIWC_DICT.affiliation);
-    const negCount = count(LIWC_DICT.negative);
+    const certCount = count(activeDict.certainty);
+    const tentCount = count(activeDict.tentative);
+    const powerCount = count(activeDict.power);
+    const affiliCount = count(activeDict.affiliation);
+    const negCount = count(activeDict.negative);
     const posCount = count(LIWC_DICT.positive);
     const analCount = count(LIWC_DICT.analytical);
     const fpCount = count(LIWC_DICT.firstPerson);
@@ -566,28 +649,56 @@ export class PsychologyEngine {
   // FULL HYBRID REPORT GENERATION
   // =============================================
 
-  static calculateProxyLinguistic(selectedOptionIds: string[]): LinguisticMarkers {
+  static calculateProxyLinguistic(selectedOptionIds: string[] | Record<string, number>): LinguisticMarkers {
     let totalComplexity = 0;
     let totalCertainty = 0;
     let totalPower = 0;
     let totalCloaking = 0;
-    let matchedCount = 0;
+    let totalWeight = 0;
 
-    selectedOptionIds.forEach(optionId => {
+    if (Array.isArray(selectedOptionIds)) {
+      selectedOptionIds.forEach(optionId => {
+        for (const scenario of LINGUISTIC_PROXY_SCENARIOS) {
+          const option = scenario.options.find(opt => opt.id === optionId);
+          if (option) {
+            totalComplexity += option.linguisticWeights.cognitiveComplexity;
+            totalCertainty += option.linguisticWeights.certaintyLanguage;
+            totalPower += option.linguisticWeights.powerLanguage;
+            totalCloaking += option.linguisticWeights.cloakingScore;
+            totalWeight += 1;
+            break;
+          }
+        }
+      });
+    } else if (typeof selectedOptionIds === "object" && selectedOptionIds !== null) {
+      // FCE Weighted average calculation
       for (const scenario of LINGUISTIC_PROXY_SCENARIOS) {
-        const option = scenario.options.find(opt => opt.id === optionId);
-        if (option) {
-          totalComplexity += option.linguisticWeights.cognitiveComplexity;
-          totalCertainty += option.linguisticWeights.certaintyLanguage;
-          totalPower += option.linguisticWeights.powerLanguage;
-          totalCloaking += option.linguisticWeights.cloakingScore;
-          matchedCount++;
-          break;
+        let scenarioComplexity = 0;
+        let scenarioCertainty = 0;
+        let scenarioPower = 0;
+        let scenarioCloaking = 0;
+        let scenarioAllocated = 0;
+
+        scenario.options.forEach(option => {
+          const pct = selectedOptionIds[option.id] || 0;
+          scenarioComplexity += option.linguisticWeights.cognitiveComplexity * pct;
+          scenarioCertainty += option.linguisticWeights.certaintyLanguage * pct;
+          scenarioPower += option.linguisticWeights.powerLanguage * pct;
+          scenarioCloaking += option.linguisticWeights.cloakingScore * pct;
+          scenarioAllocated += pct;
+        });
+
+        if (scenarioAllocated > 0) {
+          totalComplexity += scenarioComplexity / scenarioAllocated;
+          totalCertainty += scenarioCertainty / scenarioAllocated;
+          totalPower += scenarioPower / scenarioAllocated;
+          totalCloaking += scenarioCloaking / scenarioAllocated;
+          totalWeight += 1;
         }
       }
-    });
+    }
 
-    const count = matchedCount || 1;
+    const count = totalWeight || 1;
 
     const avgComplexity = Math.round(totalComplexity / count);
     const avgCertainty = Math.round(totalCertainty / count);
@@ -601,7 +712,7 @@ export class PsychologyEngine {
       certaintlyLanguage: avgCertainty,
       tentativeLanguage: 100 - avgCertainty,
       powerLanguage: avgPower,
-      affiliationLanguage: 100 - avgPower,
+      affiliationLanguage: 50,
       analyticalThinking: avgComplexity,
       authenticityScore: 100 - avgCloaking,
       cloakingScore: avgCloaking,
@@ -616,7 +727,8 @@ export class PsychologyEngine {
    */
   static generateHybridReport(
     questionnaireData: Record<number, number>,
-    textOrOptionIds?: string | string[]
+    textOrOptionIds?: string | string[] | Record<string, number>,
+    locale?: string
   ): HybridReport {
     // Vector A: Self-Report
     const bfi = this.calculateBFI2S(questionnaireData);
@@ -635,13 +747,13 @@ export class PsychologyEngine {
     let isProxy = false;
 
     if (textOrOptionIds) {
-      if (Array.isArray(textOrOptionIds)) {
-        hasTextSample = textOrOptionIds.length > 0;
+      if (Array.isArray(textOrOptionIds) || (typeof textOrOptionIds === "object" && textOrOptionIds !== null)) {
+        hasTextSample = Array.isArray(textOrOptionIds) ? textOrOptionIds.length > 0 : Object.keys(textOrOptionIds).length > 0;
         isProxy = true;
-        linguistic = hasTextSample ? this.calculateProxyLinguistic(textOrOptionIds) : null;
+        linguistic = hasTextSample ? this.calculateProxyLinguistic(textOrOptionIds as any) : null;
       } else if (typeof textOrOptionIds === "string") {
         hasTextSample = !!(textOrOptionIds.trim().split(/\s+/).length >= 100);
-        linguistic = hasTextSample ? this.analyzeLinguistic(textOrOptionIds) : null;
+        linguistic = hasTextSample ? this.analyzeLinguistic(textOrOptionIds, locale) : null;
       }
     }
 
@@ -662,6 +774,12 @@ export class PsychologyEngine {
       Functions: this.calculateCognitiveFunctions(bfi, cognitiveWiring)
     };
 
+    // v2 Upgrades
+    const hasSD3 = Object.keys(questionnaireData).some(k => Number(k) >= 151);
+    const sd3Raw = hasSD3 ? this.calculateSD3(questionnaireData) : null;
+    const sd3 = sd3Raw ? this.applyQuasiIpsativeCorrection(sd3Raw) : undefined;
+    const modifyingIndices = this.calculateModifyingIndices(questionnaireData);
+
     return {
       selfReport: { bfi, darkTriad, attachment, cognitiveWiring },
       linguistic,
@@ -671,6 +789,8 @@ export class PsychologyEngine {
       resilience,
       hasTextSample,
       overallCongruencyScore,
+      modifyingIndices,
+      sd3: sd3 || undefined
     };
   }
 

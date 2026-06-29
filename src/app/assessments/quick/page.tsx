@@ -22,11 +22,13 @@ export default function QuickScanPage() {
   };
 
   // Step 2a: Text sample submitted → run hybrid analysis
-  const handleTextSubmit = (selectedIds: string[]) => {
+  const handleTextSubmit = (selectedIds: Record<string, number>) => {
     setStatus("calculating");
+    const searchParams = new URLSearchParams(window.location.search);
+    const locale = searchParams.get("lang") || searchParams.get("locale") || "en";
     
     setTimeout(() => {
-      const hybridReport = PsychologyEngine.generateHybridReport(questionnaireData, selectedIds);
+      const hybridReport = PsychologyEngine.generateHybridReport(questionnaireData, selectedIds, locale);
       setReport(hybridReport);
       setStatus("preview");
     }, 3500); // Slightly longer for "Deep Analysis" feel
@@ -35,9 +37,11 @@ export default function QuickScanPage() {
   // Step 2b: Skip text → run questionnaire-only (free) report
   const handleTextSkip = () => {
     setStatus("calculating");
+    const searchParams = new URLSearchParams(window.location.search);
+    const locale = searchParams.get("lang") || searchParams.get("locale") || "en";
     
     setTimeout(() => {
-      const hybridReport = PsychologyEngine.generateHybridReport(questionnaireData);
+      const hybridReport = PsychologyEngine.generateHybridReport(questionnaireData, undefined, locale);
       setReport(hybridReport);
       setStatus("preview");
     }, 2500);

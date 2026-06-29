@@ -106,8 +106,8 @@ export default function PricingSection() {
                   ? "bg-accent text-white border-accent scale-105 z-10 shadow-xl shadow-accent/20" 
                   : "bg-white/70 border-neutral-200/50 text-foreground backdrop-blur-md shadow-sm"
               )}
-              spotlightColor={tier.highlight ? "rgba(255, 255, 255, 0.22)" : "rgba(139, 92, 246, 0.12)"}
-              spotlightRange={380}
+              glowColor={tier.highlight ? "rgba(255, 255, 255, 0.22)" : "rgba(139, 92, 246, 0.12)"}
+              radius={380}
             >
               <div className="mb-10">
                 <div className={cn(

@@ -4,14 +4,14 @@ import { PsychologyEngine } from '@/lib/psychology/scoring';
 
 export async function POST(req: NextRequest) {
   try {
-    const { answers, text_sample } = await req.json();
+    const { answers, text_sample, locale } = await req.json();
 
     if (!answers) {
       return NextResponse.json({ error: 'Answers are required' }, { status: 400 });
     }
 
     const report = await generateDeepReport(answers);
-    const scores = PsychologyEngine.generateHybridReport(answers, text_sample);
+    const scores = PsychologyEngine.generateHybridReport(answers, text_sample, locale);
 
     return NextResponse.json({ report, scores });
   } catch (error) {

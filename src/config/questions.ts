@@ -1,7 +1,7 @@
 export interface Question {
   id: number;
   text: string;
-  category: "BFI" | "DT" | "ATTACH" | "VALUE" | "COGNITIVE";
+  category: "BFI" | "DT" | "ATTACH" | "VALUE" | "COGNITIVE" | "SD3";
   facet: string;
   reverse?: boolean;
   maxScore: 5;
@@ -177,4 +177,40 @@ export const FULL_DECODE_QUESTIONS: Question[] = [
   { id: 148, text: "Lose my temper.", category: "BFI", facet: "Neuroticism", maxScore: 5 },
   { id: 149, text: "Find it hard to get excited about things.", category: "BFI", facet: "Extraversion", reverse: true, maxScore: 5 },
   { id: 150, text: "Am not interested in abstract ideas.", category: "BFI", facet: "Openness", reverse: true, maxScore: 5 },
+];
+
+// --- Short Dark Triad (SD3) Scale (27 Items) ---
+export const SD3_QUESTIONS: Question[] = [
+  // Machiavellianism (9 items)
+  { id: 151, text: "It's not wise to tell your secrets.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 152, text: "I like to use clever manipulation to get my way.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 153, text: "Whatever it takes, you must get the important people on your side.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 154, text: "Avoid direct conflict with others because they may be useful in the future.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 155, text: "It's wise to keep track of information that you can use against people later.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 156, text: "You should wait for the right time to get back at people.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 157, text: "There are things you should hide from other people because they don't need to know.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 158, text: "Make sure your plans benefit you, not others.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+  { id: 159, text: "Most people can be manipulated.", category: "SD3", facet: "Machiavellianism", maxScore: 5 },
+
+  // Narcissism (9 items)
+  { id: 160, text: "People see me as a natural leader.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+  { id: 161, text: "I hate being the center of attention.", category: "SD3", facet: "Narcissism", reverse: true, maxScore: 5 },
+  { id: 162, text: "Many group activities tend to be dull without me.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+  { id: 163, text: "I know that I am special because everyone keeps telling me so.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+  { id: 164, text: "I like to get acquainted with important people.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+  { id: 165, text: "I feel embarrassed if someone compliments me.", category: "SD3", facet: "Narcissism", reverse: true, maxScore: 5 },
+  { id: 166, text: "I have been compared to famous people.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+  { id: 167, text: "I am an average person.", category: "SD3", facet: "Narcissism", reverse: true, maxScore: 5 },
+  { id: 168, text: "I insist on getting the respect I deserve.", category: "SD3", facet: "Narcissism", maxScore: 5 },
+
+  // Psychopathy (9 items)
+  { id: 169, text: "I like to get revenge on authorities.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 170, text: "I avoid dangerous situations.", category: "SD3", facet: "Psychopathy", reverse: true, maxScore: 5 },
+  { id: 171, text: "Payback needs to be quick and nasty.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 172, text: "People often say I'm out of control.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 173, text: "It's true that I can be mean to others.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 174, text: "People who mess with me always regret it.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 175, text: "I have never gotten into trouble with the law.", category: "SD3", facet: "Psychopathy", reverse: true, maxScore: 5 },
+  { id: 176, text: "I enjoy having sex with people I hardly know.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
+  { id: 177, text: "I'll say anything to get what I want.", category: "SD3", facet: "Psychopathy", maxScore: 5 },
 ];

@@ -793,6 +793,8 @@ function ReportContent() {
       const tierParam = searchParams.get("tier") as any;
       if (tierParam && ["basic", "deep", "compatibility"].includes(tierParam)) setTier(tierParam);
       
+      const locale = searchParams.get("lang") || searchParams.get("locale") || "en";
+      
       try {
         if (assessmentId) {
           const { data: assessment, error } = await supabaseAdmin
@@ -815,10 +817,10 @@ function ReportContent() {
               // Fallback: If it's a flat raw answers object, convert it to a full HybridReport
               if (finalScores && !finalScores.selfReport && typeof finalScores === "object") {
                 const textSample = assessment.reports?.[0]?.text_sample || "";
-                finalScores = PsychologyEngine.generateHybridReport(finalScores, textSample);
+                finalScores = PsychologyEngine.generateHybridReport(finalScores, textSample, locale);
               }
               setScores(finalScores);
-              const hybridData = await ReportEngine.assembleHybridReport(finalScores);
+              const hybridData = await ReportEngine.assembleHybridReport(finalScores, locale);
               setHybridDossier(hybridData);
             }
             
@@ -837,7 +839,7 @@ function ReportContent() {
           demoExpiry.setDate(demoExpiry.getDate() + 30);
           setExpiresAt(demoExpiry.toISOString());
           
-          const hybridData = await ReportEngine.assembleHybridReport(MOCK_Alpha_REPORT);
+          const hybridData = await ReportEngine.assembleHybridReport(MOCK_Alpha_REPORT, locale);
           setHybridDossier(hybridData);
           
           setLoading(false);
@@ -853,7 +855,8 @@ function ReportContent() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
               answers: JSON.parse(storedAnswers), 
-              text_sample: storedText 
+              text_sample: storedText,
+              locale: locale
             }),
           });
           
@@ -861,7 +864,7 @@ function ReportContent() {
             const data = await response.json();
             setScores(data.scores);
             setReport(data.report);
-            const hybridData = await ReportEngine.assembleHybridReport(data.scores);
+            const hybridData = await ReportEngine.assembleHybridReport(data.scores, locale);
             setHybridDossier(hybridData);
           }
         }

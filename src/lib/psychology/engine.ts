@@ -1,4 +1,5 @@
-import bricks from '../data/bricks.json';
+import bricksEN from '../data/bricks.json';
+import bricksES from '../data/locales/es/bricks.json';
 import { HybridReport } from './scoring';
 
 /**
@@ -17,9 +18,17 @@ export interface ReportSection {
 
 export class ReportEngine {
   /**
+   * Retrieves the active bricks dictionary based on locale
+   */
+  static getActiveBricks(locale?: string) {
+    return locale === "es" ? bricksES : bricksEN;
+  }
+
+  /**
    * Retrieves a randomized brick based on trait-score normalization (1-5 scale)
    */
-  static getBrick(category: string, trait: string, score: number): string {
+  static getBrick(category: string, trait: string, score: number, locale?: string): string {
+    const bricks = this.getActiveBricks(locale);
     const cat = (bricks as any)[category];
     if (!cat || !cat[trait]) {
       console.warn(`[ReportEngine] Missing brick for ${category}.${trait}`);
@@ -39,7 +48,8 @@ export class ReportEngine {
   /**
    * Assembles the "Shadow Profile" (The Uncomfortable Truth)
    */
-  static getShadowBrick(darkTriad: Record<string, number>): string {
+  static getShadowBrick(darkTriad: Record<string, number>, locale?: string): string {
+    const bricks = this.getActiveBricks(locale);
     const highest = Object.entries(darkTriad).reduce((a, b) => a[1] > b[1] ? a : b);
     const traitName = highest[0].toLowerCase();
     
@@ -55,23 +65,26 @@ export class ReportEngine {
   /**
    * Primary Entrance: Assembles the full Hybrid Report
    */
-  static async assembleHybridReport(report: HybridReport): Promise<Record<string, string>> {
+  static async assembleHybridReport(report: HybridReport, locale?: string): Promise<Record<string, string>> {
+    const bricks = this.getActiveBricks(locale);
     const bfi = report.selfReport.bfi;
     const dt = report.selfReport.darkTriad;
     const style = report.selfReport.attachment.Style as string;
 
     const sections: Record<string, string> = {
       personality_architecture: [
-        this.getBrick('bfi', 'OPEN_MINDEDNESS', bfi.OPEN_MINDEDNESS),
-        this.getBrick('bfi', 'CONSCIENTIOUSNESS', bfi.CONSCIENTIOUSNESS),
-        this.getBrick('bfi', 'EXTRAVERSION', bfi.EXTRAVERSION)
+        this.getBrick('bfi', 'OPEN_MINDEDNESS', bfi.OPEN_MINDEDNESS, locale),
+        this.getBrick('bfi', 'CONSCIENTIOUSNESS', bfi.CONSCIENTIOUSNESS, locale),
+        this.getBrick('bfi', 'EXTRAVERSION', bfi.EXTRAVERSION, locale)
       ].join("\n\n"),
 
-      shadow_profile: this.getShadowBrick(dt),
+      shadow_profile: this.getShadowBrick(dt, locale),
 
       connection_blueprint: (bricks as any).attachment[style]?.[0] || "Attachment profile pending deep scan.",
       
-      clicinal_edge: "Operational Analysis: Your psychological hardware presents a unique strategic profile. High-order integration of clinical markers suggests a capacity for extreme tactical focus in low-trust environments."
+      clicinal_edge: locale === "es" 
+        ? "Análisis Operativo: Su hardware psicológico presenta un perfil estratégico único. La integración de alto orden de los marcadores clínicos sugiere una capacidad para un enfoque táctico extremo en entornos de baja confianza."
+        : "Operational Analysis: Your psychological hardware presents a unique strategic profile. High-order integration of clinical markers suggests a capacity for extreme tactical focus in low-trust environments."
     };
 
     return sections;

@@ -100,7 +100,7 @@ export default function HowItWorks() {
               <SpotlightCard 
                 key={i} 
                 className="framework-card group p-10 bg-white/70 border border-neutral-200/50 backdrop-blur-md rounded-2xl hover:shadow-2xl transition-all duration-500"
-                spotlightColor="rgba(139, 92, 246, 0.12)"
+                glowColor="rgba(139, 92, 246, 0.12)"
               >
                 <f.icon className="text-accent mb-8 group-hover:scale-110 transition-transform" size={32} />
                 <span className="block text-[10px] font-bold tracking-widest uppercase text-foreground/40 mb-2">{f.subtitle}</span>
