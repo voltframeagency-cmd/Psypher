@@ -2,91 +2,63 @@
   "bfi": {
     "OPEN_MINDEDNESS": {
       "high": [
-        "Arquitecto de la abstracción: Su apertura cognitiva es significativamente más amplia que la media, priorizando la síntesis de variables discordantes en visiones estratégicas unificadas.",
-        "Amplitud cognitiva: Posee un impulso innato para desmantelar paradigmas convencionales en favor de marcos intelectuales de alta complejidad. La ambigüedad es su principal ventaja operativa.",
-        "Disruptor estético: Sus vías neuronales priorizan la experiencia novedosa sobre la estabilidad tradicional. Está calibrado biológicamente para el riesgo experimental y la divergencia creativa."
+        "Arquitecto de la abstracción: Su apertura cognitiva es significativamente más amplia que la media, priorizando la síntesis de variables discordantes en visiones estratégicas unificadas. Posee un impulso innato para desmantelar paradigmas convencionales en favor de marcos intelectuales de alta complejidad. La ambigüedad es su principal ventaja operativa. En lugar de reaccionar a las normas establecidas, busca redefinirlas activamente introduciendo ideas especulativas y estructuras experimentales."
       ],
       "low": [
-        "Estabilizador pragmático: Prioriza la continuidad operativa y los datos empíricos sobre la abstracción especulativa. Su fortaleza radica en el dominio técnico de los protocolos existentes.",
-        "Ancla de eficiencia: Enfoca la energía cognitiva en la optimización de sistemas probados, actuando como un amortiguador crítico contra la experimentación caótica o no probada.",
-        "Analista concreto: Su percepción se basa en la realidad observable. Filtra el 'ruido conceptual' para mantener el enfoque en la ejecución inmediata de alta fidelidad."
+        "Estabilizador pragmático: Prioriza la continuidad operativa y los datos empíricos sobre la abstracción especulativa. Su fortaleza radica en el dominio técnico de los protocolos existentes. Enfoca la energía cognitiva en la optimización de sistemas probados, actuando como un amortiguador crítico contra la experimentación caótica o no probada. Su percepción se basa en la realidad observable, filtrando el ruido conceptual para mantener el enfoque en la ejecución inmediata de alta fidelidad."
       ],
       "neutral": [
-        "Generalista adaptativo: Equilibra la curiosidad conceptual con la utilidad práctica, alternando entre la abstracción y la ejecución según los requisitos de la situación.",
-        "Explorador selectivo: Su apertura se dirige a dominios específicos de interés, manteniendo una base cognitiva estable mientras permite la innovación dirigida.",
-        "Sintetizador moderado: Integra nueva información a un ritmo controlado, asegurando que la innovación no comprometa la estabilidad estructural."
+        "Generalista adaptativo: Equilibra la curiosidad conceptual con la utilidad práctica, alternando entre la abstracción y la ejecución según los requisitos de la situación. Su apertura se dirige a dominios específicos de interés, manteniendo una base cognitiva estable mientras permite la innovación dirigida. Integra nueva información a un ritmo controlado, asegurando que la innovación no comprometa la estabilidad estructural."
       ]
     },
     "CONSCIENTIOUSNESS": {
       "high": [
-        "Perfeccionista sistémico: Su metodología operativa se define por el refinamiento recursivo y la absoluta integridad procedimental. Es el arquitecto del éxito estructural a largo plazo.",
-        "Ejecutor estratégico: Posee un enfoque de alta densidad en el logro de objetivos, caracterizado por un mapeo exhaustivo de variables y un seguimiento sin fricciones.",
-        "Motor de confiabilidad: Su estructura cognitiva está programada para el orden. Neutraliza la entropía mediante una planificación meticulosa y un alto umbral de persistencia disciplinada."
+        "Perfeccionista sistémico: Su metodología operativa se define por el refinamiento recursivo y la absoluta integridad procedimental. Es el arquitecto del éxito estructural a largo plazo. Posee un enfoque de alta densidad en el logro de objetivos, caracterizado por un mapeo exhaustivo de variables y un seguimiento sin fricciones. Su estructura cognitiva está programada para el orden, neutralizando la entropía mediante una planificación meticulosa y un alto umbral de persistencia disciplinada."
       ],
       "low": [
-        "Ágil oportunista: Prospera en entornos de baja estructura donde la capacidad de pivotar rápidamente es más valiosa que la adherencia rígida a una secuencia predeterminada.",
-        "Kinético espontáneo: Su energía se prioriza hacia la respuesta inmediata en lugar de la planificación a largo plazo. Destaca en escenarios operativos de alta varianza e impredecibles.",
-        "Minimalista adaptativo: Ignora la sobrecarga burocrática para encontrar el camino más corto hacia los resultados, a menudo subvirtiendo los protocolos estándar para mantener la velocidad táctica."
+        "Ágil oportunista: Prospera en entornos de baja estructura donde la capacidad de pivotar rápidamente es más valiosa que la adherencia rígida a una secuencia predeterminada. Su energía se prioriza hacia la respuesta inmediata en lugar de la planificación a largo plazo. Destaca en escenarios operativos de alta varianza e impredecibles. Ignora la sobrecarga burocrática para encontrar el camino más corto hacia los resultados, a menudo subvirtiendo los protocolos estándar para mantener la velocidad táctica."
       ]
     },
     "EXTRAVERSION": {
       "high": [
-        "Cinemática social: Opera como un nodo de energía de alto rendimiento. Su presencia sirve como catalizador para el impulso colectivo y el arbitraje rápido de información.",
-        "Comunicador dominante: Posee una presencia vocal y social de alto estatus, asumiendo automáticamente posiciones de liderazgo en las jerarquías de grupo para impulsar el éxito de la misión.",
-        "Motivador extrínseco: Su sistema de recompensa psicológica está calibrado para estímulos sociales de alta frecuencia, lo que le permite navegar con facilidad por dinámicas de red complejas."
+        "Cinemática social: Opera como un nodo de energía de alto rendimiento. Su presencia sirve como catalizador para el impulso colectivo y el arbitraje rápido de información. Posee una presencia vocal y social de alto estatus, asumiendo automáticamente posiciones de liderazgo en las jerarquías de grupo para impulsar el éxito de la misión. Su sistema de recompensa psicológica está calibrado para estímulos sociales de alta frecuencia, lo que le permite navegar con facilidad por dinámicas de red complejas."
       ],
       "low": [
-        "Procesador interno: Conserva la energía social para análisis de gran profundidad. Su influencia es sutil, ejercida a través de interacciones enfocadas, de baja frecuencia y alto impacto.",
-        "Observador discreto: Prioriza la adquisición de datos sobre la exhibición externa, lo que le permite mapear entornos sociales con neutralidad objetiva mientras permanece desapercibido.",
-        "Operativo autónomo: Es autosuficiente y psicológicamente resistente al aislamiento. Su toma de decisiones está desacoplada del sentimiento del grupo o de la validación social."
+        "Procesador interno: Conserva la energía social para análisis de gran profundidad. Su influencia es sutil, ejercida a través de interacciones enfocadas, de baja frecuencia y alto impacto. Prioriza la adquisición de datos sobre la exhibición externa, lo que le permite mapear entornos sociales con neutralidad objetiva mientras permanece desapercibido. Como operativo autónomo, es autosuficiente y psicológicamente resistente al aislamiento."
       ]
     }
   },
   "darkTriad": {
     "MACHIAVELLIANISM": {
       "high": [
-        "Realista táctico: Ve las dinámicas interpersonales a través de la lente de la utilidad y el mapeo de poder. Su empatía es cognitiva más que afectiva, lo que permite una optimización estratégica fría.",
-        "Orquestador estratégico: Posee la habilidad de navegar por redes sociales complejas, gestionando percepciones y variables para asegurar un resultado predeterminado.",
-        "Apalancador pragmático: Es un maestro del arbitraje social, identificando los incentivos ocultos de los demás y utilizándolos para cerrar la brecha entre la intención y el resultado."
+        "Realista táctico: Ve las dinámicas interpersonales a través de la lente de la utilidad y el mapeo de poder. Su empatía es cognitiva más que afectiva, lo que permite una optimización estratégica fría. Posee la habilidad de navegar por redes sociales complejas, gestionando percepciones y variables para asegurar un resultado predeterminado. Como maestro del arbitraje social, identifica los incentivos ocultos de los demás y los utiliza para cerrar la brecha entre la intención y el resultado."
       ]
     },
     "PSYCHOPATHY": {
       "high": [
-        "Dominante intrépido: Posee un umbral anormalmente alto para el estrés y una interferencia emocional restringida. Esto permite la toma de decisiones de alto riesgo en entornos que paralizarían a otros.",
-        "Neutralizador afectivo: Su biología psicológica minimiza la culpa reactiva o la ansiedad social, otorgándole la capacidad de ejecutar acciones 'incómodas' pero necesarias con precisión quirúrgica.",
-        "Tomador de riesgos de alta agilidad: No se ve afectado por las convenciones sociales ni por el miedo a las consecuencias, lo que le permite un nivel de audacia táctica que define la disrupción de alto estatus."
+        "Dominante intrépido: Posee un umbral anormalmente alto para el estrés y una interferencia emocional restringida. Esto permite la toma de decisiones de alto riesgo en entornos que paralizarían a otros. Su biología psicológica minimiza la culpa reactiva o la ansiedad social, otorgándole la capacidad de ejecutar acciones incómodas pero necesarias con precisión quirúrgica. Libre de convenciones sociales, demuestra un nivel de audacia táctica que define la disrupción de alto estatus."
       ]
     },
     "NARCISSISM": {
       "high": [
-        "Ego visionario: Su autopercepción está calibrada para el liderazgo de alto nivel. Posee el 'Índice de Grandeza' requerido para inspirar seguidores colectivos a través de una convicción absoluta.",
-        "Señalizador de élite: Está programado para proyectar estatus y competencia, asegurando que su presencia sea percibida como un activo de alto valor en cualquier estructura jerárquica.",
-        "Presencia de mando: Su arquitectura psicológica exige ocupar el centro del escenario, gravitando naturalmente hacia roles que permiten la máxima influencia y visibilidad."
+        "Ego visionario: Su autopercepción está calibrada para el liderazgo de alto orden. Posee el índice de grandeza requerido para inspirar a colectivos enteros mediante una convicción absoluta. Está programado para transmitir marcadores de estatus y competencia, asegurando que su presencia sea percibida como un activo de gran valor en cualquier estructura jerárquica. Su arquitectura psicológica exige ocupar el centro del escenario, gravitando naturalmente hacia roles de máxima influencia."
       ]
     }
   },
   "attachment": {
     "Secure": [
-      "Base psicológica: Su estructura de apego está optimizada para operaciones de alta confianza y baja ansiedad. Sirve como una fuerza estabilizadora en cualquier entorno colaborativo.",
-      "Integrado equilibrado: Navega por la intimidad y la autonomía sin fricciones, poseyendo la seguridad para comprometerse profundamente sin perder el enfoque estratégico individual.",
-      "Ancla relacional: Mantiene el equilibrio emocional durante el conflicto, lo que permite negociaciones lúcidas y la preservación de alianzas estratégicas a largo plazo."
+      "Fundamento psicológico: Su estructura de apego está optimizada para operaciones de alta confianza y baja ansiedad. Sirve como fuerza estabilizadora en entornos colaborativos, navegando por la intimidad y la autonomía sin fricciones. Posee la seguridad para comprometerse profundamente sin perder el enfoque estratégico individual, manteniendo el equilibrio emocional durante el conflicto para preservar alianzas a largo plazo."
     ],
     "Anxious-Preoccupied": [
-      "Conector de alta sensibilidad: Está hiperalerta a las señales sociales y a los cambios de jerarquía. Su 'hipervigilancia' le permite detectar sutiles cambios en las alianzas mucho antes que los demás.",
-      "Cinético impulsado por validación: Su deseo de conexión fomenta un compromiso social de alta frecuencia, aunque requiere un constante 'refuerzo de estatus' para evitar la fatiga operativa.",
-      "Estratega relacional: Prioriza el mantenimiento de los lazos como su principal mecanismo de supervivencia, a menudo sacrificando la autonomía personal para asegurar la integridad del colectivo."
+      "Conector de alta sensibilidad: Está hiper-sintonizado con las señales sociales y los cambios jerárquicos. Su hipervigilancia le permite detectar alteraciones sutiles en las alianzas mucho antes que los demás. Su impulso de conexión alimenta un alto nivel de interacción social, aunque requiere un refuerzo de estatus constante para prevenir la fatiga operativa. Prioriza mantener los lazos afectivos como su principal mecanismo de supervivencia, gestionando la estabilidad colectiva."
     ],
     "Dismissive-Avoidant": [
-      "Operativo soberano: Posee un alto grado de autonomía defensiva. Prospera en roles que requieren distanciamiento emocional y la capacidad de operar sin validación externa.",
-      "Estratega de la autonomía: Ve la dependencia como una vulnerabilidad. Su principal directiva interna es la preservación de la autosuficiencia y la minimización de la obligación social.",
-      "Analista distante: Separa las relaciones personales de los objetivos profesionales con precisión quirúrgica, asegurando que el sentimiento nunca comprometa la 'lógica fría' de la misión."
+      "Operativo soberano: Posee un alto grado de autonomía defensiva. Destaca en roles que requieren desapego emocional y capacidad para funcionar sin validación externa. Considera la dependencia como una vulnerabilidad, orientando su energía hacia la autosuficiencia y la minimización de obligaciones sociales. Separa las relaciones personales de los objetivos profesionales con precisión quirúrgica, asegurando que el sentimiento nunca comprometa la lógica fría de la misión."
     ]
   },
   "shadow": {
     "The Uncomfortable Truth": [
-      "Bajo la superficie de su fachada profesional yace un grupo de alta densidad de indicadores de {trait}. Su principal riesgo es el 'Complejo de Dios'—la creencia de que su visión estratégica hace obsoletas las limitaciones éticas estándar.",
-      "Su 'ventaja clínica' psicológica sugiere una capacidad de {trait} que roza lo depredador. En escenarios de alto riesgo, es probable que priorice la misión sobre las variables humanas involucradas.",
-      "La revelación del 'Protocolo de la Sombra': Su comportamiento indica una profunda dependencia de {trait} para enmascarar vulnerabilidades relacionales subyacentes. Utiliza el poder como un profiláctico contra el abandono percibido."
+      "Bajo la superficie de su fachada profesional se encuentra un núcleo de alta densidad de marcadores de {trait}. Su principal riesgo es el Complejo de Dios: la creencia de que su visión estratégica hace obsoletas las limitaciones éticas estándar. Su ventaja clínica sugiere una capacidad de {trait} que roza lo depredador. En escenarios de alto riesgo, es probable que priorice la misión por encima de las variables humanas. Su comportamiento revela una dependencia profunda en {trait} para ocultar vulnerabilidades de relación latentes."
     ]
   }
 }

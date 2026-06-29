@@ -1607,6 +1607,12 @@ function ReportContent() {
                               </div>
                             </div>
 
+                            {hybridDossier?.core_drivers && (
+                              <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+                                <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier.core_drivers} />
+                              </div>
+                            )}
+
                             <div className="pt-12 border-t border-zinc-900">
                               <PrescriptivePlaybook 
                                 dimension="Actionable Synthesis"
@@ -1673,6 +1679,7 @@ function ReportContent() {
                             <ResonanceVector 
                               style={scores.selfReport.attachment.Style} 
                               security={scores.selfReport.attachment.Security} 
+                              narrative={hybridDossier?.connection_blueprint}
                             />
                           )}
                         </section>
@@ -1693,6 +1700,7 @@ function ReportContent() {
                               style={scores.selfReport.attachment.Style} 
                               security={scores.selfReport.attachment.Security} 
                               theme={isLightMode ? "light" : "dark"}
+                              narrative={hybridDossier?.connection_blueprint}
                             />
 
                             {tier === "compatibility" && (
@@ -1772,6 +1780,12 @@ function ReportContent() {
                               <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 overflow-hidden shadow-sm">
                                 <CognitiveInteractiveSection scores={scores} />
                               </div>
+
+                              {hybridDossier?.cognitive_wiring && (
+                                <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+                                  <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier.cognitive_wiring} />
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -1817,6 +1831,12 @@ function ReportContent() {
                                   </p>
                                 </div>
                               </div>
+
+                              {hybridDossier?.validity_audit && (
+                                <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+                                  <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier.validity_audit} />
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}

@@ -15,9 +15,10 @@ interface ResonanceVectorProps {
   security: number;
   color?: string;
   theme?: "light" | "dark";
+  narrative?: string;
 }
 
-export default function ResonanceVector({ style, security, color = "#60A5FA", theme = "dark" }: ResonanceVectorProps) {
+export default function ResonanceVector({ style, security, color = "#60A5FA", theme = "dark", narrative }: ResonanceVectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -147,7 +148,7 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
               <p className={`text-sm leading-relaxed font-light ${
                 isLight ? "text-zinc-500" : "text-zinc-400"
               }`}>
-                {meta.desc}
+                {narrative || meta.desc}
               </p>
 
               {/* Friction Indicators */}

@@ -2,91 +2,63 @@
   "bfi": {
     "OPEN_MINDEDNESS": {
       "high": [
-        "Architect of Abstraction: Your cognitive aperture is significantly wider than the baseline, prioritized toward the synthesis of discordant variables into unified strategic visions.",
-        "Cognitive Boundlessness: You possess an innate drive to dismantle conventional paradigms in favor of high-complexity intellectual frameworks. Ambiguity is your primary operational leverage.",
-        "Aesthetic Disruptor: Your neural pathways prioritize novel experience over traditional stability. You are biologically calibrated for experimental risk and creative divergence."
+        "Architect of Abstraction: Your cognitive aperture is significantly wider than the baseline, prioritized toward the synthesis of discordant variables into unified strategic visions. You possess an innate drive to dismantle conventional paradigms in favor of high-complexity intellectual frameworks. Ambiguity is your primary operational leverage. Rather than reacting to established norms, you seek to actively redefine them by introducing speculative ideas and experimental structures."
       ],
       "low": [
-        "Pragmatic Stabilizer: You prioritize operational continuity and empirical data over speculative abstraction. Your strength lies in the technical mastery of existing protocols.",
-        "Efficiency Anchor: You focus cognitive energy on the optimization of proven systems, acting as a critical buffer against chaotic or unproven experimentation.",
-        "Concrete Analyst: Your perception is grounded in observable reality. You filter out 'conceptual noise' to maintain focus on immediate, high-fidelity execution."
+        "Pragmatic Stabilizer: You prioritize operational continuity and empirical data over speculative abstraction. Your strength lies in the technical mastery of existing protocols. You focus cognitive energy on the optimization of proven systems, acting as a critical buffer against chaotic or unproven experimentation. Your perception is grounded in observable reality, filtering out conceptual noise to maintain focus on immediate, high-fidelity execution."
       ],
       "neutral": [
-        "Adaptive Generalist: You balance conceptual curiosity with practical utility, shifting between abstraction and execution based on situational requirements.",
-        "Selective Explorer: Your openness is directed toward specific domains of interest, maintaining a stable cognitive baseline while allowing for targeted innovation.",
-        "Moderate Synthesizer: You integrate new information at a controlled pace, ensuring that innovation does not compromise structural stability."
+        "Adaptive Generalist: You balance conceptual curiosity with practical utility, shifting between abstraction and execution based on situational requirements. Your openness is directed toward specific domains of interest, maintaining a stable cognitive baseline while allowing for targeted innovation. You integrate new information at a controlled pace, ensuring that innovation does not compromise structural stability."
       ]
     },
     "CONSCIENTIOUSNESS": {
       "high": [
-        "Systemic Perfectionist: Your operational methodology is defined by recursive refinement and absolute procedural integrity. You are the architect of long-term structural success.",
-        "Strategic Executor: You possess a high-density focus on objective attainment, characterized by an exhaustive mapping of variables and zero-friction follow-through.",
-        "Reliability Engine: Your cognitive hardware is hardwired for order. You neutralize entropy through meticulous planning and a high threshold for disciplined persistence."
+        "Systemic Perfectionist: Your operational methodology is defined by recursive refinement and absolute procedural integrity. You are the architect of long-term structural success. You possess a high-density focus on objective attainment, characterized by an exhaustive mapping of variables and zero-friction follow-through. Your cognitive hardware is hardwired for order, neutralizing entropy through meticulous planning and disciplined persistence."
       ],
       "low": [
-        "Opportunistic Agile: You thrive in low-structure environments where rapid pivotability is more valuable than rigid adherence to a predetermined sequence.",
-        "Spontaneous Kinetic: Your energy is prioritized toward immediate response rather than long-term planning. You excel in high-variance, unpredictable operational theaters.",
-        "Adaptive Minimalist: You ignore bureaucratic overhead to find the shortest path to results, often subverting standard protocols to maintain tactical speed."
+        "Opportunistic Agile: You thrive in low-structure environments where rapid pivotability is more valuable than rigid adherence to a predetermined sequence. Your energy is prioritized toward immediate response rather than long-term planning. You excel in high-variance, unpredictable operational theaters. By ignoring bureaucratic overhead, you find the shortest path to results, subverting standard protocols to maintain tactical speed."
       ]
     },
     "EXTRAVERSION": {
       "high": [
-        "Social Kinematics: You operate as a high-output energy node. Your presence serves as a catalyst for collective momentum and rapid information arbitrage.",
-        "Dominant Communicator: You possess a high-status vocal and social presence, automatically assuming leadership positions in group hierarchies to drive mission success.",
-        "Extrinsic Motivator: Your psychological reward system is calibrated for high-frequency social stimulus, allowing you to navigate complex network dynamics with ease."
+        "Social Kinematics: You operate as a high-output energy node. Your presence serves as a catalyst for collective momentum and rapid information arbitrage. You possess a high-status vocal and social presence, automatically assuming leadership positions in group hierarchies to drive mission success. Your psychological reward system is calibrated for high-frequency social stimulus, allowing you to navigate complex network dynamics with ease."
       ],
       "low": [
-        "Internal Processor: You conserve social energy for high-depth analysis. Your influence is subtle, exercised through focused, low-frequency, high-impact interactions.",
-        "Discreet Observer: You prioritize data acquisition over external display, allowing you to map social environments with objective neutrality while remaining undetected.",
-        "Autonomous Operative: You are self-contained and psychologically resilient to isolation. Your decision-making is decoupled from group sentiment or social validation."
+        "Internal Processor: You conserve social energy for high-depth analysis. Your influence is subtle, exercised through focused, low-frequency, high-impact interactions. You prioritize data acquisition over external display, allowing you to map social environments with objective neutrality while remaining undetected. As an autonomous operative, you are self-contained and psychologically resilient to isolation."
       ]
     }
   },
   "darkTriad": {
     "MACHIAVELLIANISM": {
       "high": [
-        "Tactical Realist: You view interpersonal dynamics through the lens of utility and power mapping. Your empathy is cognitive rather than affective, allowing for cold strategic optimization.",
-        "Strategic Orchestrator: You possess the elite ability to navigate complex social lattices, managing perceptions and variables to ensure a predetermined outcome.",
-        "Pragmatic Leverager: You are a master of social arbitrage, identifying the hidden incentives of others and utilizing them to bridge the gap between intent and result."
+        "Tactical Realist: You view interpersonal dynamics through the lens of utility and power mapping. Your empathy is cognitive rather than affective, allowing for cold strategic optimization. You possess the elite ability to navigate complex social lattices, managing perceptions and variables to ensure a predetermined outcome. As a master of social arbitrage, you identify the hidden incentives of others and utilize them to bridge the gap between intent and result."
       ]
     },
     "PSYCHOPATHY": {
       "high": [
-        "Fearless Dominant: You possess an abnormally high threshold for stress and restricted emotional interference. This allows for high-stakes decision-making in environments that would paralyze others.",
-        "Affective Neutralizer: Your psychological biology minimizes reactive guilt or social anxiety, granting you the ability to execute 'uncomfortable' but necessary actions with surgical precision.",
-        "High-Agility Risk-Taker: You are unburdened by social conventions or fear of consequence, allowing for a level of tactical audacity that defines high-status disruption."
+        "Fearless Dominant: You possess an abnormally high threshold for stress and restricted emotional interference. This allows for high-stakes decision-making in environments that would paralyze others. Your psychological biology minimizes reactive guilt or social anxiety, granting you the ability to execute uncomfortable but necessary actions with surgical precision. Unburdened by social conventions, you demonstrate a level of tactical audacity that defines high-status disruption."
       ]
     },
     "NARCISSISM": {
       "high": [
-        "Visionary Ego: Your self-perception is calibrated for high-order leadership. You possess the 'Grandeur Index' required to inspire collective followings through absolute conviction.",
-        "Elite Signalist: You are hardwired to broadcast status and competence markers, ensuring your presence is perceived as a high-value asset in any hierarchical structure.",
-        "Command Presence: Your psychological architecture demands center-stage placement, naturally gravitating toward roles that allow for maximal influence and visibility."
+        "Visionary Ego: Your self-perception is calibrated for high-order leadership. You possess the Grandeur Index required to inspire collective followings through absolute conviction. You are hardwired to broadcast status and competence markers, ensuring your presence is perceived as a high-value asset in any hierarchical structure. Your psychological architecture demands center-stage placement, naturally gravitating toward roles that allow for maximal influence."
       ]
     }
   },
   "attachment": {
     "Secure": [
-      "Psychological Foundation: Your attachment hardware is optimized for high-trust, low-anxiety operations. You serve as a stabilizing force in any collaborative environment.",
-      "Balanced Integrated: You navigate intimacy and autonomy with zero-friction, possessing the security to engage deeply without losing individual strategic focus.",
-      "Relational Anchor: You maintain emotional equilibrium during conflict, allowing for clear-headed negotiations and the preservation of long-term strategic alliances."
+      "Psychological Foundation: Your attachment hardware is optimized for high-trust, low-anxiety operations. You serve as a stabilizing force in collaborative environments, navigating intimacy and autonomy with zero friction. You possess the security to engage deeply without losing individual strategic focus, maintaining emotional equilibrium during conflict to preserve long-term strategic alliances."
     ],
     "Anxious-Preoccupied": [
-      "High-Sensitivity Networker: You are hyper-attuned to social signals and hierarchy shifts. Your 'Hyper-Vigilance' allows you to detect subtle changes in alliance long before others.",
-      "Validation-Driven Kinetic: Your drive for connection fuels high-frequency social engagement, though it requires constant 'Status Reinforcement' to prevent operational fatigue.",
-      "Relational Strategist: You prioritize the maintenance of bonds as your primary survival mechanism, often sacrificing personal autonomy to ensure the integrity of the collective."
+      "High-Sensitivity Networker: You are hyper-attuned to social signals and hierarchy shifts. Your hyper-vigilance allows you to detect subtle changes in alliances long before others. Your drive for connection fuels high-frequency social engagement, though it requires constant status reinforcement to prevent operational fatigue. You prioritize the maintenance of bonds as your primary survival mechanism, managing collective stability."
     ],
     "Dismissive-Avoidant": [
-      "Sovereign Operative: You possess a high degree of defensive autonomy. You thrive in roles that require emotional detachment and the ability to operate without external validation.",
-      "Autonomy Strategist: You view dependency as a vulnerability. Your primary internal directive is the preservation of self-reliance and the minimization of social obligation.",
-      "Detached Analyst: You separate personal relationships from professional objectives with surgical precision, ensuring that sentiment never compromises the 'Cold Logic' of the mission."
+      "Sovereign Operative: You possess a high degree of defensive autonomy. You thrive in roles that require emotional detachment and the ability to operate without external validation. You view dependency as a vulnerability, directing your energy toward self-reliance and the minimization of social obligation. You separate personal relationships from professional objectives with surgical precision, ensuring sentiment never compromises cold logic."
     ]
   },
   "shadow": {
     "The Uncomfortable Truth": [
-      "Beneath the surface of your professional display lies a high-density cluster of {trait} markers. Your primary risk is the 'God Complex'—a belief that your strategic vision renders standard ethical constraints obsolete.",
-      "Your psychological 'Clinical Edge' suggests a capacity for {trait} that borders on the predatory. In high-stakes scenarios, you are likely to prioritize the mission over the human variables involved.",
-      "The 'Shadow Protocol' reveal: Your behavior indicates a deep-seated reliance on {trait} to mask underlying relational vulnerabilities. You use power as a prophylactic against perceived abandonment."
+      "Beneath the surface of your professional display lies a high-density cluster of {trait} markers. Your primary risk is the God Complex—a belief that your strategic vision renders standard ethical constraints obsolete. Your psychological Clinical Edge suggests a capacity for {trait} that borders on the predatory. In high-stakes scenarios, you are likely to prioritize the mission over the human variables involved. Your behavior indicates a deep-seated reliance on {trait} to mask underlying relational vulnerabilities."
     ]
   }
 }
