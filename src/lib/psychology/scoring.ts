@@ -622,6 +622,21 @@ export class PsychologyEngine {
     const stability = 6 - (bfi.NEGATIVE_EMOTIONALITY || bfi.Neuroticism || 3);
     scores.Security = Math.round((secBase * 0.4) + (stability * 12));
 
+    const benBase = linguistic ? linguistic.affiliationLanguage : 50;
+    scores.Benevolence = Math.round((benBase * 0.6) + (bfi.AGREEABLENESS * 8));
+
+    const tradBase = linguistic ? (100 - linguistic.tentativeLanguage) : 50;
+    scores.Tradition = Math.round((tradBase * 0.4) + (bfi.CONSCIENTIOUSNESS * 6) + ((6 - bfi.OPEN_MINDEDNESS) * 6));
+
+    const confBase = linguistic ? (100 - linguistic.powerLanguage) : 50;
+    scores.Conformity = Math.round((confBase * 0.4) + (bfi.CONSCIENTIOUSNESS * 6) + (bfi.AGREEABLENESS * 6));
+
+    const stimBase = linguistic ? (100 - linguistic.certaintlyLanguage) : 50;
+    scores.Stimulation = Math.round((stimBase * 0.4) + (bfi.EXTRAVERSION * 6) + (bfi.OPEN_MINDEDNESS * 6));
+
+    const sdBase = linguistic ? linguistic.cognitiveComplexity : 50;
+    scores.SelfDirection = Math.round((sdBase * 0.6) + (bfi.OPEN_MINDEDNESS * 8));
+
     Object.keys(scores).forEach(k => scores[k] = Math.min(Math.max(scores[k], 0), 100));
     
     return scores;
