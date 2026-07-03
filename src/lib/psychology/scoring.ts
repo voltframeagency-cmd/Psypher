@@ -688,7 +688,7 @@ export class PsychologyEngine {
           scenarioAllocated += pct;
         });
 
-        if (scenarioAllocated > 0) {
+        if (scenarioAllocated > 0 && !isNaN(scenarioAllocated)) {
           totalComplexity += scenarioComplexity / scenarioAllocated;
           totalCertainty += scenarioCertainty / scenarioAllocated;
           totalPower += scenarioPower / scenarioAllocated;
@@ -732,7 +732,16 @@ export class PsychologyEngine {
   ): HybridReport {
     // Vector A: Self-Report
     const bfi = this.calculateBFI2S(questionnaireData);
-    const darkTriad = this.calculateDTDD(questionnaireData);
+    let darkTriad = this.calculateDTDD(questionnaireData);
+
+    const hasSD3 = Object.keys(questionnaireData).some(k => Number(k) >= 151);
+    const sd3Raw = hasSD3 ? this.calculateSD3(questionnaireData) : null;
+    const sd3 = sd3Raw ? this.applyQuasiIpsativeCorrection(sd3Raw) : undefined;
+
+    if (sd3) {
+      darkTriad = sd3;
+    }
+
     const attachmentScores = this.calculateAttachment(questionnaireData);
     const attachment = {
       ...attachmentScores,
@@ -774,10 +783,6 @@ export class PsychologyEngine {
       Functions: this.calculateCognitiveFunctions(bfi, cognitiveWiring)
     };
 
-    // v2 Upgrades
-    const hasSD3 = Object.keys(questionnaireData).some(k => Number(k) >= 151);
-    const sd3Raw = hasSD3 ? this.calculateSD3(questionnaireData) : null;
-    const sd3 = sd3Raw ? this.applyQuasiIpsativeCorrection(sd3Raw) : undefined;
     const modifyingIndices = this.calculateModifyingIndices(questionnaireData);
 
     return {
