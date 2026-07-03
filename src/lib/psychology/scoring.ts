@@ -271,10 +271,10 @@ export class PsychologyEngine {
    * Cognitive Wiring: Jungian Archetype Mapping from Big Five
    */
   static getCognitiveWiring(bfi: Record<string, number>): string {
-    const E = bfi.Extraversion || 50;
-    const O = bfi.Openness || 50;
-    const A = bfi.Agreeableness || 50;
-    const C = bfi.Conscientiousness || 50;
+    const E = bfi.EXTRAVERSION !== undefined ? this.normalizeBFI(bfi.EXTRAVERSION) : 50;
+    const O = bfi.OPEN_MINDEDNESS !== undefined ? this.normalizeBFI(bfi.OPEN_MINDEDNESS) : 50;
+    const A = bfi.AGREEABLENESS !== undefined ? this.normalizeBFI(bfi.AGREEABLENESS) : 50;
+    const C = bfi.CONSCIENTIOUSNESS !== undefined ? this.normalizeBFI(bfi.CONSCIENTIOUSNESS) : 50;
 
     const energy = E > 50 ? "E" : "I";
     const info = O > 50 ? "N" : "S";
@@ -285,11 +285,11 @@ export class PsychologyEngine {
   }
 
   static calculateCognitiveFunctions(bfi: Record<string, number>, type: string): Record<string, number> {
-    const O = bfi.Openness || 50;
-    const C = bfi.Conscientiousness || 50;
-    const E = bfi.Extraversion || 50;
-    const A = bfi.Agreeableness || 50;
-    const N = bfi.Neuroticism || 50;
+    const O = bfi.OPEN_MINDEDNESS !== undefined ? this.normalizeBFI(bfi.OPEN_MINDEDNESS) : 50;
+    const C = bfi.CONSCIENTIOUSNESS !== undefined ? this.normalizeBFI(bfi.CONSCIENTIOUSNESS) : 50;
+    const E = bfi.EXTRAVERSION !== undefined ? this.normalizeBFI(bfi.EXTRAVERSION) : 50;
+    const A = bfi.AGREEABLENESS !== undefined ? this.normalizeBFI(bfi.AGREEABLENESS) : 50;
+    const N = bfi.NEGATIVE_EMOTIONALITY !== undefined ? this.normalizeBFI(bfi.NEGATIVE_EMOTIONALITY) : 50;
 
     return {
       "Adaptive Observation": Math.round((O * 0.7 + C * 0.3)),
