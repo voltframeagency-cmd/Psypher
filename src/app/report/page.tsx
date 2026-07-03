@@ -851,12 +851,21 @@ function ReportContent() {
         const storedText = sessionStorage.getItem("psypher_text_sample");
         
         if (storedAnswers) {
+          let parsedText: any = storedText;
+          if (storedText && (storedText.startsWith("{") || storedText.startsWith("["))) {
+            try {
+              parsedText = JSON.parse(storedText);
+            } catch (e) {
+              // ignore
+            }
+          }
+
           const response = await fetch("/api/generate-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
               answers: JSON.parse(storedAnswers), 
-              text_sample: storedText,
+              text_sample: parsedText,
               locale: locale
             }),
           });
