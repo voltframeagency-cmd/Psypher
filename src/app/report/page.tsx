@@ -847,8 +847,25 @@ function ReportContent() {
           return;
         }
 
-        const storedAnswers = sessionStorage.getItem("psypher_answers");
-        const storedText = sessionStorage.getItem("psypher_text_sample");
+        let storedAnswers = sessionStorage.getItem("psypher_answers");
+        let storedText = sessionStorage.getItem("psypher_text_sample");
+
+        if (!storedAnswers && isDevMode) {
+          const mockAnswers: Record<number, number> = {};
+          for (let i = 1; i <= 30; i++) {
+            mockAnswers[i] = Math.floor(Math.random() * 5) + 1;
+          }
+          storedAnswers = JSON.stringify(mockAnswers);
+          sessionStorage.setItem("psypher_answers", storedAnswers);
+
+          const mockFce = {
+            "opt_1": 35,
+            "opt_2": 45,
+            "opt_3": 20
+          };
+          storedText = JSON.stringify(mockFce);
+          sessionStorage.setItem("psypher_text_sample", storedText);
+        }
         
         if (storedAnswers) {
           let parsedText: any = storedText;
