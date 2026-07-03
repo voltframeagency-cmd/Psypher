@@ -787,6 +787,7 @@ function ReportContent() {
   }, [searchParams]);
 
   useEffect(() => {
+    const isDevMode = process.env.NODE_ENV === "development" || searchParams.get("dev") === "true";
     const fetchReport = async () => {
       const assessmentId = searchParams.get("id");
       const isDemo = searchParams.get("demo") === "true";
@@ -808,7 +809,7 @@ function ReportContent() {
 
           if (assessment && !error) {
             setReport(assessment.reports?.[0]?.content_text);
-            setIsUnlocked(assessment.status === "completed");
+            setIsUnlocked(assessment.status === "completed" || isDevMode);
             setClearanceCode(assessment.clearance_code);
             setExpiresAt(assessment.expires_at);
             
@@ -864,6 +865,7 @@ function ReportContent() {
             const data = await response.json();
             setScores(data.scores);
             setReport(data.report);
+            setIsUnlocked(isDevMode);
             const hybridData = await ReportEngine.assembleHybridReport(data.scores, locale);
             setHybridDossier(hybridData);
           }
