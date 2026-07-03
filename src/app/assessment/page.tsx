@@ -233,6 +233,16 @@ function AssessmentContent() {
                     <>ACCESS REPORT — {price}</>
                   )}
                 </button>
+                {(process.env.NODE_ENV === "development") && (
+                  <button
+                    onClick={() => {
+                      window.location.href = `/report?id=${assessmentId}&dev=true`;
+                    }}
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs uppercase tracking-widest font-black mb-6 rounded-full"
+                  >
+                    [DEV] Bypass Paywall & View Report
+                  </button>
+                )}
                 <div className="flex flex-col gap-2">
                   <p className="text-[9px] uppercase font-bold text-zinc-300 tracking-widest">
                     SECURE ENCRYPTION · ONE-TIME PAYMENT
