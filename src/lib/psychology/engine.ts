@@ -186,4 +186,108 @@ export class ReportEngine {
 
     return sections;
   }
+
+  static generateDeterministicExecutiveSummary(report: HybridReport, locale?: string): string {
+    const wiring = report.selfReport.cognitiveWiring || "INTJ";
+    const attachmentStyle = report.selfReport.attachment.Style || "Secure";
+    const mach = report.selfReport.darkTriad.MACHIAVELLIANISM || 3.0;
+    const psych = report.selfReport.darkTriad.PSYCHOPATHY || 3.0;
+    const narc = report.selfReport.darkTriad.NARCISSISM || 3.0;
+    const shadowAvg = Math.round(((mach + psych + narc) / 3) * 20);
+
+    let uncomfortableTruth = "";
+    if (shadowAvg > 66) {
+      uncomfortableTruth = locale === "es"
+        ? "Su perfil muestra un escudo de sombra estratégica altamente desarrollado. Utiliza el distanciamiento analítico para evitar el consenso tradicional, priorizando los resultados sobre la armonía interpersonal."
+        : "Your profile shows a highly developed strategic shadow shield. You use analytical detachment to bypass traditional consensus, prioritizing outcomes over interpersonal harmony.";
+    } else if (shadowAvg < 33) {
+      uncomfortableTruth = locale === "es"
+        ? "Proyecta una alta confianza interpersonal y empatía, pero puede tener dificultades para evitar el conflicto. Sus métricas indican un fuerte deseo de consenso que a veces puede ralentizar la velocidad operativa."
+        : "You project high interpersonal trust and empathy, but may struggle with conflict avoidance. Your metrics indicate a strong desire for consensus that can sometimes slow operational velocity.";
+    } else {
+      uncomfortableTruth = locale === "es"
+        ? "Equilibra la asertividad estratégica con la colaboración grupal. Proyecta una fachada estratégica altamente competente para ocultar una profunda aversión subyacente a la vulnerabilidad, adaptando su estilo según la confianza situacional."
+        : "You balance strategic assertiveness with group collaboration. You project a highly competent strategic facade to mask a deep underlying aversion to vulnerability, adapting your style based on situational trust.";
+    }
+
+    let strategicFramework = locale === "es"
+      ? `Su configuración cognitiva dominante **${wiring}** combinada con un protocolo de apego **${attachmentStyle}** dictamina su perfil de liderazgo. `
+      : `Your dominant **${wiring}** cognitive configuration combined with a **${attachmentStyle}** attachment protocol dictates your leadership profile. `;
+    
+    if (wiring.startsWith("I")) {
+      strategicFramework += locale === "es"
+        ? "Procesa las operaciones a través de una deliberación interna silenciosa, reservando energía para proteger la integridad de sus modelos analíticos."
+        : "You process operations through quiet internal deliberation, reserving energy to protect the integrity of your analytical models.";
+    } else {
+      strategicFramework += locale === "es"
+        ? "Procesa las operaciones como un catalizador social activo, impulsando alineaciones de equipo en tiempo real e intercambios verbales."
+        : "You process operations as an active social catalyst, driving real-time team alignments and verbal exchanges.";
+    }
+
+    let subIndicesStrategy = "";
+    if (mach > 3.5) {
+      subIndicesStrategy = locale === "es"
+        ? `Su puntuación de maquiavelismo de ${Math.round(mach * 20)}% no es una debilidad. Es su principal activo estratégico en entornos competitivos de baja confianza.`
+        : `Your Machiavellian score of ${Math.round(mach * 20)}% is not a liability. It is your primary strategic asset in competitive, low-trust environments.`;
+    } else {
+      subIndicesStrategy = locale === "es"
+        ? "Su perfil moderado de Tríada Oscura sugiere una baja latencia manipuladora. Confía en la autoridad directa y la alineación transparente en lugar de la gestión social indirecta."
+        : "Your moderate Dark Triad profile suggests low manipulative latency. You rely on direct authority and transparent alignment rather than indirect social management.";
+    }
+
+    let relationalDynamics = "";
+    if (attachmentStyle.includes("Avoidant")) {
+      relationalDynamics = locale === "es"
+        ? `Con un estilo ${attachmentStyle}, busca la cercanía pero se retira cuando la intimidad requiere una entrega genuina. Este patrón crea un ciclo repetitivo de búsqueda y distanciamiento en relaciones de alto riesgo.`
+        : `With a ${attachmentStyle} style, you seek closeness but retreat when intimacy requires genuine surrender. This pattern creates a repetitive cycle of chase and withdraw in high-stakes relationships.`;
+    } else if (attachmentStyle.includes("Anxious")) {
+      relationalDynamics = locale === "es"
+        ? `Con un estilo ${attachmentStyle}, tiene una sensibilidad elevada a los cambios interpersonales. Busca una alineación constante, lo que ocasionalmente puede introducir ruido operativo.`
+        : `With a ${attachmentStyle} style, you have heightened sensitivity to interpersonal shifts. You seek constant alignment, which can occasionally introduce operational noise.`;
+    } else {
+      relationalDynamics = locale === "es"
+        ? "Con una base de apego seguro, establece alianzas profesionales estables y de baja fricción, permitiendo límites de confianza saludables sin retirada defensiva."
+        : "With a Secure attachment base, you establish stable, low-friction professional alliances, permitting healthy trust boundaries without defensive retreat.";
+    }
+
+    const playbook1 = wiring.includes("I")
+      ? (locale === "es" ? "Inicie una verificación directa de conflicto verbal" : "Initiate one direct verbal conflict check-in")
+      : (locale === "es" ? "Pase cuarenta y ocho horas en una planificación estratégica interna profunda sin consultar a los equipos" : "Spend forty-eight hours in deep internal strategic planning without consulting teams");
+
+    const playbook3 = attachmentStyle.includes("Avoidant")
+      ? (locale === "es" ? "Delegue un control de hito crítico sin métricas de auditoría" : "Delegate one critical milestone check-in without audit metrics")
+      : (locale === "es" ? "Defina reglas explícitas de transparencia para estabilizar la alineación de la comunicación" : "Define explicit transparency rules to stabilize communication alignment");
+
+    return locale === "es" ? `## LA VERDAD INCÓMODA
+${uncomfortableTruth}
+
+## MARCO ESTRATÉGICO
+${strategicFramework}
+
+## ESTRATEGIA DE SUBÍNDICES
+${subIndicesStrategy}
+
+## DINÁMICA RELACIONAL
+${relationalDynamics}
+
+## EL MARCO PSYPHER
+1. ${playbook1}.
+2. Comparta un cuello de botella u fallo operativo específico con su equipo.
+3. ${playbook3}.` : `## THE UNCOMFORTABLE TRUTH
+${uncomfortableTruth}
+
+## STRATEGIC FRAMEWORK
+${strategicFramework}
+
+## SUB-INDICES STRATEGY
+${subIndicesStrategy}
+
+## RELATIONAL DYNAMICS
+${relationalDynamics}
+
+## THE PSYPHER FRAMEWORK
+1. ${playbook1}.
+2. Share a specific operational bottleneck or failure with your team.
+3. ${playbook3}.`;
+  }
 }

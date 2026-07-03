@@ -808,7 +808,6 @@ function ReportContent() {
             .single();
 
           if (assessment && !error) {
-            setReport(assessment.reports?.[0]?.content_text);
             setIsUnlocked(assessment.status === "completed" || isDevMode);
             setClearanceCode(assessment.clearance_code);
             setExpiresAt(assessment.expires_at);
@@ -821,6 +820,10 @@ function ReportContent() {
                 finalScores = PsychologyEngine.generateHybridReport(finalScores, textSample, locale);
               }
               setScores(finalScores);
+              
+              const summaryText = assessment.reports?.[0]?.content_text || ReportEngine.generateDeterministicExecutiveSummary(finalScores, locale);
+              setReport(summaryText);
+
               const hybridData = await ReportEngine.assembleHybridReport(finalScores, locale);
               setHybridDossier(hybridData);
             }
@@ -877,24 +880,20 @@ function ReportContent() {
             }
           }
 
-          const response = await fetch("/api/generate-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              answers: JSON.parse(storedAnswers), 
-              text_sample: parsedText,
-              locale: locale
-            }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setScores(data.scores);
-            setReport(data.report);
-            setIsUnlocked(isDevMode);
-            const hybridData = await ReportEngine.assembleHybridReport(data.scores, locale);
-            setHybridDossier(hybridData);
-          }
+          const computedScores = PsychologyEngine.generateHybridReport(
+            JSON.parse(storedAnswers),
+            parsedText,
+            locale
+          );
+
+          setScores(computedScores);
+          setIsUnlocked(isDevMode);
+
+          const execSummary = ReportEngine.generateDeterministicExecutiveSummary(computedScores, locale);
+          setReport(execSummary);
+
+          const hybridData = await ReportEngine.assembleHybridReport(computedScores, locale);
+          setHybridDossier(hybridData);
         }
       } catch (err) {
         console.error("Report Fetch Error:", err);
