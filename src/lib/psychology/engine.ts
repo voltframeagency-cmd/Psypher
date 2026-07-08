@@ -1,5 +1,6 @@
 import bricksEN from '../data/bricks.json';
 import bricksES from '../data/locales/es/bricks.json';
+import rolesData from '../data/roles.json';
 import { HybridReport } from './scoring';
 
 /**
@@ -164,6 +165,12 @@ export class ReportEngine {
       debasementText
     ].join("\n\n");
 
+    const activeRoles = (rolesData as any)[locale === "es" ? "es" : "en"];
+    const userRole = activeRoles[type] || { title: "Strategic Resource", desc: "Vocational vector profile pending deep scan." };
+    const vocationalText = locale === "es"
+      ? `**Dirección de Carrera y Rol Estratégico: ${userRole.title}**\n\n${userRole.desc}`
+      : `**Vocational Vector & Strategic Role: ${userRole.title}**\n\n${userRole.desc}`;
+
     const sections: Record<string, string> = {
       personality_architecture: [
         this.getBrick('bfi', 'OPEN_MINDEDNESS', bfi.OPEN_MINDEDNESS, locale),
@@ -181,7 +188,8 @@ export class ReportEngine {
       
       cognitive_wiring: cognitiveWiringText,
       core_drivers: coreDriversText,
-      validity_audit: validityAuditText
+      validity_audit: validityAuditText,
+      vocational_vectors: vocationalText
     };
 
     return sections;

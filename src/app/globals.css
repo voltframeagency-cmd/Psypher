@@ -196,7 +196,71 @@ html.js-ready .hero-clip-notched {
   background: rgba(20, 20, 20, 0.6);
 }
 
+/* Print Optimization Styling */
+@media print {
+  body {
+    background-color: #0F0F0F !important;
+    color: #F5F0EB !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
+  nav,
+  header,
+  footer,
+  aside,
+  button,
+  .print\:hidden,
+  .paywall-gate,
+  .locked-state,
+  .sticky-nav-container,
+  .sticky-report-nav,
+  .radar-hud-label,
+  .bg-grid,
+  .noise-overlay,
+  .dev-tools-panel {
+    display: none !important;
+  }
 
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+  }
 
+  .grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2rem !important;
+    width: 100% !important;
+  }
 
+  .lg\:grid-cols-12 {
+    display: block !important;
+  }
+  
+  .lg\:col-span-8,
+  .lg\:col-span-4 {
+    width: 100% !important;
+    margin-bottom: 2rem !important;
+  }
+
+  section,
+  .page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 4rem !important;
+  }
+
+  .border-zinc-900 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .bg-zinc-950\/20,
+  .glass-panel {
+    background-color: rgba(20, 20, 20, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}

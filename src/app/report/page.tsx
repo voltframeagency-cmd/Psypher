@@ -26,6 +26,7 @@ import BklitNotchBar from "@/components/report/BklitNotchBar";
 import { MessageCircle, Swords, Users, ShieldAlert, Share2, Target, Zap, Compass, Flame, Trophy, Crown, Shield, Scale, History, Heart, Globe, Sun, Moon } from "lucide-react";
 import { ReportEngine } from "@/lib/psychology/engine";
 import SchwartzCircumplex from "@/components/report/SchwartzCircumplex";
+import rolesData from "@/lib/data/roles.json";
 
 const SCHWARTZ_MAP: Record<string, { label: string; icon: any; desc: string }> = {
   SelfDirection: { label: "Self-Direction", icon: Compass, desc: "Prioritizes intellectual autonomy, creative agency, and independent strategy." },
@@ -727,6 +728,11 @@ function ReportContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDevTools, setShowDevTools] = useState(false);
+
+  const lang = searchParams.get("lang") || searchParams.get("locale") || "en";
+  const type = scores?.selfReport?.cognitiveWiring || "INTJ";
+  const activeRoles = (rolesData as any)[lang === "es" ? "es" : "en"] || (rolesData as any).en;
+  const userRole = activeRoles[type] || { title: "Strategic Architect", desc: "" };
   const [activeSection, setActiveSection] = useState<string>("overview");
   const [activeTab, setActiveTab] = useState<"core" | "shadow" | "sync">("core");
   const [hoveredTrait, setHoveredTrait] = useState<string | null>(null);
@@ -1329,8 +1335,8 @@ function ReportContent() {
                             <div className="space-y-2">
                               <span className="text-[8px] font-mono tracking-[0.3em] uppercase text-zinc-500 font-bold">Subject_profile_signature</span>
                               <h3 className="text-4xl font-light tracking-tighter text-white leading-tight">
-                                Strategic<br />
-                                <span className="text-[#6D28D9] font-medium">Architect</span>
+                                {userRole.title.split(" ")[0]}<br />
+                                <span className="text-[#6D28D9] font-medium">{userRole.title.split(" ").slice(1).join(" ")}</span>
                               </h3>
                             </div>
                             
@@ -1446,6 +1452,20 @@ function ReportContent() {
                         })}
                       </div>
                     </div>
+
+                    {hybridDossier?.vocational_vectors && (
+                      <div className="col-span-full mt-8 bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-sm relative overflow-hidden">
+                        <SpotlightCard glowColor="rgba(109, 40, 217, 0.05)" className="w-full h-full flex flex-col justify-center animate-in fade-in duration-700">
+                          <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-6 h-[1px] bg-[#6D28D9]" />
+                              <span className="text-[8px] font-mono tracking-[0.3em] uppercase text-purple-500 opacity-60">VOCATIONAL_ALIGNMENT // STRATEGIC_ROLE</span>
+                            </div>
+                            <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier.vocational_vectors} />
+                          </div>
+                        </SpotlightCard>
+                      </div>
+                    )}
 
                     <div className="col-span-full mt-8">
                       <PrescriptivePlaybook 

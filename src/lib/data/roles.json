@@ -1,0 +1,38 @@
+{
+  "en": {
+    "INTJ": { "title": "Strategic Architect", "desc": "You excel in conceptualizing macro-level organizational pathways, constructing multi-phase execution systems, and neutralizing operational complexities with detached analytical models." },
+    "ENTJ": { "title": "Turnaround Director", "desc": "You are built for high-stakes leadership, restructuring inefficient systems, and driving high-velocity team alignments toward quantifiable objectives." },
+    "INFJ": { "title": "Visionary Counsel", "desc": "You operate as a trusted advisor, mapping long-term organizational ideals and aligning strategic growth with deep human value frameworks." },
+    "ENFJ": { "title": "Catalytic Leader", "desc": "You thrive in building unified corporate cultures, mobilizing teams around transformative missions, and mentoring high-potential talent." },
+    "INTP": { "title": "Systems Analyst", "desc": "You are a master of technical debugging, mapping abstract logic loops, and parsing complex code or statistical systems." },
+    "ENTP": { "title": "Disruptive Innovator", "desc": "You excel in generating zero-to-one concepts, validating speculative markets, and designing creative solutions to systemic deadlocks." },
+    "INFP": { "title": "Cultural Guardian", "desc": "You preserve organizational integrity and value alignment, championing authentic communication and human-centric mission directives." },
+    "ENFP": { "title": "Agile Strategist", "desc": "You thrive in high-variance, fast-moving environments, connecting diverse ideas and driving cross-functional project momentum." },
+    "ISTJ": { "title": "Operations Controller", "desc": "You are the anchor of procedural continuity, auditing operational workflows, and maintaining absolute data and compliance standards." },
+    "ESTJ": { "title": "Executive Administrator", "desc": "You excel in logistical execution, enforcing standard operating procedures, and organizing capital and human resources for maximum output." },
+    "ISFJ": { "title": "Support Anchor", "desc": "You secure institutional memory and stabilize team dynamics, protecting workflows from disruption through systematic service." },
+    "ESFJ": { "title": "Corporate Liaison", "desc": "You manage partner relationships, coordinate cross-team logistics, and ensure high-status interpersonal alignment in corporate networks." },
+    "ISTP": { "title": "Tactical Mechanic", "desc": "You resolve immediate technical emergencies, optimizing mechanical or code bottlenecks with hands-on diagnostic precision." },
+    "ESTP": { "title": "Crisis Arbitrageur", "desc": "You navigate high-stakes negotiations, arbitrating volatile deals, and converting sudden market fluctuations into tactical wins." },
+    "ISFP": { "title": "Creative Synthesizer", "desc": "You translate conceptual values into aesthetic and user experience design, building immersive interfaces and brand identities." },
+    "ESFP": { "title": "Engagement Specialist", "desc": "You drive brand presence and consumer relations, translating operational capability into high-energy customer experiences." }
+  },
+  "es": {
+    "INTJ": { "title": "Arquitecto Estratégico", "desc": "Destaca en la conceptualización de rutas organizativas a nivel macro, la construcción de sistemas de ejecución multifásicos y la neutralización de complejidades operativas." },
+    "ENTJ": { "title": "Director de Reestructuración", "desc": "Está diseñado para el liderazgo de alto impacto, la reestructuración de sistemas ineficientes y el impulso de alineaciones de equipo de alta velocidad." },
+    "INFJ": { "title": "Asesor Visionario", "desc": "Actúa como un asesor de confianza, trazando ideales organizativos a largo plazo y alineando el crecimiento estratégico con marcos de valor humano." },
+    "ENFJ": { "title": "Líder Catalítico", "desc": "Destaca en la construcción de culturas corporativas unificadas, la movilización de equipos en torno a misiones transformadoras y la mentoría de talento." },
+    "INTP": { "title": "Analista de Sistemas", "desc": "Es un maestro de la depuración técnica, el mapeo de bucles lógicos abstractos y el análisis de sistemas de código o datos estadísticos complejos." },
+    "ENTP": { "title": "Innovador Disruptivo", "desc": "Sobresale en la generación de conceptos de cero a uno, la validación de mercados especulativos y el diseño de soluciones a bloqueos sistémicos." },
+    "INFP": { "title": "Guardián Cultural", "desc": "Preserva la integridad organizativa y la alineación de valores, defendiendo la comunicación auténtica y las directrices centradas en el ser humano." },
+    "ENFP": { "title": "Estratega Ágil", "desc": "Prospera en entornos cambiantes de alta velocidad, conectando ideas diversas e impulsando el impulso de proyectos multidisciplinares." },
+    "ISTJ": { "title": "Controlador de Operaciones", "desc": "Es el ancla de la continuidad procedimental, auditando flujos de trabajo operativos y manteniendo estándares absolutos de cumplimiento." },
+    "ESTJ": { "title": "Administrador Ejecutivo", "desc": "Destaca en la ejecución logística, la aplicación de procedimientos operativos estándar y la organización de recursos para el máximo rendimiento." },
+    "ISFJ": { "title": "Ancla de Soporte", "desc": "Asegura la memoria institucional y estabiliza la dinámica del equipo, protegiendo los flujos de trabajo mediante un servicio sistemático." },
+    "ESFJ": { "title": "Enlace Corporativo", "desc": "Gestiona las relaciones con socios, coordina la logística interdepartamental y asegura una alineación interpersonal óptima en redes corporativas." },
+    "ISTP": { "title": "Mecánico Táctico", "desc": "Resuelve emergencias técnicas inmediatas, optimizando cuellos de botella con precisión diagnóstica práctica." },
+    "ESTP": { "title": "Arbitrajista de Crisis", "desc": "Navega por negociaciones de alto riesgo, arbitrando acuerdos volátiles y convirtiendo las fluctuaciones del mercado en victorias tácticas." },
+    "ISFP": { "title": "Sintetizador Creativo", "desc": "Traduce valores conceptuales en diseño estético y de experiencia de usuario, construyendo interfaces inmersivas e identidades de marca." },
+    "ESFP": { "title": "Especialista en Compromiso", "desc": "Impulsa la presencia de marca y las relaciones con los clientes, traduciendo la capacidad operativa en experiencias de cliente de alta energía." }
+  }
+}

@@ -260,7 +260,7 @@ async function runTests() {
   const entjNarrative = await ReportEngine.assembleHybridReport(entjReport, "en");
   
   console.log("\n  [Generated Sections]");
-  const expectedSections = ["personality_architecture", "shadow_profile", "connection_blueprint", "cognitive_wiring", "core_drivers", "validity_audit"];
+  const expectedSections = ["personality_architecture", "shadow_profile", "connection_blueprint", "cognitive_wiring", "core_drivers", "validity_audit", "vocational_vectors"];
   for (const section of expectedSections) {
     const content = entjNarrative[section];
     assert(!!content && content.length > 10, `Section "${section}" should have content`, content ? `length=${content.length}` : "MISSING");
