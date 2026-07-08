@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CustomEase } from "gsap/CustomEase";
@@ -210,13 +211,13 @@ const DIMENSION_ASSETS: Record<string, { folder: string; icons: Record<string, s
     }
   },
   schwartz: {
-    folder: "", // Missing folder, using fallback
+    folder: "Drivers SVG",
     icons: {
-      Hedonism: "/assets/report/drivers.png",
-      Power: "/assets/report/drivers.png",
-      Achievement: "/assets/report/drivers.png",
-      Security: "/assets/report/drivers.png",
-      Universalism: "/assets/report/drivers.png",
+      Hedonism: "Hedonism.svg",
+      Power: "Power.svg",
+      Achievement: "Achievement.svg",
+      Security: "Security.svg",
+      Universalism: "Universalism.svg",
     }
   },
   resilience: {
@@ -257,8 +258,11 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
             <div className="group-hover/card:scale-105 transition-all duration-700 flex justify-center py-4">
               {icon ? (
                 typeof icon === 'string' ? (
-                  <img 
+                  <Image 
                     src={icon} 
+                    width={128}
+                    height={128}
+                    unoptimized
                     className={`w-32 h-32 transition-all duration-700 object-contain drop-shadow-sm ${shouldInvert ? 'filter invert opacity-80 group-hover/card:opacity-100' : 'opacity-90'}`} 
                     alt="" 
                   />
@@ -320,8 +324,11 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
         <div className="md:col-span-1 flex justify-center opacity-60">
            {icon ? (
              typeof icon === 'string' ? (
-               <img 
+               <Image 
                  src={icon} 
+                 width={48}
+                 height={48}
+                 unoptimized
                  className={`w-12 h-12 transition-all object-contain ${shouldInvert ? 'filter invert opacity-40 group-hover:opacity-100' : 'opacity-70'}`} 
                  alt="" 
                />
@@ -349,8 +356,11 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
         <div className="w-24 h-24 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
           {icon ? (
             typeof icon === 'string' ? (
-              <img 
+              <Image 
                 src={icon} 
+                width={96}
+                height={96}
+                unoptimized
                 className={`w-24 h-24 object-contain ${shouldInvert ? 'filter invert opacity-70 group-hover:opacity-100' : ''}`} 
                 alt="" 
               />
@@ -374,7 +384,7 @@ function IntelligenceRow({ label, value, description, color, icon, variant = "de
     </div>
   );
 }
-function CognitiveSpectrum({ 
+function CognitiveSpectrum({ 
   trait, 
   value, 
   colors,
@@ -538,8 +548,11 @@ function CognitiveInteractiveSection({ scores }: { scores: any }) {
            
            {/* Fixed Height Image */}
            <div className={`w-40 h-40 mb-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center p-4 transition-all duration-500 ${activeTraitName ? 'scale-110 opacity-100' : 'scale-100 opacity-90'}`}>
-             <img 
+             <Image 
                src={!activeTraitName ? "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg" : (traitDescriptions[activeTraitsKey(activeTraitName, activeValue > 50)]?.icon || "/assets/report/Cognitive Functions SVG/Adaptive Observation.svg")} 
+               width={160}
+               height={160}
+               unoptimized
                alt="Illustration" 
                className="w-full h-full object-contain filter invert opacity-80" 
              />
@@ -1073,7 +1086,7 @@ function ReportContent() {
       >
         <header className="sticky top-0 z-30 flex-shrink-0 px-6 py-4 flex flex-row justify-between items-center border-b border-zinc-900 bg-black/60 backdrop-blur-xl font-outfit">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
-            <img src="/logo.svg" alt="Psypher Logo" className="h-8 w-auto invert transition-opacity duration-300 group-hover:opacity-75" />
+            <Image src="/logo.svg" alt="Psypher Logo" width={120} height={32} unoptimized className="h-8 w-auto invert transition-opacity duration-300 group-hover:opacity-75" />
           </div>
 
           <div className="flex items-center gap-6">
@@ -1419,7 +1432,7 @@ function ReportContent() {
                                 <div className="space-y-4">
                                   <div className="flex justify-between items-start">
                                     <span className="text-[9px] font-mono tracking-[0.15em] text-purple-400 uppercase font-black">{trait}</span>
-                                    <img src={getIcon("bfi", trait)} className="w-8 h-8 object-contain opacity-60 invert group-hover:scale-105 transition-transform" alt="" />
+                                    <Image src={getIcon("bfi", trait)} width={32} height={32} unoptimized className="w-8 h-8 object-contain opacity-60 invert group-hover:scale-105 transition-transform" alt="" />
                                   </div>
                                   <p className="text-[11px] text-zinc-400 leading-relaxed font-outfit">
                                     {

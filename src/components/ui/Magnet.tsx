@@ -27,11 +27,13 @@ export const Magnet: React.FC<MagnetProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const magnetRef = useRef<HTMLDivElement>(null);
 
+  // Reset position during render if disabled to avoid cascading useEffect renders
+  if (disabled && (position.x !== 0 || position.y !== 0)) {
+    setPosition({ x: 0, y: 0 });
+  }
+
   useEffect(() => {
-    if (disabled) {
-      setPosition({ x: 0, y: 0 });
-      return;
-    }
+    if (disabled) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!magnetRef.current) return;

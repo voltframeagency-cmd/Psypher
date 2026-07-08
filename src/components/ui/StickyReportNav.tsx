@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
@@ -16,28 +16,31 @@ export function StickyReportNav({ currentTier = "deep", isUnlocked = true }: Sti
   const [activeId, setActiveId] = useState("");
   const [isVisible, setIsVisible] = useState(false);
 
-  // Compute sections based on active tier and lock status
-  const visibleSections = [
-    { id: "executive-summary", label: "Executive Summary" },
-    { id: "architecture", label: "Personality" }
-  ];
+  // Compute sections based on active tier and lock status using useMemo
+  const visibleSections = useMemo(() => {
+    const list = [
+      { id: "executive-summary", label: "Executive Summary" },
+      { id: "architecture", label: "Personality" }
+    ];
 
-  if (currentTier !== "basic") {
-    visibleSections.push(
-      { id: "shadow", label: "Dark Triad" },
-      { id: "connection", label: "Relational" }
-    );
-
-    if (isUnlocked) {
-      visibleSections.push(
-        { id: "cognitive", label: "Cognitive Wiring" },
-        { id: "values", label: "Drivers" },
-        { id: "linguistic", label: "Linguistics" },
-        { id: "matrix", label: "Congruency" },
-        { id: "actions", label: "Playbook" }
+    if (currentTier !== "basic") {
+      list.push(
+        { id: "shadow", label: "Dark Triad" },
+        { id: "connection", label: "Relational" }
       );
+
+      if (isUnlocked) {
+        list.push(
+          { id: "cognitive", label: "Cognitive Wiring" },
+          { id: "values", label: "Drivers" },
+          { id: "linguistic", label: "Linguistics" },
+          { id: "matrix", label: "Congruency" },
+          { id: "actions", label: "Playbook" }
+        );
+      }
     }
-  }
+    return list;
+  }, [currentTier, isUnlocked]);
 
   useEffect(() => {
     // Show nav only after scrolling past top section
@@ -72,7 +75,7 @@ export function StickyReportNav({ currentTier = "deep", isUnlocked = true }: Sti
       window.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
-  }, [currentTier, isUnlocked, visibleSections.length]);
+  }, [currentTier, isUnlocked, visibleSections]);
 
   const scrollTo = (id: string) => {
     gsap.to(window, {

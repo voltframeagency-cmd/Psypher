@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -53,28 +52,28 @@ export default function NarrativeBlock({ content, className, animate = true, the
     <div 
       ref={containerRef}
       className={cn(
-        "narrative-block font-sans leading-[1.65] selection:bg-purple-500/20",
+        "narrative-block font-serif leading-[1.75] selection:bg-purple-500/20",
         theme === "light" ? "text-zinc-900" : "text-zinc-300",
-        "max-w-[75ch] mx-auto text-lg md:text-xl antialiased tracking-[-0.01em]",
+        "max-w-[65ch] mx-auto text-lg md:text-xl antialiased tracking-[-0.01em]",
         className
       )}
-      style={{ fontFamily: "var(--font-outfit), sans-serif" }}
+      style={{ fontFamily: "var(--font-eb-garamond), Georgia, serif" }}
     >
       <ReactMarkdown
         components={{
-          p: ({ children }) => <p className="mb-10 last:mb-0 font-normal">{children}</p>,
+          p: ({ children }) => <p className="mb-10 last:mb-0 font-normal leading-relaxed">{children}</p>,
           h2: ({ children }) => (
             <div className="mb-10 mt-16 first:mt-0">
                <h2 className={cn(
-                 "text-4xl md:text-5xl font-bold tracking-tight mb-4 uppercase",
+                 "text-3xl md:text-4xl font-serif tracking-tight mb-4 uppercase font-black",
                  theme === "light" ? "text-black" : "text-white"
                )}>{children}</h2>
-               <div className="w-12 h-1 bg-purple-600 rounded-full" />
+               <div className="w-12 h-[2px] bg-purple-600" />
             </div>
           ),
           strong: ({ children }) => (
             <strong className={cn(
-              "font-bold underline decoration-purple-500/40 decoration-4 underline-offset-4",
+              "font-bold underline decoration-purple-500/40 decoration-2 underline-offset-4",
               theme === "light" ? "text-black" : "text-white"
             )}>{children}</strong>
           ),
