@@ -40,6 +40,9 @@ function AssessmentContent() {
   // Step 1: Questionnaire completed
   const handleQuestionnaireComplete = (responses: Record<number, number>) => {
     setQuestionnaireData(responses);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("psypher_answers", JSON.stringify(responses));
+    }
     persistAssessment(responses); // Pre-save
     setStatus("text-sample"); // Advance to Step 2
   };
@@ -47,6 +50,9 @@ function AssessmentContent() {
   // Step 2a: Text sample submitted → run hybrid analysis
   const handleTextSubmit = (selectedIds: Record<string, number>) => {
     setStatus("calculating");
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("psypher_text_sample", JSON.stringify(selectedIds));
+    }
     const locale = searchParams.get("lang") || searchParams.get("locale") || "en";
     
     setTimeout(() => {
@@ -59,6 +65,9 @@ function AssessmentContent() {
   // Step 2b: Skip text → run questionnaire-only (free) report
   const handleTextSkip = () => {
     setStatus("calculating");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("psypher_text_sample");
+    }
     const locale = searchParams.get("lang") || searchParams.get("locale") || "en";
     
     setTimeout(() => {
@@ -236,7 +245,8 @@ function AssessmentContent() {
                 {(process.env.NODE_ENV === "development") && (
                   <button
                     onClick={() => {
-                      window.location.href = `/report?id=${assessmentId}&dev=true`;
+                      const idParam = (assessmentId && assessmentId !== "null") ? `id=${assessmentId}&` : "";
+                      window.location.href = `/report?${idParam}dev=true&tier=deep`;
                     }}
                     className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs uppercase tracking-widest font-black mb-6 rounded-full"
                   >
