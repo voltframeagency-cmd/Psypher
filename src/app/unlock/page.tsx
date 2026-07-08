@@ -14,11 +14,14 @@ function UnlockPortalContent() {
   const [inputCode, setInputCode] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [vRef, setVRef] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // 1. Auto-fill from localStorage on load
   useEffect(() => {
+    setVRef(`${Math.floor(1000 + Math.random() * 9000)}-ALPHA`);
+    
     const savedCode = localStorage.getItem("psypher_clearance_code");
     if (savedCode && !inputCode) {
       setInputCode(savedCode);
@@ -108,36 +111,22 @@ function UnlockPortalContent() {
               className="w-full h-16 bg-black/[0.02] border-b-2 border-black/10 px-6 font-mono text-sm placeholder:text-black/10 focus:outline-none focus:border-[#6D28D9] transition-all group-hover:bg-black/[0.04] text-center tracking-[0.2em]"
             />
             <div className="absolute top-1/2 -translate-y-1/2 right-6">
-              <Command className="w-4 h-4 text-black/10 group-focus-within:text-[#6D28D9] transition-colors" />
+              {status === "loading" && (
+                <Loader2 className="w-5 h-5 animate-spin text-[#6D28D9]" />
+              )}
+              {status === "success" && (
+                <ShieldCheck className="w-5 h-5 text-emerald-500 animate-bounce" />
+              )}
             </div>
           </div>
 
           <button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className={cn(
-              "w-full h-16 flex items-center justify-center gap-4 transition-all duration-500 rounded-full text-[10px] tracking-[0.3em] font-black uppercase",
-              status === "success" 
-                ? "bg-[#6D28D9] text-white" 
-                : "bg-[#0A0A0A] text-white hover:bg-[#6D28D9] shadow-xl hover:shadow-[#6D28D9]/20"
-            )}
+            className="w-full h-16 bg-black text-white hover:bg-zinc-900 transition-colors font-mono text-xs uppercase tracking-widest font-black rounded-xl flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {status === "loading" ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                VERIFYING_ACCESS...
-              </>
-            ) : status === "success" ? (
-              <>
-                <ShieldCheck className="w-4 h-4" />
-                CLEARANCE_GRANTED
-              </>
-            ) : (
-              <>
-                INITIATE_DECRYPTION
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
+            <span>Decrypt Dossier</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
@@ -154,7 +143,7 @@ function UnlockPortalContent() {
             ENC: AES-256-GCM
           </div>
           <div className="text-[8px] tracking-[0.2em] text-black/20 uppercase font-mono">
-            V-REF: {Math.floor(1000 + Math.random() * 9000)}-ALPHA
+            V-REF: {vRef || "1000-ALPHA"}
           </div>
         </div>
       </div>

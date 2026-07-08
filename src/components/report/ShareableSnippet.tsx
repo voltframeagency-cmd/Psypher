@@ -15,7 +15,11 @@ export default function ShareableSnippet({ clearanceCode, summary, traits }: Sha
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
-    const canvas = await html2canvas(cardRef.current);
+    const canvas = await html2canvas(cardRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#0A0A0A",
+    });
     const link = document.createElement("a");
     link.download = `psypher-dossier-${clearanceCode}.png`;
     link.href = canvas.toDataURL();
