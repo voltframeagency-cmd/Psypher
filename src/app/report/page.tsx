@@ -1524,7 +1524,7 @@ function ReportContent() {
                         <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={report} />
                       </div>
 
-                      <div className="lg:col-span-4 bg-zinc-950/20 border border-zinc-900 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
+                      <div className="lg:col-span-4 lg:sticky lg:top-28 lg:self-start bg-zinc-950/20 border border-zinc-900 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
                         <div className="relative flex-shrink-0 w-[180px] h-[180px]">
                           <BklitGauge 
                             value={scores?.overallCongruencyScore || 78} 
