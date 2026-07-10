@@ -1498,11 +1498,7 @@ function ReportContent() {
                   );
                 })}
               </div>
-              
-              <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-2xl">
-                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
-                <span className="text-[8px] font-mono text-zinc-500 tracking-[0.3em] uppercase">{`VIEWPORT: ${activeTab === "core" ? "CORE_SYSTEMS" : activeTab === "shadow" ? "SHADOW_LATENCY" : "SYNC_COHESION"}`}</span>
-              </div>
+              {/* Viewport status pill removed */}
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto">
