@@ -15,6 +15,7 @@ interface BklitNotchBarProps {
   activeColor?: string; // Tailwind class name or custom color style
   inactiveColor?: string; // Tailwind class for tracking blocks
   className?: string;
+  sem?: number; // Standard Error of Measurement
 }
 
 export default function BklitNotchBar({
@@ -23,9 +24,15 @@ export default function BklitNotchBar({
   activeColor = "bg-purple-600 shadow-[0_0_10px_rgba(109,40,217,0.3)]",
   inactiveColor = "bg-zinc-950/80 border border-zinc-900",
   className = "",
+  sem,
 }: BklitNotchBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const activeSegments = Math.round((Math.max(0, Math.min(100, value)) / 100) * segments);
+
+  const minSem = sem !== undefined ? Math.max(0, value - sem) : value;
+  const maxSem = sem !== undefined ? Math.min(100, value + sem) : value;
+  const semLowerSeg = sem !== undefined ? Math.round((minSem / 100) * segments) : activeSegments;
+  const semUpperSeg = sem !== undefined ? Math.round((maxSem / 100) * segments) : activeSegments;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -57,10 +64,13 @@ export default function BklitNotchBar({
   return (
     <div
       ref={containerRef}
-      className={cn("flex w-full items-center gap-1.5 h-3", className)}
+      className={cn("flex w-full items-center gap-1.5 h-3 cursor-help", className)}
+      title={sem !== undefined ? `95% CI: [${Math.max(0, Math.round(value - 1.96 * sem))}%, ${Math.min(100, Math.round(value + 1.96 * sem))}%]` : undefined}
     >
       {Array.from({ length: segments }).map((_, i) => {
         const isActive = i < activeSegments;
+        const isInSemBand = sem !== undefined && i >= semLowerSeg && i < semUpperSeg;
+
         return (
           <div
             key={i}
@@ -69,14 +79,21 @@ export default function BklitNotchBar({
               inactiveColor
             )}
           >
-            {isActive && (
+            {isActive ? (
               <div
                 className={cn(
                   "notch-active-fill absolute inset-0 w-full h-full rounded-sm origin-left",
                   activeColor
                 )}
               />
-            )}
+            ) : isInSemBand ? (
+              <div
+                className={cn(
+                  "absolute inset-0 w-full h-full rounded-sm opacity-20",
+                  activeColor
+                )}
+              />
+            ) : null}
           </div>
         );
       })}

@@ -694,8 +694,19 @@ export class PsychologyEngine {
         let scenarioCloaking = 0;
         let scenarioAllocated = 0;
 
-        scenario.options.forEach(option => {
-          const pct = selectedOptionIds[option.id] || 0;
+        scenario.options.forEach((option, index) => {
+          const genericKey = `opt_${index + 1}`;
+          const altGenericKey = `${index + 1}`;
+          const letterKey = `opt_${String.fromCharCode(65 + index)}`;
+
+          const pct = selectedOptionIds[option.id] !== undefined
+            ? selectedOptionIds[option.id]
+            : (selectedOptionIds[genericKey] !== undefined
+                ? selectedOptionIds[genericKey]
+                : (selectedOptionIds[altGenericKey] !== undefined
+                    ? selectedOptionIds[altGenericKey]
+                    : (selectedOptionIds[letterKey] !== undefined ? selectedOptionIds[letterKey] : 0)));
+
           scenarioComplexity += option.linguisticWeights.cognitiveComplexity * pct;
           scenarioCertainty += option.linguisticWeights.certaintyLanguage * pct;
           scenarioPower += option.linguisticWeights.powerLanguage * pct;
@@ -822,5 +833,52 @@ export class PsychologyEngine {
       "ISTP": "Virtuoso", "ESTP": "Entrepreneur", "ISFP": "Adventurer", "ESFP": "Entertainer"
     };
     return labels[type] || "Architect";
+  }
+
+  static normalizeReport(report: HybridReport): HybridReport {
+    // Check if it's already normalized to avoid double-normalizing
+    const bfi = report.selfReport?.bfi;
+    if (!bfi) return report;
+    
+    const isRaw = Object.keys(bfi).some(k => k === "EXTRAVERSION" || k === "OPEN_MINDEDNESS");
+    if (!isRaw) return report; // Already normalized/Title Cased
+    
+    const traitKeyMapping: Record<string, string> = {
+      "OPEN_MINDEDNESS": "Openness",
+      "CONSCIENTIOUSNESS": "Conscientiousness",
+      "EXTRAVERSION": "Extraversion",
+      "AGREEABLENESS": "Agreeableness",
+      "NEGATIVE_EMOTIONALITY": "Neuroticism"
+    };
+
+    const dtKeyMapping: Record<string, string> = {
+      "MACHIAVELLIANISM": "Machiavellianism",
+      "NARCISSISM": "Narcissism",
+      "PSYCHOPATHY": "Psychopathy"
+    };
+
+    const normalizedBfi: Record<string, number> = {};
+    for (const [key, val] of Object.entries(bfi)) {
+      const mappedKey = traitKeyMapping[key] || key;
+      normalizedBfi[mappedKey] = Math.round(((val - 1) / 4) * 100);
+    }
+
+    const normalizedDt: Record<string, number> = {};
+    const dt = report.selfReport?.darkTriad;
+    if (dt) {
+      for (const [key, val] of Object.entries(dt)) {
+        const mappedKey = dtKeyMapping[key] || key;
+        normalizedDt[mappedKey] = Math.round(((val - 1) / 4) * 100);
+      }
+    }
+
+    return {
+      ...report,
+      selfReport: {
+        ...report.selfReport,
+        bfi: normalizedBfi,
+        darkTriad: normalizedDt
+      }
+    };
   }
 }

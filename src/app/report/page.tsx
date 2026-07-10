@@ -3,7 +3,7 @@
 // Force Dynamic Rendering for useSearchParams Static Analysis
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import gsap from "gsap";
@@ -28,18 +28,105 @@ import { MessageCircle, Swords, Users, ShieldAlert, Share2, Target, Zap, Compass
 import { ReportEngine } from "@/lib/psychology/engine";
 import SchwartzCircumplex from "@/components/report/SchwartzCircumplex";
 import rolesData from "@/lib/data/roles.json";
+import { getBfiSemData, PRECOMPUTED_SEM, BFI_RELIABILITY_MAP } from "@/lib/psychology/psychometrics";
+import ConfidenceBand from "@/components/report/ConfidenceBand";
+import StressOverlay from "@/components/report/StressOverlay";
+import { generateDynamics, generateCompatibilityDynamics } from "@/lib/psychology/dynamics";
+
+
+// Custom Coded Minimalist SVGs for 5 Schwartz Dimensions
+const HedonismIcon = ({ size = 24, className = "", ...props }: any) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    width={size} 
+    height={size} 
+    className={`stroke-current fill-none stroke-[1.5] ${className}`} 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <path d="M12 2a10 10 0 0 0-10 10c0 5.5 4.5 10 10 10s10-4.5 10-10" />
+    <path d="M18.4 12c.9-1.8.6-4.1-1-5.7-1.6-1.6-3.9-1.9-5.7-1" />
+    <path d="M12.4 18c-.9 1.8-.6 4.1 1 5.7 1.6 1.6 3.9 1.9 5.7 1" className="opacity-40" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const PowerIcon = ({ size = 24, className = "", ...props }: any) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    width={size} 
+    height={size} 
+    className={`stroke-current fill-none stroke-[1.5] ${className}`} 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z" fill="currentColor" fillOpacity="0.15" />
+    <path d="M5 20h14" strokeWidth="1.5" />
+    <circle cx="12" cy="14" r="1" />
+  </svg>
+);
+
+const AchievementIcon = ({ size = 24, className = "", ...props }: any) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    width={size} 
+    height={size} 
+    className={`stroke-current fill-none stroke-[1.5] ${className}`} 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+    <path d="M4 22h16M10 14.66V17h4v-2.34M12 4v10.5" />
+    <path d="M8 4h8v6a4 4 0 0 1-8 0V4z" fill="currentColor" fillOpacity="0.15" />
+  </svg>
+);
+
+const SecurityIcon = ({ size = 24, className = "", ...props }: any) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    width={size} 
+    height={size} 
+    className={`stroke-current fill-none stroke-[1.5] ${className}`} 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fillOpacity="0.15" />
+    <path d="M12 6v11" strokeDasharray="2 2" />
+    <circle cx="12" cy="11" r="3" />
+  </svg>
+);
+
+const UniversalismIcon = ({ size = 24, className = "", ...props }: any) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    width={size} 
+    height={size} 
+    className={`stroke-current fill-none stroke-[1.5] ${className}`} 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="currentColor" fillOpacity="0.05" />
+    <path d="M2 12h20" />
+  </svg>
+);
 
 const SCHWARTZ_MAP: Record<string, { label: string; icon: any; desc: string }> = {
   SelfDirection: { label: "Self-Direction", icon: Compass, desc: "Prioritizes intellectual autonomy, creative agency, and independent strategy." },
   Stimulation: { label: "Stimulation", icon: Zap, desc: "Driven by novelty, dynamic challenges, and high-velocity environments." },
-  Hedonism: { label: "Hedonism", icon: Flame, desc: "Values sensory gratification, experiential flow, and work-life harmony." },
-  Achievement: { label: "Achievement", icon: Trophy, desc: "Motivated by competence demonstration, outperformance, and recognition." },
-  Power: { label: "Power", icon: Crown, desc: "Focuses on authority, status indicators, and hierarchical leverage." },
-  Security: { label: "Security", icon: Shield, desc: "Prioritizes risk mitigation, stability, and long-term safety protocols." },
+  Hedonism: { label: "Hedonism", icon: HedonismIcon, desc: "Values sensory gratification, experiential flow, and work-life harmony." },
+  Achievement: { label: "Achievement", icon: AchievementIcon, desc: "Motivated by competence demonstration, outperformance, and recognition." },
+  Power: { label: "Power", icon: PowerIcon, desc: "Focuses on authority, status indicators, and hierarchical leverage." },
+  Security: { label: "Security", icon: SecurityIcon, desc: "Prioritizes risk mitigation, stability, and long-term safety protocols." },
   Conformity: { label: "Conformity", icon: Scale, desc: "Values compliance with collective norms, predictability, and alignment." },
   Tradition: { label: "Tradition", icon: History, desc: "Respects established workflows, institutional memory, and proven rules." },
   Benevolence: { label: "Benevolence", icon: Heart, desc: "Optimizes for close-team welfare, high-trust collaboration, and support." },
-  Universalism: { label: "Universalism", icon: Globe, desc: "Focuses on systemic impact, equity, and broad-scale welfare." }
+  Universalism: { label: "Universalism", icon: UniversalismIcon, desc: "Focuses on systemic impact, equity, and broad-scale welfare." }
 };
 
 const SCHWARTZ_QUADRANTS = [
@@ -211,13 +298,13 @@ const DIMENSION_ASSETS: Record<string, { folder: string; icons: Record<string, s
     }
   },
   schwartz: {
-    folder: "Drivers SVG",
+    folder: "",
     icons: {
-      Hedonism: "Hedonism.svg",
-      Power: "Power.svg",
-      Achievement: "Achievement.svg",
-      Security: "Security.svg",
-      Universalism: "Universalism.svg",
+      Hedonism: "Hedonism",
+      Power: "Power",
+      Achievement: "Achievement",
+      Security: "Security",
+      Universalism: "Universalism",
     }
   },
   resilience: {
@@ -230,10 +317,76 @@ const DIMENSION_ASSETS: Record<string, { folder: string; icons: Record<string, s
   }
 };
 
-const GEN_ASSETS: Record<string, string> = {
-  drivers: "/assets/report/drivers.png",
-  language: "/assets/report/language.png",
-  resilience: "/assets/report/resilience.png",
+// Coded Minimalist SVGs for Schwartz Dimensions and fallbacks (System 1 visual markers)
+const SelfTranscendenceIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-emerald-500 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <circle cx="5" cy="5" r="2" />
+    <circle cx="19" cy="5" r="2" />
+    <circle cx="5" cy="19" r="2" />
+    <circle cx="19" cy="19" r="2" />
+    <line x1="7" y1="7" x2="10" y2="10" />
+    <line x1="17" y1="7" x2="14" y2="10" />
+    <line x1="7" y1="17" x2="10" y2="14" />
+    <line x1="17" y1="17" x2="14" y2="14" />
+  </svg>
+);
+
+const SelfEnhancementIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-rose-500 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21h18M5 17l7-7 4 4 5-5" />
+    <circle cx="12" cy="10" r="1" />
+    <circle cx="16" cy="14" r="1" />
+    <circle cx="21" cy="9" r="1" />
+    <line x1="12" y1="6" x2="12" y2="2" />
+    <polyline points="10 4 12 2 14 4" />
+  </svg>
+);
+
+const ConservationIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-cyan-500 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <circle cx="12" cy="11" r="3" />
+    <line x1="12" y1="14" x2="12" y2="17" />
+  </svg>
+);
+
+const OpennessToChangeIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-purple-500 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" strokeDasharray="3 3" />
+    <path d="M12 2a10 10 0 0 1 10 10" strokeWidth="1.5" />
+    <path d="M12 12m-6 0a6 6 0 1 0 12 0" />
+    <line x1="12" y1="12" x2="18" y2="6" strokeWidth="1.5" />
+  </svg>
+);
+
+const LinguisticBiomarkersIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-purple-400 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 10v4M6 6v12M9 3v18M12 8v8M15 5v14M18 7v10M21 11v2" strokeWidth="1.5" />
+  </svg>
+);
+
+const ResilienceIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-purple-400 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L2 7l10 5 10-5-10-5Z" />
+    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+  </svg>
+);
+
+const GeneralCalibrationIcon = (
+  <svg viewBox="0 0 24 24" className="w-12 h-12 text-purple-400 stroke-current fill-none stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <line x1="12" y1="1" x2="12" y2="23" strokeDasharray="2 2" />
+    <line x1="1" y1="12" x2="23" y2="12" strokeDasharray="2 2" />
+    <circle cx="12" cy="12" r="4" fill="currentColor" fillOpacity="0.1" />
+    <path d="M10 12h4M12 10v4" />
+  </svg>
+);
+
+const GEN_ASSETS: Record<string, any> = {
+  drivers: GeneralCalibrationIcon,
+  language: LinguisticBiomarkersIcon,
+  resilience: ResilienceIcon,
 };
 
 /**
@@ -418,14 +571,53 @@ function CognitiveSpectrum({
     >
       <div className={`flex justify-center text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase ${colors.text.replace('text-', 'text-')} opacity-80 group-hover:opacity-100 transition-opacity`}>
         {value}% {value > 50 ? trait : opposite}
-      </div>
-      <div className="relative w-full h-[6px] bg-zinc-900 rounded-full overflow-visible">
-         <div className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-out origin-left rounded-full ${colors.bg}`} style={{ width: `${value}%` }} />
-         <div 
-            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-zinc-950 border-[3.5px] rounded-full shadow-sm transition-all duration-1000 ease-out ${colors.border} scale-90 group-hover:scale-110 md:w-6 md:h-6`} 
-            style={{ left: `calc(${value}% - 10px)` }}
-         />
-      </div>
+      </div>      {(() => {
+        const sem = 6.0;
+        const lower = Math.max(0, value - sem);
+        const upper = Math.min(100, value + sem);
+        return (
+          <div 
+            className="relative w-full h-4 flex items-center cursor-help group/spectrum"
+            title={`95% CI: [${Math.max(0, Math.round(value - 1.96 * sem))}%, ${Math.min(100, Math.round(value + 1.96 * sem))}%] | SEM: ±${sem}`}
+          >
+            {/* Notched track background */}
+            <div className="absolute inset-x-0 h-1.5 bg-zinc-950 border border-zinc-900 rounded-full flex justify-between overflow-hidden">
+              {Array.from({ length: 40 }).map((_, idx) => (
+                <div key={idx} className="w-[1.5px] h-full bg-zinc-800/40 last:hidden" />
+              ))}
+            </div>
+
+            {/* SEM Shadow Band */}
+            <div 
+              className="absolute h-3.5 bg-purple-500/20 shadow-[0_0_12px_rgba(168,85,247,0.4)] blur-[1px] rounded-sm transition-all duration-1000 ease-out"
+              style={{ 
+                left: `${lower}%`, 
+                width: `${upper - lower}%` 
+              }}
+            />
+
+            {/* Active Fill Track */}
+            <div 
+              className={`absolute h-[2.5px] transition-all duration-1000 ease-out origin-left rounded-full ${colors.bg}`}
+              style={{ 
+                left: 0, 
+                width: `${value}%` 
+              }}
+            />
+
+            {/* Tactile indicator handle */}
+            <div 
+              className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-zinc-950 border-[3.5px] rounded-full shadow-[0_0_10px_rgba(0,0,0,0.8)] transition-all duration-1000 ease-out ${colors.border} scale-90 group-hover:scale-105 group-hover:shadow-[0_0_15px_var(--glow-color)] md:w-[22px] md:h-[22px]`} 
+              style={{ 
+                left: `calc(${value}% - 11px)`,
+                "--glow-color": colors.bg.includes("cyan") ? "rgba(34,211,238,0.5)" : colors.bg.includes("amber") ? "rgba(251,191,36,0.5)" : colors.bg.includes("emerald") ? "rgba(52,211,153,0.5)" : "rgba(168,85,247,0.5)"
+              } as any}
+            >
+              <div className="w-1.5 h-1.5 bg-white rounded-full" />
+            </div>
+          </div>
+        );
+      })()}
       <div className={`flex justify-between text-[8px] md:text-[9px] font-mono uppercase tracking-[0.3em] font-bold transition-opacity ${isHovered ? 'opacity-70 text-zinc-300' : 'opacity-40 text-zinc-500 group-hover:opacity-60'}`}>
         <span className={value > 50 ? "opacity-100" : ""}>{trait}</span>
         <span className={value <= 50 ? "opacity-100" : ""}>{opposite}</span>
@@ -741,8 +933,38 @@ function ReportContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDevTools, setShowDevTools] = useState(false);
+  const [showStressState, setShowStressState] = useState(false);
+
+  const stressBfi = useMemo(() => {
+    if (!scores?.selfReport?.bfi) return null;
+    const bfi = scores.selfReport.bfi;
+    return {
+      Openness: Math.max(0, Math.min(100, (bfi.Openness || 50) - 8)),
+      Conscientiousness: Math.max(0, Math.min(100, (bfi.Conscientiousness || 50) - 6)),
+      Extraversion: Math.max(0, Math.min(100, (bfi.Extraversion || 50) - 10)),
+      Agreeableness: Math.max(0, Math.min(100, (bfi.Agreeableness || 50) - 12)),
+      Neuroticism: Math.max(0, Math.min(100, (bfi.Neuroticism || 50) + 15)),
+    };
+  }, [scores?.selfReport?.bfi]);
 
   const lang = searchParams.get("lang") || searchParams.get("locale") || "en";
+  const dynamics = useMemo(() => {
+    if (!scores?.selfReport) return null;
+    const bfi = scores.selfReport.bfi || { Openness: 50, Conscientiousness: 50, Extraversion: 50, Agreeableness: 50, Neuroticism: 50 };
+    const attachmentStyle = (scores.selfReport.attachment?.Style as string) || "Secure";
+    const cognitiveWiring = scores.selfReport.cognitiveWiring || "INTJ";
+    return generateDynamics(bfi, attachmentStyle, cognitiveWiring, lang);
+  }, [scores, lang]);
+
+  const compatibilityDynamics = useMemo(() => {
+    if (!scores?.selfReport || !partnerScores) return null;
+    const selfBfi = scores.selfReport.bfi || { Openness: 50, Conscientiousness: 50, Extraversion: 50, Agreeableness: 50, Neuroticism: 50 };
+    const selfStyle = scores.selfReport.attachment?.Style || "Secure";
+    const partnerBfi = partnerScores.bfi || { Openness: 50, Conscientiousness: 50, Extraversion: 50, Agreeableness: 50, Neuroticism: 50 };
+    const partnerStyle = partnerScores.attachment?.Style || "Secure";
+    return generateCompatibilityDynamics(selfBfi, selfStyle, partnerBfi, partnerStyle, lang);
+  }, [scores, partnerScores, lang]);
+
   const type = scores?.selfReport?.cognitiveWiring || "INTJ";
   const activeRoles = (rolesData as any)[lang === "es" ? "es" : "en"] || (rolesData as any).en;
   const userRole = activeRoles[type] || { title: "Strategic Architect", desc: "" };
@@ -838,13 +1060,14 @@ function ReportContent() {
                 const textSample = assessment.reports?.[0]?.text_sample || "";
                 finalScores = PsychologyEngine.generateHybridReport(finalScores, textSample, locale);
               }
-              setScores(finalScores);
               
               const summaryText = assessment.reports?.[0]?.content_text || ReportEngine.generateDeterministicExecutiveSummary(finalScores, locale);
               setReport(summaryText);
 
               const hybridData = await ReportEngine.assembleHybridReport(finalScores, locale);
               setHybridDossier(hybridData);
+
+              setScores(PsychologyEngine.normalizeReport(finalScores));
             }
             
             setLoading(false);
@@ -905,7 +1128,6 @@ function ReportContent() {
             locale
           );
 
-          setScores(computedScores);
           setIsUnlocked(isDevMode);
 
           const execSummary = ReportEngine.generateDeterministicExecutiveSummary(computedScores, locale);
@@ -913,6 +1135,8 @@ function ReportContent() {
 
           const hybridData = await ReportEngine.assembleHybridReport(computedScores, locale);
           setHybridDossier(hybridData);
+
+          setScores(PsychologyEngine.normalizeReport(computedScores));
         }
       } catch (err) {
         console.error("Report Fetch Error:", err);
@@ -1025,9 +1249,22 @@ function ReportContent() {
 
   const getIcon = (dimension: string, trait: string) => {
     const dim = DIMENSION_ASSETS[dimension];
-    if (!dim) return GEN_ASSETS[dimension] || "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=300";
+    if (!dim) return GEN_ASSETS[dimension] || GeneralCalibrationIcon;
+    if (dimension === "schwartz") {
+      if (trait === "Hedonism") return <HedonismIcon />;
+      if (trait === "Power") return <PowerIcon />;
+      if (trait === "Achievement") return <AchievementIcon />;
+      if (trait === "Security") return <SecurityIcon />;
+      if (trait === "Universalism") return <UniversalismIcon />;
+    }
     if (!dim.folder) {
-      return dim.icons[trait] || GEN_ASSETS.drivers;
+      if (dimension === "schwartz") {
+        if (["Universalism", "Benevolence"].includes(trait)) return SelfTranscendenceIcon;
+        if (["Power", "Achievement"].includes(trait)) return SelfEnhancementIcon;
+        if (["Tradition", "Conformity", "Security"].includes(trait)) return ConservationIcon;
+        if (["Hedonism", "Stimulation", "SelfDirection"].includes(trait)) return OpennessToChangeIcon;
+      }
+      return dim.icons[trait] || GEN_ASSETS.drivers || GeneralCalibrationIcon;
     }
     return `/assets/report/${dim.folder}/${dim.icons[trait] || "default.svg"}`;
   };
@@ -1068,7 +1305,7 @@ function ReportContent() {
         }
       `}</style>
 
-      <div className="fixed inset-0 pointer-events-none opacity-[0.015] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-50" />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015] mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg%20viewBox=%270%200%20200%20200%27%20xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter%20id=%27noiseFilter%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.8%27%20numOctaves=%273%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27100%25%27%20height=%27100%25%27%20filter=%27url(%23noiseFilter)%27/%3E%3C/svg%3E')] z-50" />
       
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-40">
         <div className="absolute top-[10%] -left-32 w-[400px] h-[400px] bg-purple-900/10 rounded-full blur-[100px] animate-[float_20s_infinite_ease-in-out]" />
@@ -1278,7 +1515,7 @@ function ReportContent() {
                       <div className="space-y-4">
                         <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">CORE_ANALYTICAL_NARRATIVE</span>
                         <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">
-                          {tier === "compatibility" ? "Alpha vs Beta Cohesion" : "Subject Profile Summary"}
+                          {tier === "compatibility" ? (lang === "es" ? "Cohesión Relacional Dinámica" : "Dynamic Relational Cohesion") : "Subject Profile Summary"}
                         </h1>
                       </div>
                       <p className="text-xs text-zinc-500 font-mono uppercase tracking-widest">
@@ -1305,11 +1542,19 @@ function ReportContent() {
                             inactiveFill={isLightMode ? "rgba(9, 9, 11, 0.05)" : "rgba(255, 255, 255, 0.03)"}
                             width={180} 
                             height={180} 
+                            theme={isLightMode ? "light" : "dark"}
+                            sem={5.8}
                           />
                         </div>
-                        <div className="mt-8 space-y-2">
+                        <div className="mt-8 space-y-3 flex flex-col items-center">
                           <h4 className="text-sm font-bold text-white uppercase tracking-wider">Calibration Integrity</h4>
                           <p className="text-xs text-zinc-400 leading-relaxed max-w-[200px]">Profile metadata indicates high self-awareness and data stability.</p>
+                          <ConfidenceBand 
+                            score={scores?.overallCongruencyScore || 78} 
+                            reliabilityKey="congruency_overall" 
+                            theme={isLightMode ? "light" : "dark"} 
+                            className="scale-90 mt-1"
+                          />
                         </div>
                       </div>
                     </div>
@@ -1325,11 +1570,12 @@ function ReportContent() {
                   </section>
 
                   <section id="personality" className="scroll-mt-28 space-y-12 stagger-reveal">
-                    <div className="border-b border-zinc-900 pb-8 flex justify-between items-end">
+                    <div className="border-b border-zinc-900 pb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                       <div className="space-y-4">
                         <span className="text-[8px] font-mono text-purple-400 tracking-[0.4em] uppercase font-black">DIMENSION_02 // SYSTEMATIC_BEHAVIOR</span>
                         <h1 className="text-4xl md:text-6xl font-light tracking-tighter text-white">Personality Architecture</h1>
                       </div>
+                      <StressOverlay active={showStressState} onChange={setShowStressState} theme={isLightMode ? "light" : "dark"} />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -1364,6 +1610,9 @@ function ReportContent() {
                                   onHoverTrait={setHoveredTrait}
                                   showLabels={true}
                                   standalone={false}
+                                  semData={getBfiSemData()}
+                                  stressData={stressBfi || undefined}
+                                  showStress={showStressState}
                                 />
                               )}
                             </div>
@@ -1374,6 +1623,7 @@ function ReportContent() {
                                 const isHighlighted = hoveredTrait === trait;
                                 const traitKey = trait as string;
                                 const displayLabel = traitKey === "Neuroticism" ? "Emotionality" : traitKey;
+                                const finalVal = showStressState ? ((stressBfi as any)?.[traitKey] ?? val) : val;
                                 
                                 return (
                                   <div
@@ -1389,20 +1639,16 @@ function ReportContent() {
                                         {displayLabel.toUpperCase()}
                                       </span>
                                       <span className={isHighlighted ? "text-purple-400 font-extrabold" : "text-white"}>
-                                        {val}%
+                                        {finalVal}%
                                       </span>
                                     </div>
-                                    
-                                    <div className="relative w-full h-[3px] bg-zinc-900 rounded-full overflow-hidden">
-                                      <div 
-                                        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${
-                                          isHighlighted 
-                                            ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" 
-                                            : "bg-purple-950/60 group-hover/row:bg-purple-900/60"
-                                        }`}
-                                        style={{ width: `${val}%` }} 
-                                      />
-                                    </div>
+                                    <BklitNotchBar 
+                                      value={finalVal} 
+                                      sem={PRECOMPUTED_SEM[BFI_RELIABILITY_MAP[trait]] || 7.2}
+                                      segments={10} 
+                                      activeColor={isHighlighted ? "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" : "bg-purple-600 shadow-[0_0_8px_rgba(109,40,217,0.3)]"}
+                                      className="h-1.5 mt-0.5"
+                                    />
                                   </div>
                                 );
                               })}
@@ -1414,6 +1660,8 @@ function ReportContent() {
                       <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6">
                         {scores?.selfReport?.bfi && Object.entries(scores.selfReport.bfi).map(([trait, val]: any) => {
                           const isHighlighted = hoveredTrait === trait;
+                          const displayedVal = showStressState ? ((stressBfi as any)?.[trait] ?? val) : val;
+                          
                           return (
                             <div
                               key={trait}
@@ -1445,19 +1693,28 @@ function ReportContent() {
                                   </p>
                                 </div>
                                 
-                                <div className="mt-8">
-                                  <BklitNotchBar 
-                                    value={val} 
-                                    segments={10} 
-                                    activeColor={isHighlighted ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]" : "bg-purple-600 shadow-[0_0_10px_rgba(109,40,217,0.3)]"}
-                                    className="mb-3 h-2"
-                                  />
-                                  <div className="flex items-baseline justify-between">
-                                    <span className="text-3xl font-bold tracking-tighter text-white">{val}%</span>
-                                    {tier === "compatibility" && partnerScores?.bfi?.[trait] !== undefined && (
-                                      <span className="text-[9px] font-mono text-purple-400 font-bold">Partner: {partnerScores.bfi[trait]}%</span>
-                                    )}
+                                <div className="mt-8 space-y-4">
+                                  <div>
+                                    <BklitNotchBar 
+                                      value={displayedVal} 
+                                      sem={PRECOMPUTED_SEM[BFI_RELIABILITY_MAP[trait]] || 7.2}
+                                      segments={10} 
+                                      activeColor={isHighlighted ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]" : "bg-purple-600 shadow-[0_0_10px_rgba(109,40,217,0.3)]"}
+                                      className="mb-3 h-2"
+                                    />
+                                    <div className="flex items-baseline justify-between">
+                                      <span className="text-3xl font-bold tracking-tighter text-white">{displayedVal}%</span>
+                                      {tier === "compatibility" && partnerScores?.bfi?.[trait] !== undefined && (
+                                        <span className="text-[9px] font-mono text-purple-400 font-bold">Partner: {partnerScores.bfi[trait]}%</span>
+                                      )}
+                                    </div>
                                   </div>
+                                  <ConfidenceBand 
+                                    score={displayedVal} 
+                                    reliabilityKey={trait} 
+                                    theme={isLightMode ? "light" : "dark"} 
+                                    className="scale-90 origin-left"
+                                  />
                                 </div>
                               </SpotlightCard>
                             </div>
@@ -1477,6 +1734,79 @@ function ReportContent() {
                             <NarrativeBlock theme={isLightMode ? "light" : "dark"} content={hybridDossier.vocational_vectors} />
                           </div>
                         </SpotlightCard>
+                      </div>
+                    )}
+
+                    {dynamics && (
+                      <div className="col-span-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                        {/* Strengths Card */}
+                        <div className={`p-8 rounded-[2rem] border transition-all duration-500 ${
+                          isLightMode 
+                            ? "bg-white border-zinc-200" 
+                            : "bg-zinc-950/25 border-zinc-900"
+                        }`}>
+                          <div className="flex items-center gap-3 mb-6">
+                            <span className="text-[10px] font-mono font-black text-emerald-500 uppercase tracking-widest">[✓] CORE_STRENGTHS</span>
+                          </div>
+                          <div className="space-y-6">
+                            {dynamics.strengths.map((item, index) => (
+                              <div key={index} className="space-y-1.5">
+                                <span className={`text-[10px] font-mono font-black tracking-wider uppercase ${isLightMode ? "text-zinc-900" : "text-white"}`}>
+                                  0{index + 1} ➔ {item.title}
+                                </span>
+                                <p className={`text-[12px] leading-relaxed font-light ${isLightMode ? "text-zinc-500" : "text-zinc-400"}`}>
+                                  {item.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Weaknesses Card */}
+                        <div className={`p-8 rounded-[2rem] border transition-all duration-500 ${
+                          isLightMode 
+                            ? "bg-white border-zinc-200" 
+                            : "bg-zinc-950/25 border-zinc-900"
+                        }`}>
+                          <div className="flex items-center gap-3 mb-6">
+                            <span className="text-[10px] font-mono font-black text-amber-500 uppercase tracking-widest">[!] OPERATIONAL_WEAKNESSES</span>
+                          </div>
+                          <div className="space-y-6">
+                            {dynamics.weaknesses.map((item, index) => (
+                              <div key={index} className="space-y-1.5">
+                                <span className={`text-[10px] font-mono font-black tracking-wider uppercase ${isLightMode ? "text-zinc-900" : "text-white"}`}>
+                                  0{index + 1} ➔ {item.title}
+                                </span>
+                                <p className={`text-[12px] leading-relaxed font-light ${isLightMode ? "text-zinc-500" : "text-zinc-400"}`}>
+                                  {item.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Vocational Styles Card */}
+                        <div className={`p-8 rounded-[2rem] border transition-all duration-500 ${
+                          isLightMode 
+                            ? "bg-white border-zinc-200" 
+                            : "bg-zinc-950/25 border-zinc-900"
+                        }`}>
+                          <div className="flex items-center gap-3 mb-6">
+                            <span className="text-[10px] font-mono font-black text-blue-500 uppercase tracking-widest">[⚙] VOCATIONAL_STYLING</span>
+                          </div>
+                          <div className="space-y-6">
+                            {dynamics.vocationalStyles.map((item, index) => (
+                              <div key={index} className="space-y-1.5">
+                                <span className={`text-[10px] font-mono font-black tracking-wider uppercase ${isLightMode ? "text-zinc-900" : "text-white"}`}>
+                                  0{index + 1} ➔ {item.title}
+                                </span>
+                                <p className={`text-[12px] leading-relaxed font-light ${isLightMode ? "text-zinc-500" : "text-zinc-400"}`}>
+                                  {item.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -1740,6 +2070,7 @@ function ReportContent() {
                               style={scores.selfReport.attachment.Style} 
                               security={scores.selfReport.attachment.Security} 
                               narrative={hybridDossier?.connection_blueprint}
+                              showStress={showStressState}
                             />
                           )}
                         </section>
@@ -1761,9 +2092,10 @@ function ReportContent() {
                               security={scores.selfReport.attachment.Security} 
                               theme={isLightMode ? "light" : "dark"}
                               narrative={hybridDossier?.connection_blueprint}
+                              showStress={showStressState}
                             />
 
-                            {tier === "compatibility" && (
+                            {tier === "compatibility" && compatibilityDynamics && (
                               <div className="p-10 bg-zinc-950/40 border border-zinc-900 rounded-[2.5rem] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-purple-900/5 blur-[100px] rounded-full" />
                                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-900/5 blur-[100px] rounded-full" />
@@ -1776,32 +2108,82 @@ function ReportContent() {
                                   
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <SpotlightCard 
-                                      glowColor="rgba(168, 85, 247, 0.08)"
+                                      glowColor={compatibilityDynamics.cognitiveCard.glowColor}
                                       className="p-8 rounded-[2rem] bg-zinc-950 border border-zinc-900/80 space-y-4 hover:border-zinc-800 transition-all duration-300"
                                     >
                                       <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                                        <div className={`p-2 rounded-lg ${compatibilityDynamics.cognitiveCard.isAlert ? "bg-red-500/10 text-red-400" : "bg-purple-500/10 text-purple-400"}`}>
                                           <Target size={16} />
                                         </div>
-                                        <h4 className="text-lg font-medium text-white italic">&quot;High Intellectual Symmetry&quot;</h4>
+                                        <h4 className="text-lg font-medium text-white italic">&quot;{compatibilityDynamics.cognitiveCard.title}&quot;</h4>
                                       </div>
-                                      <p className="text-xs text-zinc-400 leading-relaxed font-light">Both subjects exhibit Openness scores above 80%. Strategic alignment is highly likely in innovative environments.</p>
-                                      <div className="h-[1px] w-full bg-gradient-to-r from-purple-500/30 to-transparent" />
+                                      <p className="text-xs text-zinc-400 leading-relaxed font-light font-outfit">{compatibilityDynamics.cognitiveCard.desc}</p>
+                                      <div className={`h-[1px] w-full bg-gradient-to-r ${compatibilityDynamics.cognitiveCard.isAlert ? "from-red-500/30" : "from-purple-500/30"} to-transparent`} />
                                     </SpotlightCard>
                                     
                                     <SpotlightCard 
-                                      glowColor="rgba(239, 68, 68, 0.08)"
+                                      glowColor={compatibilityDynamics.relationalCard.glowColor}
                                       className="p-8 rounded-[2rem] bg-zinc-950 border border-zinc-900/80 space-y-4 hover:border-zinc-800 transition-all duration-300"
                                     >
                                       <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-red-500/10 rounded-lg text-red-400">
-                                          <ShieldAlert size={16} />
+                                        <div className={`p-2 rounded-lg ${compatibilityDynamics.relationalCard.isAlert ? "bg-red-500/10 text-red-400" : "bg-emerald-500/10 text-emerald-400"}`}>
+                                          {compatibilityDynamics.relationalCard.isAlert ? <ShieldAlert size={16} /> : <Users size={16} />}
                                         </div>
-                                        <h4 className="text-lg font-medium text-white italic">&quot;Relational Dissonance&quot;</h4>
+                                        <h4 className="text-lg font-medium text-white italic">&quot;{compatibilityDynamics.relationalCard.title}&quot;</h4>
                                       </div>
-                                      <p className="text-xs text-zinc-400 leading-relaxed font-light">Alpha&apos;s Avoidant style vs Beta&apos;s Secure style creates a 40% communication lag during high-stress decision windows.</p>
-                                      <div className="h-[1px] w-full bg-gradient-to-r from-red-500/30 to-transparent" />
+                                      <p className="text-xs text-zinc-400 leading-relaxed font-light font-outfit">{compatibilityDynamics.relationalCard.desc}</p>
+                                      <div className={`h-[1px] w-full bg-gradient-to-r ${compatibilityDynamics.relationalCard.isAlert ? "from-red-500/30" : "from-emerald-500/30"} to-transparent`} />
                                     </SpotlightCard>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {dynamics && (
+                              <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                                {/* Superpowers Card */}
+                                <div className={`p-8 rounded-[2rem] border transition-all duration-500 ${
+                                  isLightMode 
+                                    ? "bg-white border-zinc-200" 
+                                    : "bg-zinc-950/25 border-zinc-900"
+                                }`}>
+                                  <div className="flex items-center gap-3 mb-6">
+                                    <span className="text-[10px] font-mono font-black text-purple-400 uppercase tracking-widest">[+] RELATIONAL_SUPERPOWERS</span>
+                                  </div>
+                                  <div className="space-y-6">
+                                    {dynamics.superpowers.map((item, index) => (
+                                      <div key={index} className="space-y-1.5">
+                                        <span className={`text-[10px] font-mono font-black tracking-wider uppercase ${isLightMode ? "text-zinc-900" : "text-white"}`}>
+                                          0{index + 1} ➔ {item.title}
+                                        </span>
+                                        <p className={`text-[12px] leading-relaxed font-light ${isLightMode ? "text-zinc-500" : "text-zinc-400"}`}>
+                                          {item.desc}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Pitfalls Card */}
+                                <div className={`p-8 rounded-[2rem] border transition-all duration-500 ${
+                                  isLightMode 
+                                    ? "bg-white border-zinc-200" 
+                                    : "bg-zinc-950/25 border-zinc-900"
+                                }`}>
+                                  <div className="flex items-center gap-3 mb-6">
+                                    <span className="text-[10px] font-mono font-black text-red-400 uppercase tracking-widest">[-] RELATIONSHIP_PITFALLS</span>
+                                  </div>
+                                  <div className="space-y-6">
+                                    {dynamics.pitfalls.map((item, index) => (
+                                      <div key={index} className="space-y-1.5">
+                                        <span className={`text-[10px] font-mono font-black tracking-wider uppercase ${isLightMode ? "text-zinc-900" : "text-white"}`}>
+                                          0{index + 1} ➔ {item.title}
+                                        </span>
+                                        <p className={`text-[12px] leading-relaxed font-light ${isLightMode ? "text-zinc-500" : "text-zinc-400"}`}>
+                                          {item.desc}
+                                        </p>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
@@ -1886,7 +2268,7 @@ function ReportContent() {
                               <div className="bg-zinc-950/20 border border-zinc-900 rounded-[2.5rem] p-12 text-center shadow-sm">
                                 <div className="max-w-3xl mx-auto space-y-6">
                                   <div className="text-[8px] tracking-[0.4em] font-mono text-purple-400 uppercase">Matrix_Synthesis</div>
-                                  <p className="text-xl font-serif italic text-zinc-300 leading-relaxed">
+                                  <p className="text-xl font-serif italic text-zinc-300 leading-relaxed max-w-[65ch] mx-auto">
                                     &quot;{hybridDossier?.congruency_logic || "Statistical synthesis in progress..."}&quot;
                                   </p>
                                 </div>

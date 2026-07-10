@@ -10,6 +10,9 @@ interface ArchitectureRadarProps {
   onHoverTrait?: (trait: string | null) => void;
   showLabels?: boolean;
   standalone?: boolean;
+  semData?: Record<string, number>;
+  stressData?: Record<string, number>;
+  showStress?: boolean;
 }
 
 export default function ArchitectureRadar({ 
@@ -18,7 +21,10 @@ export default function ArchitectureRadar({
   hoveredTrait = null,
   onHoverTrait,
   showLabels = true,
-  standalone = true
+  standalone = true,
+  semData,
+  stressData,
+  showStress = false,
 }: ArchitectureRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const polygonRef = useRef<SVGPolygonElement>(null);
@@ -53,6 +59,20 @@ export default function ArchitectureRadar({
       const scoreKey = traitKeyMapping[trait] || trait;
       const score = scores[scoreKey] || 50;
       const r = (score / 100) * radius;
+      const x = 200 + r * Math.cos(angle);
+      const y = 200 + r * Math.sin(angle);
+      return `${x},${y}`;
+    }).join(" ");
+  };
+
+  const calculateSemPoints = (scores: Record<string, number>, semScores: Record<string, number> | undefined, radius: number, type: "inner" | "outer") => {
+    return traits.map((trait, i) => {
+      const angle = (i / traits.length) * 2 * Math.PI - Math.PI / 2;
+      const scoreKey = traitKeyMapping[trait] || trait;
+      const score = scores[scoreKey] || 50;
+      const semVal = semScores?.[scoreKey] || 7.2;
+      const finalScore = type === "inner" ? Math.max(0, score - semVal) : Math.min(100, score + semVal);
+      const r = (finalScore / 100) * radius;
       const x = 200 + r * Math.cos(angle);
       const y = 200 + r * Math.sin(angle);
       return `${x},${y}`;
@@ -113,10 +133,19 @@ export default function ArchitectureRadar({
             }).join(" ")}
             fill="none"
             stroke="white"
-            strokeOpacity="0.12"
-            strokeWidth="1"
+            strokeOpacity="0.08"
+            strokeWidth="0.8"
+            strokeDasharray="2 3"
           />
         ))}
+
+        {/* Oscilloscope Center Crosshair */}
+        <path 
+          d="M 188,200 L 212,200 M 200,188 L 200,212 M 200,100 L 200,105 M 200,300 L 200,295 M 100,200 L 105,200 M 300,200 L 295,200" 
+          stroke="white" 
+          strokeOpacity="0.2" 
+          strokeWidth="0.8" 
+        />
 
         {/* Axis Lines */}
         {traits.map((trait, i) => {
@@ -133,13 +162,52 @@ export default function ArchitectureRadar({
               x2={x2}
               y2={y2}
               stroke={isHighlighted ? "#a855f7" : "white"}
-              strokeOpacity={isHighlighted ? "0.6" : "0.1"}
-              strokeWidth={isHighlighted ? "1.8" : "1"}
-              strokeDasharray={isHighlighted ? "none" : "4 4"}
+              strokeOpacity={isHighlighted ? "0.6" : "0.08"}
+              strokeWidth={isHighlighted ? "1.5" : "0.8"}
+              strokeDasharray={isHighlighted ? "none" : "3 5"}
               className="transition-all duration-300"
             />
           );
         })}
+
+        {/* SEM Confidence Bands */}
+        {semData && (
+          <>
+            {/* Outer envelope */}
+            <polygon
+              points={calculateSemPoints(data, semData, 160, "outer")}
+              fill="none"
+              stroke={color}
+              strokeWidth="0.8"
+              strokeDasharray="2 4"
+              opacity="0.2"
+              className="transition-all duration-1000 ease-in-out"
+            />
+            {/* Inner envelope */}
+            <polygon
+              points={calculateSemPoints(data, semData, 160, "inner")}
+              fill="none"
+              stroke={color}
+              strokeWidth="0.8"
+              strokeDasharray="2 4"
+              opacity="0.2"
+              className="transition-all duration-1000 ease-in-out"
+            />
+          </>
+        )}
+
+        {/* Stress state volatility curve */}
+        {showStress && stressData && (
+          <polygon
+            points={calculatePoints(stressData, 160)}
+            fill="rgba(239, 68, 68, 0.03)"
+            stroke="#ef4444"
+            strokeWidth="1.8"
+            strokeDasharray="3 3"
+            opacity="0.75"
+            className="transition-all duration-1000 ease-in-out"
+          />
+        )}
 
         {/* Data Shape */}
         <polygon
@@ -147,7 +215,7 @@ export default function ArchitectureRadar({
           points={calculatePoints(data, 160)}
           fill="url(#radar-gradient-report)"
           stroke={color}
-          strokeWidth="2.5"
+          strokeWidth="2"
           className="transition-all duration-1000 ease-in-out"
         />
 
@@ -160,6 +228,12 @@ export default function ArchitectureRadar({
           const x = 200 + r * Math.cos(angle);
           const y = 200 + r * Math.sin(angle);
           const isHighlighted = hoveredTrait === scoreKey;
+
+          const stressScore = stressData?.[scoreKey];
+          const showStressIndicator = showStress && stressScore !== undefined;
+          const stressR = showStressIndicator ? (stressScore / 100) * 160 : 0;
+          const stressX = 200 + stressR * Math.cos(angle);
+          const stressY = 200 + stressR * Math.sin(angle);
           
           const cos = Math.cos(angle);
           const sin = Math.sin(angle);
@@ -177,41 +251,68 @@ export default function ArchitectureRadar({
               onMouseEnter={() => onHoverTrait?.(scoreKey)}
               onMouseLeave={() => onHoverTrait?.(null)}
             >
+              {/* Baseline Node */}
               <circle
                 cx={x}
                 cy={y}
-                r={isHighlighted ? "7" : "4.5"}
+                r={isHighlighted ? "6.5" : "4"}
                 fill={isHighlighted ? "#a855f7" : "white"}
                 stroke={isHighlighted ? "white" : color}
-                strokeWidth={isHighlighted ? "2" : "2.5"}
+                strokeWidth={isHighlighted ? "1.5" : "2"}
                 className="transition-all duration-300 ease-out"
               />
-              {isHighlighted && (
+
+              {/* Stress State Node */}
+              {showStressIndicator && (
                 <circle
-                  cx={x}
-                  cy={y}
-                  r="7"
-                  fill="none"
-                  stroke="#a855f7"
+                  cx={stressX}
+                  cy={stressY}
+                  r={isHighlighted ? "6" : "3.5"}
+                  fill="#ef4444"
+                  stroke="white"
                   strokeWidth="1.5"
-                >
-                  <animate
-                    attributeName="r"
-                    from="7"
-                    to="20"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="opacity"
-                    from="0.8"
-                    to="0"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
+                  className="transition-all duration-1000 ease-in-out"
+                  opacity="0.9"
+                />
+              )}
+
+              {isHighlighted && (
+                <>
+                  <text
+                    x={x}
+                    y={y - 12}
+                    textAnchor="middle"
+                    fill="#a855f7"
+                    className="font-mono text-[8px] font-black fill-purple-450 pointer-events-none"
+                  >
+                    {score}%
+                  </text>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r="7"
+                    fill="none"
+                    stroke="#a855f7"
+                    strokeWidth="1.5"
+                  >
+                    <animate
+                      attributeName="r"
+                      from="7"
+                      to="20"
+                      dur="1.5s"
+                      begin="0s"
+                      repeatCount="indefinite"
+                    />
+                    <animate
+                      attributeName="opacity"
+                      from="0.8"
+                      to="0"
+                      dur="1.5s"
+                      begin="0s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                </>
               )}
               {showLabels && (
                 <text

@@ -60,6 +60,7 @@ export interface BklitGaugeProps {
   notchLengthPercent?: number; // length of notches (5-100)%
   className?: string;
   theme?: "light" | "dark";
+  sem?: number; // Standard Error of Measurement
 }
 
 export default function BklitGauge({
@@ -87,6 +88,7 @@ export default function BklitGauge({
   notchLengthPercent = 100,
   className = "",
   theme = "dark",
+  sem,
 }: BklitGaugeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLSpanElement>(null);
@@ -110,7 +112,7 @@ export default function BklitGauge({
   }, [width, height, minWidth]);
 
   // Notch Coordinates & Paths Calculation
-  const { notches, resolvedSize, cx, cy, notchLength } = useMemo(() => {
+  const { notches, resolvedSize, cx, cy, notchLength, outerRadius, innerRadius } = useMemo(() => {
     const size = Math.min(dimensions.w, dimensions.h);
     const cx = dimensions.w / 2;
     const cy = dimensions.h / 2;
@@ -175,7 +177,7 @@ export default function BklitGauge({
       };
     });
 
-    return { notches: computed, resolvedSize: size, cx, cy, notchLength };
+    return { notches: computed, resolvedSize: size, cx, cy, notchLength, outerRadius, innerRadius };
   }, [dimensions, value, totalNotches, spacing, startAngle, endAngle, uniformWidth, notchLengthPercent, useGradient, activeGradient, inactiveGradient, inactiveFill]);
 
   // SVG Path with Rounded Corners fillet calculation
@@ -235,7 +237,7 @@ export default function BklitGauge({
 
       // 2. Staggered sweep reveal of active notches (like a loading bar sweeping clockwise)
       gsap.fromTo(
-        `.notch-active-${componentId}`,
+        `.notch-active-${componentId}, .notch-sem-${componentId}`,
         { scale: 0.8, opacity: 0 },
         {
           scale: 1,
@@ -273,15 +275,25 @@ export default function BklitGauge({
     return () => ctx.revert();
   }, [centerValue, notches, componentId, prefix, suffix]);
 
+  const minSem = sem !== undefined ? Math.max(0, value - sem) : value;
+  const maxSem = sem !== undefined ? Math.min(100, value + sem) : value;
+  const semLowerNotch = sem !== undefined ? Math.round((minSem / 100) * totalNotches) : 0;
+  const semUpperNotch = sem !== undefined ? Math.round((maxSem / 100) * totalNotches) : 0;
+
+  const tooltipText = sem !== undefined
+    ? `95% CI: [${Math.max(0, Math.round(value - 1.96 * sem))}${suffix}, ${Math.min(100, Math.round(value + 1.96 * sem))}${suffix}]`
+    : undefined;
+
   return (
     <div
       ref={containerRef}
-      className={`relative select-none flex items-center justify-center ${className}`}
+      className={`relative select-none flex items-center justify-center cursor-help group/gauge ${className}`}
       style={{
         width: width || "100%",
         height: height || "100%",
         minWidth,
       }}
+      title={tooltipText}
     >
       <svg
         aria-hidden="true"
@@ -302,6 +314,23 @@ export default function BklitGauge({
           />
         ))}
 
+        {/* Draw SEM Confidence Band (lower opacity glow notches) */}
+        {sem !== undefined && notches
+          .map((notch: any) => {
+            const inSemRange = notch.index >= semLowerNotch && notch.index < semUpperNotch;
+            if (!inSemRange) return null;
+            return (
+              <path
+                key={`sem-${notch.index}`}
+                className={`notch-sem-${componentId} transition-all duration-300 origin-center`}
+                style={{ transformOrigin: `${cx}px ${cy}px` }}
+                d={createNotchPath(notch.points, notchCornerRadius, notchLength)}
+                fill={activeFill || notch.activeColor}
+                fillOpacity={0.15}
+              />
+            );
+          })}
+
         {/* Draw Active Notches */}
         {notches
           .filter((n: any) => n.isActive)
@@ -315,6 +344,46 @@ export default function BklitGauge({
               fillOpacity={activeFillOpacity}
             />
           ))}
+
+        {/* Draw SEM Boundary Ticks */}
+        {sem !== undefined && (() => {
+          const totalAngle = endAngle - startAngle;
+          const getTickLine = (p: number) => {
+            const rad = ((startAngle + (p / 100) * totalAngle) * Math.PI) / 180;
+            const x1 = cx + Math.cos(rad) * outerRadius;
+            const y1 = cy + Math.sin(rad) * outerRadius;
+            const x2 = cx + Math.cos(rad) * innerRadius;
+            const y2 = cy + Math.sin(rad) * innerRadius;
+            return { x1, y1, x2, y2 };
+          };
+          const tickLower = getTickLine(minSem);
+          const tickUpper = getTickLine(maxSem);
+          const strokeColor = activeFill || notches[0]?.activeColor || "#a855f7";
+          return (
+            <>
+              <line
+                x1={tickLower.x1}
+                y1={tickLower.y1}
+                x2={tickLower.x2}
+                y2={tickLower.y2}
+                stroke={strokeColor}
+                strokeWidth="1.5"
+                strokeDasharray="2,2"
+                opacity="0.6"
+              />
+              <line
+                x1={tickUpper.x1}
+                y1={tickUpper.y1}
+                x2={tickUpper.x2}
+                y2={tickUpper.y2}
+                stroke={strokeColor}
+                strokeWidth="1.5"
+                strokeDasharray="2,2"
+                opacity="0.6"
+              />
+            </>
+          );
+        })()}
       </svg>
 
       {/* Central Metric Stack */}

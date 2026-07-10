@@ -53,7 +53,10 @@
       "Conector de alta sensibilidad: Está hiper-sintonizado con las señales sociales y los cambios jerárquicos. Su hipervigilancia le permite detectar alteraciones sutiles en las alianzas mucho antes que los demás. Su impulso de conexión alimenta un alto nivel de interacción social, aunque requiere un refuerzo de estatus constante para prevenir la fatiga operativa. Prioriza mantener los lazos afectivos como su principal mecanismo de supervivencia, gestionando la estabilidad colectiva."
     ],
     "Dismissive-Avoidant": [
-      "Operativo soberano: Posee un alto grado de autonomía defensiva. Destaca en roles que requieren desapego emocional y capacidad para funcionar sin validación externa. Considera la dependencia como una vulnerabilidad, orientando su energía hacia la autosuficiencia y la minimización de obligaciones sociales. Separa las relaciones personales de los objetivos profesionales con precisión quirúrgica, asegurando que el sentimiento nunca comprometa la lógica fría de la misión."
+        "Operativo soberano: Posee un alto grado de autonomía defensiva. Destaca en roles que requieren desapego emocional y capacidad para funcionar sin validación externa. Considera la dependencia como una vulnerabilidad, orientando su energía hacia la autosuficiencia y la minimización de obligaciones sociales. Separa las relaciones personales de los objetivos profesionales con precisión quirúrgica, asegurando que el sentimiento nunca comprometa la lógica fría de la misión."
+    ],
+    "Fearful-Avoidant": [
+        "Conector volátil: Su arquitectura relacional ejecuta un protocolo dual contradictorio—acercamiento seguido de repliegue. Anhela alianzas operativas profundas. Al mismo tiempo, desconfía de la proximidad que persigue. La confianza puede transformarse en distanciamiento protector sin previo aviso, creando un ciclo de empuje-retiro que desconcierta a sus aliados. Monitorea las señales interpersonales con vigilancia extrema, escaneando indicadores de traición a una frecuencia que la mayoría no puede percibir. Su conflicto interno no es debilidad. Es una arquitectura de supervivencia forjada por datos tempranos que le enseñaron que la cercanía conlleva riesgo."
     ]
   },
   "shadow": {

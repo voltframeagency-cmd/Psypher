@@ -53,7 +53,10 @@
       "High-Sensitivity Networker: You are hyper-attuned to social signals and hierarchy shifts. Your hyper-vigilance allows you to detect subtle changes in alliances long before others. Your drive for connection fuels high-frequency social engagement, though it requires constant status reinforcement to prevent operational fatigue. You prioritize the maintenance of bonds as your primary survival mechanism, managing collective stability."
     ],
     "Dismissive-Avoidant": [
-      "Sovereign Operative: You possess a high degree of defensive autonomy. You thrive in roles that require emotional detachment and the ability to operate without external validation. You view dependency as a vulnerability, directing your energy toward self-reliance and the minimization of social obligation. You separate personal relationships from professional objectives with surgical precision, ensuring sentiment never compromises cold logic."
+        "Sovereign Operative: You possess a high degree of defensive autonomy. You thrive in roles that require emotional detachment and the ability to operate without external validation. You view dependency as a vulnerability, directing your energy toward self-reliance and the minimization of social obligation. You separate personal relationships from professional objectives with surgical precision, ensuring sentiment never compromises cold logic."
+    ],
+    "Fearful-Avoidant": [
+        "Volatile Connector: Your relational hardware runs a contradictory dual protocol—approach then retreat. You crave deep operational alliances. You simultaneously distrust the very proximity you pursue. High trust can transition into protective detachment without warning, creating a push-pull cycle that confounds allies. You monitor interpersonal feedback with extreme vigilance, scanning for betrayal signals at a frequency most people can't perceive. Your internal conflict isn't weakness. It's a survival architecture forged from early data that taught you closeness carries risk."
     ]
   },
   "shadow": {

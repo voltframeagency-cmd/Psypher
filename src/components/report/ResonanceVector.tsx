@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ShieldAlert, Activity, Radio } from "lucide-react";
 import BklitGauge from "@/components/report/BklitGauge";
+import ConfidenceBand from "@/components/report/ConfidenceBand";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -16,10 +17,13 @@ interface ResonanceVectorProps {
   color?: string;
   theme?: "light" | "dark";
   narrative?: string;
+  showStress?: boolean;
 }
 
-export default function ResonanceVector({ style, security, color = "#60A5FA", theme = "dark", narrative }: ResonanceVectorProps) {
+export default function ResonanceVector({ style, security, color = "#60A5FA", theme = "dark", narrative, showStress = false }: ResonanceVectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const displayedSecurity = showStress ? Math.max(10, Math.round(security * 0.75)) : security;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -38,7 +42,7 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
       );
     }, containerRef);
     return () => ctx.revert();
-  }, [security]);
+  }, [security, showStress]);
 
   const styleMapping: Record<string, { label: string; subtitle: string; desc: string; friction: { tag: string; severity: "low" | "medium" | "high" }[]; signal: string }> = {
     "Secure": { 
@@ -112,23 +116,28 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left: SVG Illustration */}
             <div className="lg:col-span-4 flex justify-center rv-reveal">
-              <div className={`relative w-48 h-48 md:w-56 md:h-56 rounded-[2rem] flex items-center justify-center transition-colors ${
-                isLight ? "bg-blue-50/60" : "bg-white/[0.03]"
+              <div className={`relative w-48 h-48 md:w-56 md:h-56 rounded-[2rem] flex items-center justify-center transition-colors overflow-hidden border ${
+                isLight ? "bg-blue-50/20 border-zinc-200/80" : "bg-white/[0.01] border-zinc-900"
               }`}>
                 <img 
                   src={`/assets/report/Attachment style SVG/${style}.svg`} 
                   alt={meta.label} 
-                  className={`w-40 h-40 md:w-48 md:h-48 object-contain transition-all duration-700 hover:scale-105 ${
+                  className={`relative z-10 w-40 h-40 md:w-48 md:h-48 object-contain transition-all duration-700 hover:scale-105 ${
                     isLight ? "drop-shadow-sm" : "filter brightness-110"
                   }`}
                 />
+                
+                {/* HUD Scanline Effect */}
+                <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none z-0">
+                  <div className="absolute left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-40 animate-[scanline_2.5s_infinite_linear] will-change-[top]" />
+                </div>
               </div>
             </div>
 
             {/* Center: Style Identity */}
             <div className="lg:col-span-5 space-y-5 rv-reveal">
               <div className="space-y-2">
-                <span className={`text-[9px] font-mono tracking-[0.4em] uppercase font-black ${
+                <span className={`text-[8px] font-mono tracking-[0.4em] uppercase font-black ${
                   isLight ? "text-blue-600/70" : "text-blue-400/60"
                 }`}>
                   Attachment_Protocol
@@ -138,32 +147,36 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
                 }`}>
                   {meta.label}
                 </h3>
-                <p className={`text-[11px] font-mono tracking-widest uppercase ${
+                <p className={`text-[10px] font-mono tracking-widest uppercase ${
                   isLight ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   {meta.subtitle}
                 </p>
               </div>
 
-              <p className={`text-sm leading-relaxed font-light ${
-                isLight ? "text-zinc-500" : "text-zinc-400"
+              <p className={`text-[13px] leading-relaxed font-light ${
+                isLight ? "text-zinc-500" : "text-zinc-450"
               }`}>
                 {narrative || meta.desc}
               </p>
 
-              {/* Friction Indicators */}
-              <div className="flex flex-wrap gap-2 pt-2">
-                {meta.friction.map((f, i) => {
-                  const sev = severityColors[f.severity];
-                  return (
-                    <div key={i} className={`friction-marker flex items-center gap-2 px-3 py-1.5 border rounded-full transition-all ${sev.bg}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
-                      <span className={`text-[9px] font-mono font-bold uppercase tracking-wider ${sev.text}`}>
-                        {f.tag}
-                      </span>
-                    </div>
-                  );
-                })}
+              {/* Friction Indicators (Terminal Logs) */}
+              <div className="space-y-2 pt-2">
+                <span className="text-[7px] font-mono tracking-[0.2em] text-zinc-500 uppercase font-black">TELEMETRY_LOG // RELATION_BLOCKERS</span>
+                <div className="flex flex-col gap-1.5">
+                  {meta.friction.map((f, i) => {
+                    const sev = severityColors[f.severity];
+                    return (
+                      <div key={i} className={`friction-marker flex items-center justify-between px-4 py-2 border rounded-xl font-mono text-[8px] transition-all hover:bg-zinc-900/10 ${sev.bg} ${sev.text}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="opacity-40">SYS_LOG_0{i + 1} ➔</span>
+                          <span className="font-bold uppercase tracking-wider">{f.tag.replace(/ /g, "_")}</span>
+                        </div>
+                        <span className="font-extrabold uppercase opacity-80 tracking-widest">[SEVERITY: {f.severity}]</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -171,18 +184,19 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
             <div className="lg:col-span-3 flex flex-col items-center justify-center rv-reveal">
               <div className="w-36 h-36 md:w-44 md:h-44">
                 <BklitGauge 
-                  value={security} 
-                  centerValue={security} 
+                  value={displayedSecurity} 
+                  centerValue={displayedSecurity} 
                   defaultLabel="Trust" 
                   totalNotches={24} 
                   spacing={22}
                   notchCornerRadius={1.5}
                   useGradient 
-                  activeGradient={["#3b82f6", "#6366f1"]}
+                  activeGradient={showStress ? ["#ef4444", "#dc2626"] : ["#3b82f6", "#6366f1"]}
                   inactiveFill={isLight ? "rgba(59, 130, 246, 0.06)" : "rgba(59, 130, 246, 0.04)"}
                   width={isWindowMd() ? 176 : 144} 
                   height={isWindowMd() ? 176 : 144} 
                   theme={theme}
+                  sem={7.5}
                 />
               </div>
               <div className={`mt-3 flex items-center gap-2 px-3 py-1 rounded-full border ${
@@ -190,44 +204,63 @@ export default function ResonanceVector({ style, security, color = "#60A5FA", th
                   ? "bg-zinc-50 border-zinc-200" 
                   : "bg-zinc-900 border-zinc-800"
               }`}>
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${showStress ? "bg-red-500" : "bg-blue-500"}`} />
                 <span className={`text-[8px] font-mono tracking-widest font-black uppercase ${
                   isLight ? "text-zinc-500" : "text-zinc-400"
                 }`}>
-                  {meta.signal}
+                  {showStress ? "STRESS_DEGRADATION" : meta.signal}
                 </span>
+              </div>
+              <div className="mt-4 w-full flex justify-center scale-90">
+                <ConfidenceBand 
+                  score={displayedSecurity} 
+                  reliabilityKey="attachment_security" 
+                  theme={theme} 
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Stats Row */}
-      <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 rv-reveal`}>
-        {[
-          { label: "Processing Strength", value: `${(security * 1.28).toFixed(1)} VAL` },
-          { label: "Dynamic Coefficient", value: meta.signal },
-          { label: "Relational Bandwidth", value: `${Math.min(100, Math.round(security * 1.15))}%` },
-          { label: "Conflict Threshold", value: security >= 60 ? "HIGH" : security >= 35 ? "MODERATE" : "LOW" },
-        ].map((stat, i) => (
-          <div key={i} className={`p-4 rounded-2xl border transition-colors ${
-            isLight 
-              ? "bg-white/80 border-zinc-200/60" 
-              : "bg-white/[0.02] border-zinc-800/60"
-          }`}>
-            <span className={`text-[8px] font-mono uppercase tracking-[0.2em] ${
-              isLight ? "text-zinc-400" : "text-zinc-600"
-            }`}>
-              {stat.label}
-            </span>
-            <div className={`text-sm font-mono font-black mt-1 ${
-              isLight ? "text-zinc-700" : "text-zinc-300"
-            }`}>
-              {stat.value}
+      {/* High-Precision Readout Table */}
+      <div className={`rv-reveal overflow-hidden border rounded-3xl transition-all font-mono text-[10px] ${
+        isLight 
+          ? "bg-white border-zinc-200" 
+          : "bg-zinc-950/20 border-zinc-900"
+      }`}>
+        <div className={`grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 ${
+          isLight ? "divide-zinc-200" : "divide-zinc-900"
+        }`}>
+          {[
+            { label: "Processing Strength", value: `${(security * 1.28).toFixed(1)} VAL`, code: "SYS_VAL" },
+            { label: "Dynamic Coefficient", value: meta.signal, code: "COEFF" },
+            { label: "Relational Bandwidth", value: `${Math.min(100, Math.round(security * 1.15))}%`, code: "BAND_W" },
+            { label: "Conflict Threshold", value: security >= 60 ? "HIGH" : security >= 35 ? "MODERATE" : "LOW", code: "CONF_T" },
+          ].map((stat, i) => (
+            <div key={i} className="p-5 flex flex-col justify-between hover:bg-zinc-900/5 transition-colors">
+              <div className="flex items-center justify-between opacity-50 mb-3 text-[8px] tracking-wider uppercase font-black">
+                <span>{stat.label}</span>
+                <span className="text-[7px] font-black">{stat.code}</span>
+              </div>
+              <div className={`text-base font-black tracking-tight ${
+                isLight ? "text-zinc-900" : "text-white"
+              }`}>
+                {stat.value}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes scanline {
+          0% { top: -5%; opacity: 0; }
+          10% { opacity: 0.8; }
+          90% { opacity: 0.8; }
+          100% { top: 105%; opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

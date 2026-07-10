@@ -7,6 +7,7 @@ import { ShieldAlert, EyeOff, Activity, Fingerprint } from "lucide-react";
 import NarrativeBlock from "@/components/ui/NarrativeBlock";
 import SpotlightCard from "@/components/ui/SpotlightCard";
 import BklitGauge from "@/components/report/BklitGauge";
+import ConfidenceBand from "@/components/report/ConfidenceBand";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -122,7 +123,7 @@ export default function ShadowSection({ scores, partnerScores, narrative, theme 
                   </span>
                 </div>
 
-                <div className="w-36 h-36 mb-6 flex flex-col items-center justify-center relative">
+                <div className="w-36 h-48 mb-6 flex flex-col items-center justify-center relative">
                   <BklitGauge 
                     value={val} 
                     centerValue={val} 
@@ -136,6 +137,7 @@ export default function ShadowSection({ scores, partnerScores, narrative, theme 
                     width={140} 
                     height={140} 
                     theme={theme}
+                    sem={6.4}
                   />
                   {partnerScores && (
                     <div className={`text-[9px] font-mono tracking-widest mt-2 uppercase ${
@@ -144,6 +146,12 @@ export default function ShadowSection({ scores, partnerScores, narrative, theme 
                       Partner: {getScoreVal(partnerScores, trait)}%
                     </div>
                   )}
+                  <ConfidenceBand 
+                    score={val}
+                    reliabilityKey={`dt_${trait.toLowerCase()}`}
+                    theme={theme}
+                    className="mt-2 scale-90"
+                  />
                 </div>
 
                 <h3 className={`text-xl font-light tracking-tight mb-2 uppercase ${
